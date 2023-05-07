@@ -79,7 +79,6 @@ class FullScreenWindow(ttk.Frame):
 #     def __init__(self):
 #         pass
 
-
 if __name__ == "__main__":
     # w = FullScreenWindow(root)
     App().mainloop()
