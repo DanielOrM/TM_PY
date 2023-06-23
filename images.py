@@ -1,11 +1,20 @@
-from tkinter import PhotoImage, Label
+from tkinter import PhotoImage
+from PIL import ImageTk, Image
+
+
+def open_image_setup(file_location):
+    image = PhotoImage(file=file_location)
+    return image
 
 
 def bg_image_setup(file_location):
-    bg_image = PhotoImage(file=file_location)
+    # bg_image = PhotoImage(file=file_location)
+    bg_image_temp = Image.open(file_location)
+    bg_image_temp2 = bg_image_temp.resize((1920, 1080))
+    bg_image = ImageTk.PhotoImage(bg_image_temp2)
     return bg_image
 
 
-def set_bg(parent, bg_image):
-    background_label = Label(parent, image=bg_image)
-    background_label.place(x=0, y=0, relwidth=1, relheight=1)
+# def set_bg(parent, bg_image):
+#     background_label = Label(parent, image=bg_image)
+#     background_label.place(x=0, y=0, relwidth=1, relheight=1)
