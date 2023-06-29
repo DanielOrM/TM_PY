@@ -2,7 +2,7 @@ from tkinter import PhotoImage
 from PIL import ImageTk, Image
 
 
-def open_image_setup(file_location):
+def open_image_setup_file(file_location):
     image = PhotoImage(file=file_location)
     return image
 
