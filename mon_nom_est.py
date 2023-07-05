@@ -77,8 +77,6 @@ class View(tk.Frame):
         # CH.configure_canvas_item(CH(self.master), app_background, room_name)
         canvas_page = self.master.rect.change_background("app_background", self.master.pages.get(f"{room_name}"))
 
-
-
     def show_album(self, event=None):
         self.master.rect.open_journal()
         # print("STILL THERE")
@@ -96,6 +94,9 @@ class Control(tk.Frame):
         master.bind("<d>", self.change_room_right) # aller à droite
         master.bind("<Button-3>", self.take_picture) # button 3 => click droit
         master.bind("<Button-2>", self.see_album) # button 2 => mid click
+        #temporaire binding
+        # master.bind("<q>", self.control_change_page_left)
+        # master.bind("<e>", self.control_change_page_right)
 
     def change_room_left(self, event=None):
         if self.master.index > 0:
@@ -124,6 +125,12 @@ class Control(tk.Frame):
 
     def see_album(self, event=None):
         self.master.view.show_album()
+
+    def control_change_page_left(self, event=None):
+        self.master.bind("<q>", self.master.rect.change_page_left)
+
+    def control_change_page_right(self, event=None):
+        self.master.bind("<e>", self.master.rect.change_page_right)
 
 
 class FullScreenWindow(tk.Frame):
@@ -175,8 +182,10 @@ class CanvasHandler(tk.Frame):
                                               image=self.master.album
                                               )
         self.canvas.itemconfigure(self.album, state="hidden")
+        self.page_num = 1
         self.photos_list = []
         self.photos_list_updated = [] # sert à check si la liste a changé
+        self.segmented_4_indexes_photos_list_updated = []
         # print(self.canvas.itemconfigure(self.album).get("state")[4])
         self.sbarv = tk.Scrollbar(self, orient=VERTICAL)
         self.sbarh = tk.Scrollbar(self, orient=HORIZONTAL)
@@ -193,6 +202,9 @@ class CanvasHandler(tk.Frame):
         self.canvas.bind("<Button-3>", self.on_button_press)
         self.canvas.bind("<B3-Motion>", self.on_move_press)
         self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
+        # self.canvas.bind("<q>", self.change_page_left)
+        # self.canvas.bind("<e>", self.change_page_right)
+
 
         self.rect = None
         self.start_x = None
@@ -230,12 +242,14 @@ class CanvasHandler(tk.Frame):
             # self.canvas.itemconfigure(self.album, state="normal")
             # self.canvas.lift(self.album, self.background)
             self.changing_state_canvas_item(self.album, "normal")
+            # print(state)
             # self.canvas.lift(self.album)
-            self.show_photos_album()
+            self.is_album_photos_updated()
             # print("I am visible!!!!!")
         elif state == "normal":
             # self.canvas.itemconfigure(self.album, state="hidden")
             self.changing_state_canvas_item(self.album, "hidden")
+            # print(state)
             # self.canvas.lower(self.album)
             self.hide_photos_album()
             # print("shhhh I am hidden...")
@@ -246,6 +260,8 @@ class CanvasHandler(tk.Frame):
     def place_photo_album_list(self, crop_dimensions):
         # ajoute photo prise dans liste des photos
         image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
+        # print(image_to_crop_temp)
+        # image_to_crop_temp = self.master.pages_file_location.get(self.master.pages_name[self.master.index])
         image_to_crop = image_to_crop_temp.resize((1920,1080)).convert("RGBA")
         # image_to_crop = self.master.pages.get(self.master.pages_name[self.master.index])
         # print(image_to_crop)
@@ -254,48 +270,123 @@ class CanvasHandler(tk.Frame):
         # print(w, h)
         # print(crop_dimensions)
         pic_taken_temp = image_to_crop.crop(crop_dimensions)
+        # pic_taken_temp = pic_taken_temp.convert("RGB")
         # print(pic_taken_temp)
         # pic_taken = pic_taken_temp
+        # global pic_taken
         pic_taken = ImageTk.PhotoImage(pic_taken_temp)
+        # print(pic_taken)
+        # self.canvas.image = self.canvas.itemconfigure(pic_taken)
         # pic_taken = ImageTk.PhotoImage(image_to_crop)
-        self.photos_list_updated.append(pic_taken)
-
-    def show_photos_album(self, event=None):
-        # crée image pour chaque photo dans album => grid
+        # self.photos_list_updated.append(pic_taken)
+        # print(pic_taken)
+        # print(pic_taken)
+        # global image_id
+        image_id = self.canvas.create_image(
+            self.master.winfo_screenheight()/2, self.master.winfo_screenwidth()/2,
+            image=pic_taken,state="hidden"
+        )
+        # print(image_id)
+        # self.canvas.image = image_id
+        # print(self.canvas.image)
+        self.photos_list_updated.append(image_id)
         # print(self.photos_list)
         # print(self.photos_list_updated)
-        # for image in self.photos_list_updated:
-        #     print(image)
+        # self.photos_list = self.photos_list_updated
+        # self.photos_list_updated = []
+        # print(self.photos_list)
+
+
+    def is_album_photos_updated(self, event=None):
+        # print(self.photos_list)
+        # print(self.photos_list_updated)
         p1 = set(self.photos_list_updated)
         p2 = set(self.photos_list)
         diff = p1.difference(p2)
         # print(diff)
         if diff:
-            # print(self.photos_list_updated)
             print("SOMETHING HAS CHANGED")
+            self.photos_list = self.photos_list_updated[:]
+            # print(self.photos_list)
             # print(self.photos_list_updated)
-            # crée image juste pour image qui se trouve dans updated list
-            # for id, image in enumerate(self.photos_list_updated):
-            #     print(id)
-            #     self.canvas.create_image(self.master.winfo_screenwidth() / 2, self.master.winfo_screenheight()/2,
-            #                                     image=image, tag="pic{0}".format(id))
-            #
-            for id, image in enumerate(self.photos_list_updated):
-                # img = str(image)
-                # print(str(image))
-                # print(int(''.join(list(filter(str.isdigit, img))))-4)
-                # print("END")
-                self.canvas.create_image(self.master.winfo_screenwidth() / 2, self.master.winfo_screenheight()/2,
-                                                image=image, tag="TEST{0}".format(id), state="normal"
-                                         )
+            self.listing_photos()
+            self.show_pics_by_page_num(self.page_num)
+            "Je teste pour check si pyimage existe vraiment --> tk error sinon mais code est supposé marcher"
+            # test = self.segmented_4_indexes_photos_list_updated
+            # print(test)
+            # for pic in test[0]:
+            #     # print(pic)
+            #     print(self.canvas.itemconfigure(pic)["image"][4])
+        else:
+            # print(self.photos_list_updated)
+            print("NOTHING HAS CHANGED")
+            # print(self.segmented_4_indexes_photos_list_updated)
+            # print(self.photos_list)
+            # print(self.photos_list_updated)
+            # print(self.segmented_4_indexes_photos_list_updated)
+            if len(self.segmented_4_indexes_photos_list_updated) != 0:
+                self.show_pics_by_page_num(self.page_num)
+
+
+    def listing_photos(self, event=None):
+        # crée image pour chaque photo dans album => grid
+        self.segmented_4_indexes_photos_list_updated = []
+        prev = 0
+        next_segmented_index = 4
+        # segmented_4_indexes_photos_list.append(self.photos_list[prev:next_segmented_index])
+        # prev = next_segmented_index + 1
+        # next_segmented_index += 5
+        # segmented_4_indexes_photos_list.append(self.photos_list[prev:next_segmented_index])
+        # print(segmented_4_indexes_photos_list)
+        while len(self.photos_list[prev:next_segmented_index]) == 4:  # loop tant 4 photos par 2 pages
+            pages_2 = self.photos_list[prev:next_segmented_index]
+            self.segmented_4_indexes_photos_list_updated.append(pages_2)  # ajoute liste de 4 photos dans segmented_4_indexes_photos_list
+            # print(segmented_4_indexes_photos_list)
+            prev = next_segmented_index
+            # print(prev)
+            next_segmented_index += 4
+            # print(next_segmented_index)
+        else:
+            pages_2 = self.photos_list[prev:next_segmented_index]
+            if len(pages_2) != 0:
+                self.segmented_4_indexes_photos_list_updated.append(pages_2)
+                # print(segmented_4_indexes_photos_list)
+        # print(self.segmented_4_indexes_photos_list_updated)
+
+        # crée image pour chaque photo dans album => grid
+        # print(self.photos_list)
+        # print(self.photos_list_updated)
+        # for image in self.photos_list_updated:
+        #     print(image)
+        # p1 = set(self.photos_list_updated)
+        # p2 = set(self.photos_list)
+        # diff = p1.difference(p2)
+        # # print(diff)
+        # if diff:
+        #     # print(self.photos_list_updated)
+        #     print("SOMETHING HAS CHANGED")
+        #     # print(self.photos_list_updated)
+        #     # crée image juste pour image qui se trouve dans updated list
+        #     # for id, image in enumerate(self.photos_list_updated):
+        #     #     print(id)
+        #     #     self.canvas.create_image(self.master.winfo_screenwidth() / 2, self.master.winfo_screenheight()/2,
+        #     #                                     image=image, tag="pic{0}".format(id))
+        #     #
+        #     for image in enumerate(self.photos_list):
+        #         # img = str(image)
+        #         # print(str(image))
+        #         # print(int(''.join(list(filter(str.isdigit, img))))-4)
+        #         # print("END")
+        #         image_id = self.canvas.create_image(image=image, state="hidden")
+
             # rend équivalentes photos_list et photos_list_updated
             # new_list = self.photos_list_updated[:]
-            self.listing_photos(self.photos_list, "normal")
-            self.photos_list += self.photos_list_updated
-            self.photos_list_updated = []
-        else:
-            print("NOTHING HAS CHANGED")
-            self.listing_photos(self.photos_list, "normal")
+            # self.listing_photos(self.photos_list, "normal")
+            # self.photos_list += self.photos_list_updated
+            # self.photos_list_updated = []
+        # else:
+        #     print("NOTHING HAS CHANGED")
+            # self.listing_photos(self.photos_list, "normal")
             # for index, image in enumerate(self.photos_list):
             #     img = str(image)
             #     print(f"The index is {index}")
@@ -322,9 +413,10 @@ class CanvasHandler(tk.Frame):
             # print(self.photos_list)
 
     def hide_photos_album(self, event=None):
+        pass
         # print("ALL THE PICS ARE HIDDEN")
         # print(self.photos_list)
-        self.listing_photos(self.photos_list, "hidden")
+        # self.listing_photos(self.photos_list, "hidden")
             # print(self.canvas.itemconfigure(5))
             # print(self.canvas.itemconfigure(7))
             # print(self.canvas.itemconfigure(9))
@@ -343,46 +435,85 @@ class CanvasHandler(tk.Frame):
 
             # self.changing_state_canvas_item(image_state, "hidden")
 
-    def listing_photos(self, iterable_list, new_state):
-        # num_pic_per_2_pages = 0
-        for index, image in enumerate(iterable_list):
-            img = str(image)
-            print(f"The index is {index}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print(f"The index of the very first image is {self.initial_img_id}")
-            if not index:
-                print("START")
-                print(image)
-                self.initial_img_id = int(''.join(list(filter(str.isdigit, img))))-4
-                print(f"The new initial index for other images: {self.initial_img_id}")
-                # print(first_img_id)
-                print(self.canvas.itemconfigure(self.initial_img_id))
-                self.changing_state_canvas_item(self.initial_img_id, new_state)
-                # num_pic_per_2_pages +=1
-                # if num_pic_per_2_pages == 1:
-                #     self.canvas.move(self.initial_img_id, -20, -2) # coin haut gauche
-                print("END")
-            else:
-                print("START FOR OTHER INDEX")
-                print(image)
-                self.initial_img_id += 2
-                new_img_id = self.initial_img_id
-                print(new_img_id)
-                print(self.canvas.itemconfigure(new_img_id))
-                self.canvas.itemconfigure(new_img_id, state=new_state)
-                # num_pic_per_2_pages += 1
-                # if num_pic_per_2_pages ==  2:
-                #     self.canvas.move(self.initial_img_id, -200, 200) # coin bas gauche
-                # elif num_pic_per_2_pages == 3:
-                #     self.canvas.move(self.initial_img_id, 200, -200) # coin haut droit
-                # elif num_pic_per_2_pages == 4:
-                #     self.canvas.move(self.initial_img_id, 200, 200) # coin bas droit
-                #     num_pic_per_2_pages = 0
-                print("END FOR OTHER INDEX")
-
+    # def listing_photos(self, iterable_list, new_state):
+    #     num_pic_per_2_pages = 0
+    #     album_frame_placement = tk.Frame(width=480, height=270, state="hidden")
+    #     album_frame_placement.place(in_=self.master, anchor="c", relx=.5, rely=.5)
+    #     # album_frame_placement = in_=self.master, anchor="c", relx=.5, rely=.5, background="black"
+    #     for index, image in enumerate(iterable_list):
+    #         img = str(image)
+    #         # print(f"The index is {index}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    #         # print(f"The index of the very first image is {self.initial_img_id}")
+    #         if not index:
+    #             print("START!!!!!!!!!!!!!!!!")
+    #             print(image)
+    #             self.initial_img_id = int(''.join(list(filter(str.isdigit, img))))-4
+    #             # print(f"The new initial index for other images: {self.initial_img_id}")
+    #             # print(first_img_id)
+    #             print(self.canvas.itemconfigure(self.initial_img_id))
+    #             self.changing_state_canvas_item(self.initial_img_id, new_state)
+    #             num_pic_per_2_pages +=1
+    #             if num_pic_per_2_pages == 1:
+    #                 album_frame_placement.place(x=960, y=540, anchor="nw")
+    #                 # self.canvas.move(self.initial_img_id, -20, -2) # coin haut gauche
+    #                 pass
+    #             print("END!!!!!!!!!!!!!!!")
+    #         else:
+    #             print("!!!!!!!!!!!!!!!!!START FOR OTHER INDEX")
+    #             print(image)
+    #             self.initial_img_id += 2
+    #             new_img_id = self.initial_img_id
+    #             # print(new_img_id)
+    #             # print(self.canvas.itemconfigure(new_img_id))
+    #             self.canvas.itemconfigure(new_img_id, state=new_state)
+    #             num_pic_per_2_pages += 1
+    #             if num_pic_per_2_pages ==  2:
+    #                 # self.canvas.move(self.initial_img_id, -200, 200) # coin bas gauche
+    #                 pass
+    #             elif num_pic_per_2_pages == 3:
+    #                 # self.canvas.move(self.initial_img_id, 200, -200) # coin haut droit
+    #                 pass
+    #             elif num_pic_per_2_pages == 4:
+    #                 # self.canvas.move(self.initial_img_id, 200, 200) # coin bas droit
+    #                 pass
+    #                 num_pic_per_2_pages = 0
+    #             print("!!!!!!!!!!!!!!!END FOR OTHER INDEX")
+    #
     def change_background(self, tagOrId, new_background):
         self.canvas.itemconfigure(tagOrId, image=new_background)
 
+    def change_page_left(self, event=None):
+        # self.canvas.focus_set(event)
+        print("test")
+        if self.page_num > 1:
+            self.page_num -= 1
+            self.show_pics_by_page_num(self.page_num)
+
+    def change_page_right(self, event=None):
+        # self.canvas.focus_set(event)
+        print("TEST")
+        self.page_num += 1
+        self.show_pics_by_page_num(self.page_num)
+
+    def show_pics_by_page_num(self, page_num):
+        print("This is page {0}".format(page_num))
+        index_segmented_list = page_num-1
+        # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
+        if len(self.segmented_4_indexes_photos_list_updated) != 0:
+            for index, pic in enumerate(self.segmented_4_indexes_photos_list_updated[index_segmented_list]):
+                # print("HEY FOR LOOP")
+                # print(pic)
+                print(pic, index)
+                # print(self.canvas.itemconfigure(pic), index)
+                self.changing_state_canvas_item(pic, "normal")
+                # state_key = self.canvas.itemconfigure(pic)["state"]
+                # self.canvas.itemconfigure(self.canvas.itemconfigure(pic), state="normal")
+                print(self.canvas.itemconfigure(pic))
+                # print(self.segmented_4_indexes_photos_list_updated)
+                # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
+            # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
+
 
 if __name__ == "__main__":
-    # w = FullScreenWindow(root)
     App().mainloop()
+
