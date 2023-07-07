@@ -17,11 +17,11 @@ class App(tk.Tk):
         self.index = 2
         self.pages_name = ["room_2", "room_1", "room_0", "room1", "room2"]
         self.pages_file_location = {
-            "room_2": "./images/rooms/bathrooom.png",
-            "room_1": "./images/rooms/bedroom_kobe.png",
-            "room_0": "./images/rooms/bedroom_test.png",
-            "room1": "./images/rooms/draw_room.png",
-            "room2": "./images/rooms/library_room.png"
+            "room_2": "./images/rooms/real_rooms/bathroom/PA_SalleDeBain.png",
+            "room_1": "./images/rooms/real_rooms/kitchen/PA_Cuisine.png",
+            "room_0": "./images/rooms/real_rooms/main_door/PA_PorteOuverte.png",
+            "room1": "./images/rooms/real_rooms/player_room/PA_CarnetDessinBureau.png",
+            "room2": "./images/rooms/real_rooms/library/PA_Bibliothèque.png"
         }
         self.pages = {
             "room_2": bg_image_setup(self.pages_file_location.get("room_2")),
