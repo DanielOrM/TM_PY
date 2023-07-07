@@ -1,9 +1,8 @@
 import tkinter as tk
 from tkinter import VERTICAL, HORIZONTAL
-
 from PIL import Image, ImageTk
-
 from images import bg_image_setup, open_image_setup_file
+from fade_transition import FadeTransition
 
 
 class App(tk.Tk):
@@ -14,6 +13,8 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Mon nom est...")
+        self.grid_rowconfigure(0, weight=1)  # For row 0
+        self.grid_columnconfigure(0, weight=1)  # For column 0
         self.index = 2
         self.pages_name = ["room_2", "room_1", "room_0", "room1", "room2"]
         self.pages_file_location = {
@@ -50,6 +51,7 @@ class App(tk.Tk):
         self.fw = FullScreenWindow(self)
         self.c = Control(self)
         self.rect = CanvasHandler(self) # rectangle photo dimensions
+        self.fade = FadeTransition(self)
         # self.r = RoomModel(self)
 
 
@@ -75,6 +77,7 @@ class View(tk.Frame):
         # )
         # self.master.rect.lower(room_name)
         # CH.configure_canvas_item(CH(self.master), app_background, room_name)
+        self.master.fade.create_transition()
         canvas_page = self.master.rect.change_background("app_background", self.master.pages.get(f"{room_name}"))
 
     def show_album(self, event=None):
