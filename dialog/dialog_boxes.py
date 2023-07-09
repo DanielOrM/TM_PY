@@ -9,7 +9,8 @@ class DialogBoxes:
         self.index_letter = 0
         self.index_line = 0
         self.text = {
-            "intro": txt_files_reader("dialog/dialog_text/intro_text.txt")
+            "intro": txt_files_reader("dialog/dialog_text/intro_text.txt"),
+            "camera_trouvee": txt_files_reader("dialog/dialog_text/camera_trouvee.txt")
         }
 
     def typewritten_effect(self, text_id, chosen_text):
@@ -20,6 +21,10 @@ class DialogBoxes:
         # update le texte
         # print(self.prev_text)
         # print(new_text)
+        # print(self.prev_text)
+        # print(self.index_letter)
+        # print(self.index_line)
+        # print(self.prev_text)
         if self.prev_text:
             new_text = str(self.prev_text+new_text)
         # new_text = str(self.prev_text + new_text)
@@ -29,7 +34,7 @@ class DialogBoxes:
         self.master.after(80, self.text_iteration, tagOrId, chosen_text)
 
     def text_iteration(self, tagOrId, chosen_text):
-        print("Le texte se fait iterate...")
+        # print("Le texte se fait iterate...")
         # iterate à travers texte choisi et update le new_text dans func change_text
         # iterable_list = list(chosen_text)
         # iterable_list = list(line) # ligne = iterable
@@ -38,14 +43,17 @@ class DialogBoxes:
         # print(iterable_list)
         try:
             new_letter = iterable_line[self.index_letter] # return la prochaine lettre dans le texte choisi
-            print(new_letter)
+            # print(new_letter)
             if new_letter == "[":
                 print("STOP")
                 self.index_line = 0
                 self.index_letter = 0
+                self.prev_text = ""
+                # print(f"Ici c'est le reste: {self.prev_text}")
                 # time.sleep(1.5)
                 # attends 1,5s avant clear texte pour que joueur puisse lire
                 self.master.after(1500, self.master.rect.canvas.itemconfigure(tagOrId, text=""))
+                # print(self.master.rect.canvas.itemcget(tagOrId, "text"))
             else:
                 self.change_text(tagOrId, new_letter, chosen_text)  # new_letter = new_text
                 self.index_letter += 1
@@ -61,9 +69,7 @@ class DialogBoxes:
 
     def dialog_to_use(self, chosen_moment):
         # choisit quel texte à return
-        if chosen_moment == "intro":
-            print("ICI C'EST L'INTRO")
-            return self.text.get(chosen_moment)
+        return self.text.get(chosen_moment)
 
 
 

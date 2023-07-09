@@ -41,9 +41,11 @@ class HomeScreen:
         self.HSFrame.grid_remove()
         self.check_game_e()
 
-    def check_game_e(self):
+    def check_game_e(self, event=None):
         self.master.check_game_events()
 
+    def test(self, event=None):
+        print("HI!!!!")
 
 
 class App(tk.Tk):
@@ -101,7 +103,7 @@ class App(tk.Tk):
         self.GEH = GameEventHandler(self)
         # self.intro_ended = False
 
-    def check_game_events(self):
+    def check_game_events(self, event=None):
         self.GEH.events_to_check()
 
 
@@ -139,13 +141,18 @@ class View(tk.Frame):
 class Control(tk.Frame):
     """
     Événements gérés:
-    -
+        - a: déplacement pièce à gauche
+        - d: déplacement pièce à droite
+        - click-gauche: appel func check events jeu (classe: GameEventHandler)
+        - click-droit: prend une photo (pas encore fonctionnel)
+        - middle-click: ouvre/ferme album photo (pas encore fonctionnel)
     """
 
     def __init__(self, master):
         super().__init__(master)
         master.bind("<a>", self.change_room_left) # aller à gauche
         master.bind("<d>", self.change_room_right) # aller à droite
+        # master.bind("<Button-1>", self.master.check_game_events)
         master.bind("<Button-3>", self.take_picture) # button 3 => click droit
         master.bind("<Button-2>", self.see_album) # button 2 => mid click
         #temporaire binding
@@ -229,13 +236,19 @@ class CanvasHandler(tk.Frame):
         self.background = self.canvas.create_image(self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/2,
                                                    image=self.master.pages.get(self.master.pages_name[self.master.index]), tag="app_background"
                                                    )
+        # position du boutton camera à changer
+        self.clickable_camera_button = self.canvas.create_image(600,300,image=self.master.camera, tag="camera_click")
+        self.canvas.tag_bind(self.clickable_camera_button, "<Button-1>", self.take_camera)
+        # print(self.master.camera.width(), self.master.camera.height())
         self.camera = self.canvas.create_image(self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.5,
                                                image=self.master.camera
                                                )
         self.album = self.canvas.create_image(self.master.winfo_screenwidth() / 2, self.master.winfo_screenheight() / 2,
                                               image=self.master.album
                                               )
+        # self.canvas.itemconfigure(self.background, state="hidden")
         self.canvas.itemconfigure(self.album, state="hidden")
+        self.canvas.itemconfigure(self.camera, state="hidden")
         # self.canvas.itemconfigure(self.background, state="hidden")
         # self.dialog_box = open_image_setup_file("./images/dialog/NB_BlackBarDialogBoxShrunk.png")
         self.dialog_box = open_image_setup_file("./images/intro/NB_RedBarTest.png")
@@ -291,6 +304,15 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.rect)
         self.rect = None
 
+    def take_camera(self, event=None):
+        # print(self.canvas.gettags("camera_click"))
+        self.canvas.delete(self.clickable_camera_button)
+        self.canvas.itemconfigure(self.camera, state="normal")
+        # print(self.master.GEH.camera_deleted)
+        self.master.GEH.camera_deleted = True
+        self.master.check_game_events()
+        # self.master.check_game_events()
+        # print(self.canvas.gettags("camera_click"))
     def open_journal(self, event=None):
         # print("Hiiiiii I'm a canvas maker!")
         state = self.canvas.itemcget(self.album, "state")
@@ -377,7 +399,7 @@ class CanvasHandler(tk.Frame):
         else:
             # print(self.photos_list_updated)
             print("NOTHING HAS CHANGED")
-            self.create_dialog_box()
+            # self.create_dialog_box()
             # print(self.segmented_4_indexes_photos_list_updated)
             # print(self.photos_list)
             # print(self.photos_list_updated)
@@ -538,7 +560,7 @@ class CanvasHandler(tk.Frame):
     #             print("!!!!!!!!!!!!!!!END FOR OTHER INDEX")
     #
     def change_background(self, tagOrId, new_background):
-        print("L'intro a bien débuté.")
+        print("L'intro a bien débuté. Background changé")
         # print(self.canvas.itemconfigure(tagOrId))
         self.canvas.itemconfigure(tagOrId, image=new_background)
         # print(self.canvas.itemconfigure(tagOrId))
