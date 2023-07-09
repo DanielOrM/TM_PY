@@ -43,7 +43,9 @@ class DialogBoxes:
                 print("STOP")
                 self.index_line = 0
                 self.index_letter = 0
-                self.prev_text = ""
+                # time.sleep(1.5)
+                # attends 1,5s avant clear texte pour que joueur puisse lire
+                self.master.after(1500, self.master.rect.canvas.itemconfigure(tagOrId, text=""))
             else:
                 self.change_text(tagOrId, new_letter, chosen_text)  # new_letter = new_text
                 self.index_letter += 1
