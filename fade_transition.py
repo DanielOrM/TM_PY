@@ -46,7 +46,7 @@ class FadeTransition(tk.Label):
     def update_label(self):
         t = (1.0 / self.frames_per_second) * self.current_step
         self.current_step += 0.7
-        print(self.current_step)
+        # print(self.current_step)
         new_color = self.interpolate(self.start_color, self.end_color, t)
         # print(self.new_color)
         self.configure(background="#%02x%02x%02x" % new_color)

@@ -3,6 +3,47 @@ from tkinter import VERTICAL, HORIZONTAL
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file
 from fade_transition import FadeTransition
+from dialog.dialog_boxes import DialogBoxes
+from game_events_handler import GameEventHandler
+
+
+class HomeScreen:
+    def __init__(self, master):
+        self.master = master
+        # super().__init__(master)
+        # self.config(background="black")
+        self.HS_image = bg_image_setup("./images/homescreen/PA_homescreenTest.png")
+        self.HSFrame = tk.Canvas(master, height=self.master.winfo_screenheight(), width=self.master.winfo_screenwidth())
+        self.apply_HS_canvas_image()
+        # self.grid_rowconfigure(row=0, column=1, weight=1)
+        # self.grid_columnconfigure(row=1, column=0, weight=1)
+        self.start_button = tk.Button(self.HSFrame, text='Jouer', width=40, command=self.intro)
+        self.start_button.grid(sticky="NS")
+        self.exit_game_button = tk.Button(self.HSFrame, text='Quitter', width=40, command=self.master.destroy)
+        self.exit_game_button.grid()
+        self.HSFrame.grid_propagate(False)
+        self.HSFrame.grid()
+        self.master.mainloop()
+
+
+    def apply_HS_canvas_image(self):
+        # print(self.HS_image)
+        title_height = self.master.winfo_screenheight()/4
+        title_width = self.master.winfo_screenwidth()/2
+        center_height = self.master.winfo_screenheight()/2
+        center_width = self.master.winfo_screenwidth()/2
+        self.HSFrame.create_image(center_width, center_height, image=self.HS_image)
+        self.HSFrame.create_text((title_width, title_height), text="MON NOM EST", fill="white",
+                                 font=("Helvetica", 40, "bold")
+        )
+
+    def intro(self):
+        self.HSFrame.grid_remove()
+        self.check_game_e()
+
+    def check_game_e(self):
+        self.master.check_game_events()
+
 
 
 class App(tk.Tk):
@@ -33,6 +74,7 @@ class App(tk.Tk):
         }
         self.camera = open_image_setup_file("./images/player/PA_NB_PhotoCameraFromBehind.png").subsample(2,2) # image caméra 2 fois plus petite
         self.album = open_image_setup_file("./images/player/PA_NB_Album.png")
+        self.black_background = bg_image_setup("images/intro/NB_BlackBox.png")
         # dimensions écran
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
@@ -52,7 +94,15 @@ class App(tk.Tk):
         self.c = Control(self)
         self.rect = CanvasHandler(self) # rectangle photo dimensions
         self.fade = FadeTransition(self)
-        # self.r = RoomModel(self)
+        self.dial = DialogBoxes(self)
+        # self.HS = HomeScreen(self)
+
+        # handler d'évents avec classe GameEventHandler
+        self.GEH = GameEventHandler(self)
+        # self.intro_ended = False
+
+    def check_game_events(self):
+        self.GEH.events_to_check()
 
 
 class View(tk.Frame):
@@ -82,6 +132,7 @@ class View(tk.Frame):
 
     def show_album(self, event=None):
         self.master.rect.open_journal()
+        # self.master.dial.create_frame()
         # print("STILL THERE")
 
 
@@ -185,6 +236,9 @@ class CanvasHandler(tk.Frame):
                                               image=self.master.album
                                               )
         self.canvas.itemconfigure(self.album, state="hidden")
+        # self.canvas.itemconfigure(self.background, state="hidden")
+        # self.dialog_box = open_image_setup_file("./images/dialog/NB_BlackBarDialogBoxShrunk.png")
+        self.dialog_box = open_image_setup_file("./images/intro/NB_RedBarTest.png")
         self.page_num = 1
         self.photos_list = []
         self.photos_list_updated = [] # sert à check si la liste a changé
@@ -323,6 +377,7 @@ class CanvasHandler(tk.Frame):
         else:
             # print(self.photos_list_updated)
             print("NOTHING HAS CHANGED")
+            self.create_dialog_box()
             # print(self.segmented_4_indexes_photos_list_updated)
             # print(self.photos_list)
             # print(self.photos_list_updated)
@@ -483,7 +538,10 @@ class CanvasHandler(tk.Frame):
     #             print("!!!!!!!!!!!!!!!END FOR OTHER INDEX")
     #
     def change_background(self, tagOrId, new_background):
+        print("L'intro a bien débuté.")
+        # print(self.canvas.itemconfigure(tagOrId))
         self.canvas.itemconfigure(tagOrId, image=new_background)
+        # print(self.canvas.itemconfigure(tagOrId))
 
     def change_page_left(self, event=None):
         # self.canvas.focus_set(event)
@@ -499,6 +557,14 @@ class CanvasHandler(tk.Frame):
         self.show_pics_by_page_num(self.page_num)
 
     def show_pics_by_page_num(self, page_num):
+        """
+            - for loop toutes les photos d'une page précise
+            - change la clef state de toutes ces photos (hidden --> normal) et (normal --> hidden) sur ouverture album
+            - max 4 photos par pages
+            - change state que de 4 photos max
+            - recrée une nouvelle liste index_segmented_list si joueur prend nv. photo
+        """
+
         print("This is page {0}".format(page_num))
         index_segmented_list = page_num-1
         # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
@@ -516,7 +582,32 @@ class CanvasHandler(tk.Frame):
                 # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
             # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
 
+    def create_dialog_box(self, chosen_moment):
+        """
+            - crée sur demande bar dialogue + texte à display selon actions/moments joueur
+            - détruit bar dialogue + texte à display après fin texte
+        """
 
-if __name__ == "__main__":
-    App().mainloop()
+        # position black_dialog_bar
+        dialog_position = (self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.35)
+        # print(dialog_position)
+        # crée barre noir dialogue
+        black_dialog_bar = self.canvas.create_image(dialog_position[0], dialog_position[1], image=self.dialog_box)
+        chosen_text = self.master.dial.dialog_to_use(chosen_moment) # choisit texte à display selon action/moment joueur
+        # texte = positionné au centre de black_dialog_bar
+        dialog_text = self.canvas.create_text((dialog_position[0],self.master.winfo_screenheight()/1.25),
+                                              text="", fill="white", font=("Helvetica", 15, "italic"))
+        self.master.dial.typewritten_effect(dialog_text, chosen_text)
+        self.canvas.itemconfigure(black_dialog_bar, state="hidden")
+
+
+# if __name__ == "__main__":
+#     App().mainloop()
+
+def main():
+    root = App()
+    HomeScreen(root)
+
+if __name__ == '__main__':
+    main()
 
