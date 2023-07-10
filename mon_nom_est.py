@@ -247,6 +247,7 @@ class CanvasHandler(tk.Frame):
                                               image=self.master.album
                                               )
         # self.canvas.itemconfigure(self.background, state="hidden")
+        self.canvas.itemconfigure("camera_click", state="hidden")
         self.canvas.itemconfigure(self.album, state="hidden")
         self.canvas.itemconfigure(self.camera, state="hidden")
         # self.canvas.itemconfigure(self.background, state="hidden")
@@ -308,7 +309,6 @@ class CanvasHandler(tk.Frame):
         # print(self.canvas.gettags("camera_click"))
         self.canvas.delete(self.clickable_camera_button)
         self.canvas.itemconfigure(self.camera, state="normal")
-        # print(self.master.GEH.camera_deleted)
         self.master.GEH.camera_deleted = True
         self.master.check_game_events()
         # self.master.check_game_events()
@@ -374,7 +374,6 @@ class CanvasHandler(tk.Frame):
         # self.photos_list = self.photos_list_updated
         # self.photos_list_updated = []
         # print(self.photos_list)
-
 
     def is_album_photos_updated(self, event=None):
         # print(self.photos_list)

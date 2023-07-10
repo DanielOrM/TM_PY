@@ -2,24 +2,24 @@ import tkinter as tk
 from global_var import screen_width, screen_height
 
 
-class App(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.geometry("1920x1080")
-        self.configure(background="red")
-        self.bind("<a>", self.start_fade_transition)
-        self.fade = FadeTransition(self)
-        # self.grid_rowconfigure(0, weight=1)  # For row 0
-        # self.grid_columnconfigure(0, weight=1)  # For column 0
-
-    def start_fade_transition(self, event=None):
-        self.fade.create_transition()
+# class App(tk.Tk):
+#     def __init__(self):
+#         super().__init__()
+#         self.geometry("1920x1080")
+#         self.configure(background="red")
+#         self.bind("<a>", self.start_fade_transition)
+#         self.fade = FadeTransition(self)
+#         # self.grid_rowconfigure(0, weight=1)  # For row 0
+#         # self.grid_columnconfigure(0, weight=1)  # For column 0
+#
+#     def start_fade_transition(self, event=None):
+#         self.fade.create_transition()
 
 
 class FadeTransition(tk.Label):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, master, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
         self.configure(background="gray")
         label_background_system_color = self.cget("background")
         label_background_16_bit_color = self.winfo_rgb(label_background_system_color)
@@ -31,6 +31,7 @@ class FadeTransition(tk.Label):
         self.frames_per_second = 60
         self.ms_sleep_duration = 1000 // self.frames_per_second
         self.current_step = 0
+        self.fade_transition_ended = False
         # self.create_transition()
         # self.new_color = None
 
@@ -56,6 +57,10 @@ class FadeTransition(tk.Label):
             # self.pack_forget()
             self.current_step = 0
             self.grid_remove()
+            self.fade_transition_ended = True
+            if self.fade_transition_ended:
+                self.master.check_game_events()
+                self.fade_transition_ended = False
 
 # def main():
 #
