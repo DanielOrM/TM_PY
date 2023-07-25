@@ -7,6 +7,7 @@ from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
 from hover_message import create_hover_message
 from global_var import screen_width, screen_height
+import pygame
 
 
 class HomeScreen:
@@ -510,9 +511,12 @@ class CanvasHandler(tk.Frame):
 #     App().mainloop()
 
 def main():
+    pygame.mixer.init()
     root = App()
     HomeScreen(root)
 
+
 if __name__ == '__main__':
     main()
+
 
