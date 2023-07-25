@@ -1,4 +1,5 @@
 import tkinter as tk
+import pygame
 from global_var import screen_width, screen_height
 
 
@@ -37,6 +38,9 @@ class FadeTransition(tk.Label):
 
     def create_transition(self):
         self.grid(row=0, column=0, sticky="NSWE")
+        # bruits de pas
+        pygame.mixer.music.load("./son/bruits-pas-son.mp3")
+        pygame.mixer.music.play(loops=0)
         self.update_label()
 
     def interpolate(self, color_a, color_b, t):
@@ -59,6 +63,7 @@ class FadeTransition(tk.Label):
             self.grid_remove()
             self.fade_transition_ended = True
             if self.fade_transition_ended:
+                pygame.mixer.music.stop()
                 self.master.check_game_events()
                 self.fade_transition_ended = False
 
