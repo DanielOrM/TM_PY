@@ -28,7 +28,6 @@ class GameEventHandler:
             print("SALUT C'EST MOI LA CAMERA")
             self.master.rect.create_dialog_box("camera_trouvee")
             self.camera_deleted = False
-
         else:
             print("Rien à signaler...")
 
