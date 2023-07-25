@@ -47,7 +47,7 @@ class DialogBoxes:
                 new_letter = iterable_line[self.index_letter] # return la prochaine lettre dans le texte choisi
                 # print(new_letter)
                 if new_letter == "[":
-                    print("STOP")
+                    # print("STOP")
                     self.index_line = 0
                     self.index_letter = 0
                     self.prev_text = ""
@@ -65,7 +65,7 @@ class DialogBoxes:
                     self.change_text(tagOrId, new_letter, chosen_text)  # new_letter = new_text
                     self.index_letter += 1
             except IndexError:
-                print("HA J'ai attrapé l'erreur")
+                # print("HA J'ai attrapé l'erreur")
                     # check_letter = iterable_line[self.index_letter]
                     # check_letter_2 = iterable_line[self.index_letter+1]
                     # check_letter_3 = iterable_line[self.index_letter+2]
