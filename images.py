@@ -1,5 +1,6 @@
 from tkinter import PhotoImage
 from PIL import ImageTk, Image
+from global_var import screen_width, screen_height
 
 
 def open_image_setup_file(file_location):
@@ -10,8 +11,7 @@ def open_image_setup_file(file_location):
 def bg_image_setup(file_location):
     # bg_image = PhotoImage(file=file_location)
     bg_image_temp = Image.open(file_location)
-    bg_image_temp2 = bg_image_temp.resize((1920, 1080))
-    bg_image = ImageTk.PhotoImage(bg_image_temp2)
+    bg_image = ImageTk.PhotoImage(bg_image_temp.resize((screen_width, screen_height)))
     return bg_image
 
 
