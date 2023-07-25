@@ -26,6 +26,8 @@ class HomeScreen:
         self.exit_game_button.grid()
         self.HSFrame.grid_propagate(False)
         self.HSFrame.grid()
+        pygame.mixer.music.load("./son/DARKNESS.mp3")
+        pygame.mixer.music.play()
         self.master.mainloop()
 
     def apply_HS_canvas_image(self):
@@ -40,6 +42,8 @@ class HomeScreen:
         )
 
     def intro(self):
+        pygame.mixer.music.stop()
+        pygame.mixer.music.unload()
         self.HSFrame.grid_remove()
         self.check_game_e()
 
