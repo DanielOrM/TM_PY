@@ -48,4 +48,3 @@ class GameEventHandler:
             return True
         else:
             return False
-
