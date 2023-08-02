@@ -15,17 +15,21 @@ class HomeScreen:
         self.master = master
         # super().__init__(master)
         # self.config(background="black")
+        # configure de grid pour le reste du code
+        self.master.grid_rowconfigure(0, weight=1)  # For row 0
+        self.master.grid_columnconfigure(0, weight=1)  # For column 0
+
         self.HS_image = bg_image_setup("./images/homescreen/PA_homescreenTest.png")
-        self.HSFrame = tk.Canvas(master, height=self.master.winfo_screenheight(), width=self.master.winfo_screenwidth())
+        self.HSFrame = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_HS_canvas_image()
-        # self.grid_rowconfigure(row=0, column=1, weight=1)
-        # self.grid_columnconfigure(row=1, column=0, weight=1)
         self.start_button = tk.Button(self.HSFrame, text='Jouer', width=40, command=self.intro)
-        self.start_button.grid(sticky="NS")
+        self.start_button.grid()
         self.exit_game_button = tk.Button(self.HSFrame, text='Quitter', width=40, command=self.master.destroy)
         self.exit_game_button.grid()
         self.HSFrame.grid_propagate(False)
         self.HSFrame.grid()
+        pygame.mixer.music.load("./son/DARKNESS.mp3")
+        pygame.mixer.music.play()
         self.master.mainloop()
 
     def apply_HS_canvas_image(self):
@@ -40,6 +44,8 @@ class HomeScreen:
         )
 
     def intro(self):
+        pygame.mixer.music.stop()
+        pygame.mixer.music.unload()
         self.HSFrame.grid_remove()
         self.check_game_e()
 
@@ -58,8 +64,8 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Mon nom est...")
-        self.grid_rowconfigure(0, weight=1)  # For row 0
-        self.grid_columnconfigure(0, weight=1)  # For column 0
+        # self.grid_rowconfigure(0, weight=1)  # For row 0
+        # self.grid_columnconfigure(0, weight=1)  # For column 0
         self.index = 2
         self.pages_name = ["room_2", "room_1", "room_0", "room1", "room2"]
         self.pages_file_location = {
@@ -425,6 +431,13 @@ class CanvasHandler(tk.Frame):
         self.page_num += 1
         self.is_album_photos_updated()
         self.show_pics_by_page_num(self.page_num)
+
+    def get_bg_att(self, event=None):
+        # return "canvas object" avec le tag "app_background"
+        return self.canvas.itemconfigure("app_background")
+
+    def get_key_val_canvas_obj(self, obj, key):
+        return self.canvas.itemcget(obj, key)
 
     def show_pics_by_page_num(self, page_num):
         """
