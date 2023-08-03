@@ -5,20 +5,22 @@ from images import bg_image_setup, open_image_setup_file
 from fade_transition import FadeTransition
 from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
-from hover_message import create_hover_message
+from hover_message import create_hover_message, HoverMessRelPos
 from global_var import screen_width, screen_height
 import pygame
+import pynput
 
 
 class HomeScreen:
     def __init__(self, master):
         self.master = master
+        self.mouse_listener = pynput.mouse.Listener(suppress=True)
+        self.keyboard_listener = pynput.mouse.Listener(suppress=True)
         # super().__init__(master)
         # self.config(background="black")
         # configure de grid pour le reste du code
         self.master.grid_rowconfigure(0, weight=1)  # For row 0
         self.master.grid_columnconfigure(0, weight=1)  # For column 0
-
         self.HS_image = bg_image_setup("./images/homescreen/PA_homescreenTest.png")
         self.HSFrame = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_HS_canvas_image()
@@ -42,6 +44,8 @@ class HomeScreen:
         self.HSFrame.create_text((title_width, title_height), text="MON NOM EST", fill="white",
                                  font=("Helvetica", 40, "bold")
         )
+        # rend l'écran d'accueil accessible à partir de master
+        self.master.HS = self.HSFrame
 
     def intro(self):
         pygame.mixer.music.stop()
@@ -111,10 +115,20 @@ class App(tk.Tk):
 
         # handler d'évents avec classe GameEventHandler
         self.GEH = GameEventHandler(self)
-        # self.intro_ended = False
+
+        # obtenir coords souris
+        # self.bind("<Motion>", self.motion)
+
+        # HS widget
+        self.HS = None
 
     def check_game_events(self, event=None):
         self.GEH.events_to_check()
+
+    def motion(self, event):
+        self.GEH.rel_pos["x"], self.GEH.rel_pos["y"] = event.x, event.y
+        print("{}, {}".format(self.GEH.rel_pos["x"], self.GEH.rel_pos["y"])) # coords en x et en y de la souris
+        self.check_game_events()
 
 
 class View(tk.Frame):
@@ -250,8 +264,9 @@ class CanvasHandler(tk.Frame):
         self.clickable_camera_button = self.canvas.create_image(600,300,image=self.master.camera, tag="camera_click")
         # print(self.canvas.itemconfigure(self.clickable_camera_button))
         self.is_hover_message_running = False
-        create_hover_message(self.master, self.canvas, self.clickable_camera_button, text="[Click Gauche]")
-        # self.canvas.tag_bind(self.clickable_camera_button, "<Enter>", self.hightlight_items(self.clickable_camera_button))
+        # messages intéractions
+        create_hover_message(self.master, self.canvas, self.clickable_camera_button, text="[Click Gauche]") # prendre caméra
+        self.popup_draw = HoverMessRelPos(self.master, self.canvas, "[Click gauche] pour dessiner")
         self.canvas.tag_bind(self.clickable_camera_button, "<Button-1>", self.take_camera)
         # print(self.master.camera.width(), self.master.camera.height())
         self.camera = self.canvas.create_image(self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.5,
