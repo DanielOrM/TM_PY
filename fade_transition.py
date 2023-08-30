@@ -1,24 +1,14 @@
+"""Transition de type fondu"""
 import tkinter as tk
 import pygame
-from global_var import screen_width, screen_height
-
-
-# class App(tk.Tk):
-#     def __init__(self):
-#         super().__init__()
-#         self.geometry("1920x1080")
-#         self.configure(background="red")
-#         self.bind("<a>", self.start_fade_transition)
-#         self.fade = FadeTransition(self)
-#         # self.grid_rowconfigure(0, weight=1)  # For row 0
-#         # self.grid_columnconfigure(0, weight=1)  # For column 0
-#
-#     def start_fade_transition(self, event=None):
-#         self.fade.create_transition()
 
 
 class FadeTransition(tk.Label):
-
+    """
+    Transition de type fondu
+        - bruits de pas début + stop
+        - blanc --> noir (flash)
+    """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.configure(background="gray")
@@ -37,6 +27,11 @@ class FadeTransition(tk.Label):
         # self.new_color = None
 
     def create_transition(self):
+        """
+        Transition en plein écran
+        Bruits de pas enclenché
+        Lancement transition
+        """
         self.grid(row=0, column=0, sticky="NSWE")
         # bruits de pas
         pygame.mixer.music.load("./son/bruits-pas-son.mp3")
@@ -44,11 +39,18 @@ class FadeTransition(tk.Label):
         self.update_label()
 
     def interpolate(self, color_a, color_b, t):
+        """
+        Return tuple avec couleurs (blanc--> noir) qui changent
+        """
         # 'color_a' et 'color_b' sont des tuples RGB
         # 't' = valeur entre 0.0 et 1.0
         return tuple(int(a + (b - a) * t) for a, b in zip(color_a, color_b))
 
     def update_label(self):
+        """
+        Changement blanc --> noir progressif (t)
+        Quand transition stop --> fin bruits de pas
+        """
         t = (1.0 / self.frames_per_second) * self.current_step
         self.current_step += 0.7
         # print(self.current_step)
@@ -66,15 +68,3 @@ class FadeTransition(tk.Label):
                 pygame.mixer.music.stop()
                 self.master.check_game_events()
                 self.fade_transition_ended = False
-
-# def main():
-#
-#     application = App()
-#     application.mainloop()
-#
-#     return 0
-
-
-# if __name__ == "__main__":
-#     import sys
-#     sys.exit(main())

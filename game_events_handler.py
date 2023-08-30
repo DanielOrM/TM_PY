@@ -1,7 +1,14 @@
-# from ctypes import *
+"""Classe gérant tous les intéractions + event du jeu"""
 
 
 class GameEventHandler:
+    """
+    Conditions diff pour tt. pièces
+    Conditions pour intro
+    Rel.x + Rel.y
+        - events_to_check
+        - get_current_room_img
+    """
     def __init__(self, master):
         self.master = master
         self.intro_initialized = False
@@ -12,6 +19,7 @@ class GameEventHandler:
             "x": 0,
             "y": 0
         }
+        self.is_desktop_visible = False
 
     def events_to_check(self):
         """
@@ -22,11 +30,6 @@ class GameEventHandler:
             - pyimage 4 = chambre dessin
             - pyimage 5 = bibliothèque
         """
-        # print(self.x, self.y)
-        # évite d'interrompre l'intro ou accidentellement trigger des conditions de la func "events_to_check"
-        # if self.master.HS.winfo_ismapped():
-        #     print("Encore à l'écran d'accueil!")
-        #     return
         if not self.intro_initialized and not self.intro_ended:
             # DialogBoxes().dialog_to_use("intro")
             print("INTRO COMMENCE")
@@ -54,22 +57,57 @@ class GameEventHandler:
             if self.camera_deleted:
                 print("SALUT C'EST MOI LA CAMERA")
                 self.master.rect.create_dialog_box("camera_trouvee")
-                self.camera_deleted = False # évite de retoggle cette partie du code. L'image de la "pickable caméra" est bien détruite
+                # évite de retoggle cette partie du code. iImage "pickable caméra" = détruite
+                self.camera_deleted = False
         elif self.get_current_room_img() == "pyimage4":
             if 575 < self.rel_pos.get("x") < 1000 and 565 < self.rel_pos.get("y") < 650:
                 print("DESSIN")
                 print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
                 self.master.rect.popup_draw.show_tip(self.rel_pos)
+                # print(pygame.mouse.get_pressed())
+                # print(pygame.mouse.get_pressed()[0])
+                self.master.bind("<Button-1>",
+                                 lambda x: self.master.rect.change_background("app_background",
+                                           self.master.desktop_closeup.get("desktop")))
             else:
                 self.master.rect.popup_draw.hide_tip()
+        elif self.get_current_room_img() == "pyimage5":
+            if 800 < self.rel_pos.get("x") < 1000 and 50 < self.rel_pos.get("y") < 250:
+                print("Livres ???!!!")
+                self.master.rect.see_books.show_tip(self.rel_pos)
+                self.master.bind("<Button-1>",
+                                 lambda x: self.master.rect.change_background("app_background",
+                                           self.master.library_closeup.get("see_books")))
+            else:
+                self.master.rect.see_books.hide_tip()
+        # regarde livres dispo
+        elif self.get_current_room_img() == "pyimage7":
+            print("Accès à tous les livres...")
+            if 380 < self.rel_pos.get("x") < 480:
+                print("LIVRE A LIRE")
+                self.master.rect.open_family_book.show_tip(self.rel_pos)
+                self.master.bind("<Button-1>",
+                                 lambda x: self.master.rect.change_background("app_background",
+                                           self.master.library_closeup.get("family_book")))
+            else:
+                self.master.rect.open_family_book.hide_tip()
+        # joueur lit livre "famille"
+        elif self.get_current_room_img() == "pyimage8":
+            # print(self.rel_pos)
+            self.master.rect.read_fam_book.show_tip(self.rel_pos)
+            # quand joueur appuie sur E, ouvre image "read_fam_book" et enlève le texte affiché
+            # self.master.bind("<E>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")), self.master.rect.read_fam_book.hide_tip())
+            # self.master.bind("<e>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")))
+            self.master.bind("<e>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")))
         if not self.get_current_room_img() == "pyimage3" and not self.camera_deleted:
             self.master.rect.changing_state_canvas_item("camera_click", "hidden")
         else:
             print("Rien à signaler...")
 
     def get_current_room_img(self):
-        # check si appareil photo est dans la pièce principale. Sinon, l'object "pickable" se déplace avec le joueur
+        """
+        Return n° pyimage actuelle (image fond d'écran)
+        """
         # bg = self.master.rect.get_bg_att()
         # print(bg)
         return self.master.rect.get_key_val_canvas_obj("app_background", "image") # background
-
