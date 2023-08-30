@@ -1,3 +1,6 @@
+"""
+Module servant à prendre dimensions écran machine
+"""
 import ctypes
 
 user32 = ctypes.windll.user32
