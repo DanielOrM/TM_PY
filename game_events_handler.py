@@ -84,6 +84,8 @@ class GameEventHandler:
             # windll.user32.BlockInput(False)
             # Bouger la souris réappelle func motion de classe App
             self.master.bind("<Motion>", self.master.motion)
+        elif self.get_current_room_img() == "pyimage1":
+            pass
         elif self.get_current_room_img() == "pyimage2":
             print(self.master.pages_file_location["room_1"])
             if 575 < self.rel_pos.get("x") < 1000 and 0 < self.rel_pos.get("y") < 300:
@@ -136,7 +138,7 @@ class GameEventHandler:
             else:
                 self.master.rect.see_books.hide_tip()
         # regarde livres dispo
-        elif self.get_current_room_img() == "pyimage7":
+        elif self.get_current_room_img() == "pyimage8":
             print("Accès à tous les livres...")
             if 380 < self.rel_pos.get("x") < 480:
                 print("LIVRE A LIRE")
@@ -148,7 +150,7 @@ class GameEventHandler:
             else:
                 self.master.rect.open_family_book.hide_tip()
         # joueur lit livre "famille"
-        elif self.get_current_room_img() == "pyimage8":
+        elif self.get_current_room_img() == "pyimage9":
             # print(self.rel_pos)
             self.master.rect.read_fam_book.show_tip(self.rel_pos)
             # quand joueur appuie sur E, ouvre image "read_fam_book" et enlève le texte affiché
@@ -186,4 +188,5 @@ class GameEventHandler:
         """
         # bg = self.master.rect.get_bg_att()
         # print(bg)
+        print(self.master.rect.get_key_val_canvas_obj("app_background", "image"))
         return self.master.rect.get_key_val_canvas_obj("app_background", "image")  # background
