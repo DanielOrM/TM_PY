@@ -106,6 +106,11 @@ class App(tk.Tk):
             "room1": bg_image_setup(self.pages_file_location.get("room1")),
             "room2": bg_image_setup(self.pages_file_location.get("room2"))
         }
+        # cuisine
+        self.kitchen_closeup = {
+            "oranges":
+                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineDésordreZoom.png")
+        }
         # chambre dessin
         self.desktop_closeup = {
             "desktop":
@@ -320,6 +325,8 @@ class CanvasHandler(tk.Frame):
         create_hover_message(self.master, self.canvas,
                              self.clickable_camera_button,
                              text="[Click Gauche]") # prendre caméra
+        self.orange_kitchen = HoverMessRelPos(self.master, self.canvas,
+                                              "[Click gauche] pour mieux observer")
         self.popup_draw = HoverMessRelPos(self.master, self.canvas,
                                           "[Click gauche] pour observer le bureau")
         self.see_books = HoverMessRelPos(self.master, self.canvas,

@@ -1,4 +1,7 @@
 """Classe gérant tous les intéractions + event du jeu"""
+from global_var import screen_height, screen_width
+from dialog.txt_files_reader import txt_files_story
+from images import bg_image_setup
 
 
 class GameEventHandler:
@@ -9,6 +12,7 @@ class GameEventHandler:
         - events_to_check
         - get_current_room_img
     """
+
     def __init__(self, master):
         self.master = master
         self.intro_initialized = False
@@ -19,7 +23,16 @@ class GameEventHandler:
             "x": 0,
             "y": 0
         }
+        self.text_box = self.master.rect.canvas.create_rectangle(screen_width / 3 * 2, 0,
+                                                                 screen_width, screen_height,
+                                                                 fill="grey", stipple="gray50")
+        self.master.rect.changing_state_canvas_item(self.text_box, "hidden")
+        self.text_readable = self.master.rect.canvas.create_text(screen_width / 6 * 5, screen_height / 2,
+                                                    text="",
+                                                    fill="white", font=("Helvetica", 12, "italic"))
+        self.master.rect.changing_state_canvas_item(self.text_readable, "hidden")
         self.is_desktop_visible = False
+        self.is_fam_book_read = False
 
     def events_to_check(self):
         """
@@ -29,6 +42,8 @@ class GameEventHandler:
             - pyimage 3 = salle principale (porte)
             - pyimage 4 = chambre dessin
             - pyimage 5 = bibliothèque
+                - pyimage 7 = close-up livres
+                    - pyimage 8 = lire livre famille
         """
         if not self.intro_initialized and not self.intro_ended:
             # DialogBoxes().dialog_to_use("intro")
@@ -51,6 +66,22 @@ class GameEventHandler:
             # windll.user32.BlockInput(False)
             # Bouger la souris réappelle func motion de classe App
             self.master.bind("<Motion>", self.master.motion)
+        elif self.get_current_room_img() == "pyimage2":
+            print(self.master.pages_file_location["room_1"])
+            if 575 < self.rel_pos.get("x") < 1000 and 0 < self.rel_pos.get("y") < 300:
+                self.master.pages["room_1"] = bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_Cuisine.png")
+                self.master.fade.create_transition()
+                self.master.rect.change_background("app_background",
+                                                   self.master.pages.get("room_1"))
+        elif self.get_current_room_img() == "pyimage21":
+            if 0 < self.rel_pos.get("x") < 500 and 600 < self.rel_pos.get("y") < 800:
+                self.master.rect.orange_kitchen.show_tip(self.rel_pos)
+                self.master.bind("<Button-1>",
+                                 lambda x: self.master.rect.change_background("app_background",
+                                                                              self.master.kitchen_closeup.get(
+                                                                                  "oranges")))
+            else:
+                self.master.rect.orange_kitchen.hide_tip()
         elif self.get_current_room_img() == "pyimage3":
             # print("Là... ça marche. C'est la pièce principale.")
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
@@ -60,6 +91,10 @@ class GameEventHandler:
                 # évite de retoggle cette partie du code. iImage "pickable caméra" = détruite
                 self.camera_deleted = False
         elif self.get_current_room_img() == "pyimage4":
+            # pour pyimage 8 (lire)
+            self.is_fam_book_read = False
+            self.master.rect.changing_state_canvas_item(self.text_box, "hidden")
+            self.master.rect.changing_state_canvas_item(self.text_readable, "hidden")
             if 575 < self.rel_pos.get("x") < 1000 and 565 < self.rel_pos.get("y") < 650:
                 print("DESSIN")
                 print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
@@ -68,7 +103,8 @@ class GameEventHandler:
                 # print(pygame.mouse.get_pressed()[0])
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.change_background("app_background",
-                                           self.master.desktop_closeup.get("desktop")))
+                                                                              self.master.desktop_closeup.get(
+                                                                                  "desktop")))
             else:
                 self.master.rect.popup_draw.hide_tip()
         elif self.get_current_room_img() == "pyimage5":
@@ -77,7 +113,8 @@ class GameEventHandler:
                 self.master.rect.see_books.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.change_background("app_background",
-                                           self.master.library_closeup.get("see_books")))
+                                                                              self.master.library_closeup.get(
+                                                                                  "see_books")))
             else:
                 self.master.rect.see_books.hide_tip()
         # regarde livres dispo
@@ -88,7 +125,8 @@ class GameEventHandler:
                 self.master.rect.open_family_book.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.change_background("app_background",
-                                           self.master.library_closeup.get("family_book")))
+                                                                              self.master.library_closeup.get(
+                                                                                  "family_book")))
             else:
                 self.master.rect.open_family_book.hide_tip()
         # joueur lit livre "famille"
@@ -98,7 +136,27 @@ class GameEventHandler:
             # quand joueur appuie sur E, ouvre image "read_fam_book" et enlève le texte affiché
             # self.master.bind("<E>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")), self.master.rect.read_fam_book.hide_tip())
             # self.master.bind("<e>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")))
-            self.master.bind("<e>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")))
+            self.master.bind("<e>", lambda x: self.master.rect.change_background("app_background",
+                                                                                 self.master.library_closeup.get(
+                                                                                     "read_fam_book")))
+            if not self.is_fam_book_read:
+                print(txt_files_story("./dialog/dialog_text/lire_livre.txt"))
+                # self.master.rect.canvas.create_rectangle(screen_width / 3 * 2, 0,
+                #                                          screen_width, screen_height, fill="grey", stipple="gray50")
+                self.master.rect.changing_state_canvas_item(self.text_box, "normal")
+                self.master.rect.canvas.itemconfigure(self.text_readable,
+                                                      text=txt_files_story("./dialog/dialog_text/lire_livre.txt"))
+                self.master.rect.changing_state_canvas_item(self.text_readable, "normal")
+                # self.master.rect.canvas.create_text(screen_width / 6 * 5, screen_height / 2,
+                #                                     text=txt_files_story("./dialog/dialog_text/lire_livre.txt"),
+                #                                     fill="white", font=("Helvetica", 12, "italic"))
+
+                # self.master.rect.canvas.create_text(screen_width/6*5, screen_height/4,
+                #                                     text=txt_files_reader("./dialog/dialog_text/lire_livre.txt"),
+                #                                     fill="white", font=("Helvetica", 12, "italic"),
+                #                                     justify="left")
+                # text=txt_files_reader("./dialog/dialog_text/lire_livre.txt")
+            self.is_fam_book_read = True
         if not self.get_current_room_img() == "pyimage3" and not self.camera_deleted:
             self.master.rect.changing_state_canvas_item("camera_click", "hidden")
         else:
@@ -110,4 +168,4 @@ class GameEventHandler:
         """
         # bg = self.master.rect.get_bg_att()
         # print(bg)
-        return self.master.rect.get_key_val_canvas_obj("app_background", "image") # background
+        return self.master.rect.get_key_val_canvas_obj("app_background", "image")  # background
