@@ -18,6 +18,7 @@ class DialogBoxes:
         self.prev_text = ""
         self.index_letter = 0
         self.index_line = 0
+        self.is_running = True
         self.text = {
             "intro": txt_files_reader("dialog/dialog_text/intro_text.txt"),
             "camera_trouvee": txt_files_reader("dialog/dialog_text/camera_trouvee.txt"),
@@ -28,7 +29,6 @@ class DialogBoxes:
         """
         Under the hood: appelle func update_text
         """
-        #
         self.update_text(text_id, self.prev_text, chosen_text)
 
     def update_text(self, tag_or_id, new_text, chosen_text):
@@ -51,8 +51,13 @@ class DialogBoxes:
 
     def text_iteration(self, tag_or_id, chosen_text):
         """
-        Itèreà travers texte choisi + update le new_text dans func change_text
+        Itère travers texte choisi + update le new_text dans func change_text
         """
+        if not self.is_running:
+            print("RETURN STATEMENT")
+            self.is_running = True
+            self.master.rect.canvas.itemconfigure(tag_or_id, text="")
+            return
         try:
             iterable_line = list(chosen_text[self.index_line])
             # last_index_iterable_line = len(iterable_line)-1
@@ -79,7 +84,7 @@ class DialogBoxes:
                 if all(character == "." for character in list(chosen_text[self.index_line+1])):
                     time.sleep(1.5)
                     self.prev_text = ""
-                    print("ça se vide...")
+                    # print("ça se vide...")
                 if self.master.rect.canvas.itemcget(tag_or_id, "text") == " ...":
                     # print("Normalement ça marche.")
                     time.sleep(0.9)
@@ -103,3 +108,10 @@ class DialogBoxes:
         Choisit quel texte à return
         """
         return self.text.get(chosen_moment)
+
+    def stop(self):
+        print("Still RUNNING")
+        self.is_running = False
+        self.prev_text = ""
+        self.index_letter = 0
+        self.index_line = 0

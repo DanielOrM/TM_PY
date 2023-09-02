@@ -173,7 +173,7 @@ class App(tk.Tk):
         self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"] = event.x, event.y
         self.check_game_events()
         # utile pour le débug pour les conditions sur classe GameEventHandler
-        print(self.rect.get_key_val_canvas_obj("app_background", "image"))
+        # print(self.rect.get_key_val_canvas_obj("app_background", "image"))
 
 
 class View(tk.Frame):

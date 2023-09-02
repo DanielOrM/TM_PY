@@ -1,4 +1,5 @@
 """Classe gérant tous les intéractions + event du jeu"""
+import tkinter as tk
 from global_var import screen_height, screen_width
 from dialog.txt_files_reader import txt_files_story
 from images import bg_image_setup
@@ -34,6 +35,22 @@ class GameEventHandler:
         self.is_desktop_visible = False
         self.is_fam_book_read = False
 
+        # intéractions / widgets
+        self.skip_intro_butt = tk.Button(self.master, text='Skip intro', width=40, command=self.skip_intro)
+
+    def skip_intro(self):
+        """
+        Skips intro and ends the dialog
+        """
+        self.intro_initialized = True
+        self.intro_ended = True
+        self.are_rooms_visible = True
+        self.skip_intro_butt.grid_remove()
+        self.master.dial.stop()
+        self.master.view.change_room("room_0")
+        self.master.rect.changing_state_canvas_item("camera_click", "normal")
+        self.master.bind("<Motion>", self.master.motion)
+
     def events_to_check(self):
         """
         Images:
@@ -51,6 +68,7 @@ class GameEventHandler:
             # windll.user32.BlockInput(True)
             # enlève souris input, click et intéractions avec clavier
             self.master.rect.change_background("app_background", self.master.black_background)
+            self.skip_intro_butt.grid()
             # self.master.rect.canvas.itemconfigure(self.master.rect.camera, state="hidden")
             self.master.rect.create_dialog_box("intro")
             # print("EN ATTENTE")
