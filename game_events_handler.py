@@ -112,6 +112,7 @@ class GameEventHandler:
             # cacher mess pop-up CUISINE
             self.master.rect.orange_kitchen.hide_tip()
             self.master.rect.drawer_open.hide_tip()
+            self.master.rect.read_pamphlet_drawer.hide_tip()
         elif self.get_current_room_img() == "pyimage2":
             # print(self.master.pages_file_location["room_1"])
             if 575 < self.rel_pos.get("x") < 1000 and 0 < self.rel_pos.get("y") < 300:
@@ -159,13 +160,14 @@ class GameEventHandler:
                                                                 "./dialog/dialog_text/lire_brochure_cuisine.txt"))
                 self.is_pamphlet_kitchen_read = True
             else:
-                self.master.rect.read_pamphlet_drawer.hide_tip(self.rel_pos)
+                self.master.rect.read_pamphlet_drawer.hide_tip()
         elif self.get_current_room_img() == "pyimage3":
             # lire brochure cuisine
             self.is_pamphlet_kitchen_read = False
             # cacher mess pop-up CUISINE
             self.master.rect.orange_kitchen.hide_tip()
             self.master.rect.drawer_open.hide_tip()
+            self.master.rect.read_pamphlet_drawer.hide_tip()
             # cacher mess pop-up BUREAU
             self.master.rect.popup_draw.hide_tip()
             reset_story_reader(self.master)
