@@ -7,7 +7,7 @@ from images import bg_image_setup, open_image_setup_file
 from fade_transition import FadeTransition
 from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
-from hover_message import create_hover_message, HoverMessRelPos
+from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
 
 
@@ -106,10 +106,19 @@ class App(tk.Tk):
             "room1": bg_image_setup(self.pages_file_location.get("room1")),
             "room2": bg_image_setup(self.pages_file_location.get("room2"))
         }
+        # cuisine
+        self.kitchen_closeup = {
+            "oranges":
+                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineDésordreZoom.png"),
+            "drawer":
+                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineTiroir.png")
+        }
         # chambre dessin
         self.desktop_closeup = {
             "desktop":
-                bg_image_setup("./images/rooms/real_rooms/player_room/PA_CarnetDessinZoom.png")
+                bg_image_setup("./images/rooms/real_rooms/player_room/PA_CarnetDessinZoom.png"),
+            "draw":
+                bg_image_setup("./images/rooms/real_rooms/player_room/PA_PapierDessin.png"),
         }
         # bibliothèque
         self.library_closeup = {
@@ -166,9 +175,10 @@ class App(tk.Tk):
             - appelle func check_game_events
         """
         self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"] = event.x, event.y
+        # print(self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"])
         self.check_game_events()
         # utile pour le débug pour les conditions sur classe GameEventHandler
-        print(self.rect.get_key_val_canvas_obj("app_background", "image"))
+        # print(self.rect.get_key_val_canvas_obj("app_background", "image"))
 
 
 class View(tk.Frame):
@@ -317,9 +327,19 @@ class CanvasHandler(tk.Frame):
         # print(self.canvas.itemconfigure(self.clickable_camera_button))
         self.is_hover_message_running = False
         # messages intéractions
-        create_hover_message(self.master, self.canvas,
+        self.tool_tip_cam = HoverMessage(self.canvas, self.clickable_camera_button)
+        create_hover_message(self.master, self.canvas, self.tool_tip_cam,
                              self.clickable_camera_button,
                              text="[Click Gauche]") # prendre caméra
+        self.draw = HoverMessRelPos(self.master, self.canvas,
+                                    "[E] pour dessiner"
+                                    )
+        self.orange_kitchen = HoverMessRelPos(self.master, self.canvas,
+                                              "[Click gauche] pour mieux observer")
+        self.drawer_open = HoverMessRelPos(self.master, self.canvas,
+                                           "[Click gauche] pour observer le tiroir")
+        self.read_pamphlet_drawer = HoverMessRelPos(self.master, self.canvas,
+                                                 "[E] pour lire la brochure")
         self.popup_draw = HoverMessRelPos(self.master, self.canvas,
                                           "[Click gauche] pour observer le bureau")
         self.see_books = HoverMessRelPos(self.master, self.canvas,
@@ -423,8 +443,23 @@ class CanvasHandler(tk.Frame):
         cur_x = self.canvas.canvasx(event.x)
         cur_y = self.canvas.canvasy(event.y)
         self.place_photo_album_list((self.start_x, self.start_y, cur_x, cur_y))
+        # print(f"coin haut gauche: {self.start_x, self.start_y}, coin bas droit: {cur_x, cur_y}.")
+        self.master.game_e_handler.check_start_x = self.start_x
+        self.master.game_e_handler.check_start_y = self.start_y
+        self.master.game_e_handler.check_end_x = cur_x
+        self.master.game_e_handler.check_end_y = cur_y
         self.canvas.delete(self.rect)
         self.rect = None
+        self.master.check_game_events()
+        print("ehriuheruheurheurheuruer")
+        print(f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
+        # reset valeur check
+        self.master.game_e_handler.check_start_x = 0
+        self.master.game_e_handler.check_end_x = 0
+        self.master.game_e_handler.check_start_y = 0
+        self.master.game_e_handler.check_end_y = 0
+        print(
+        f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
 
     def hightlight_items(self, image, event=None):
         """
@@ -444,6 +479,7 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.clickable_camera_button)
         self.canvas.itemconfigure(self.camera, state="normal")
         self.master.game_e_handler.camera_deleted = True
+        self.tool_tip_cam.hidetip()
         self.master.check_game_events()
         # self.master.check_game_events()
         # print(self.canvas.gettags("camera_click"))

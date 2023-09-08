@@ -51,24 +51,26 @@ class HoverMessage:
             tw.destroy()
 
 
-def create_hover_message(master, widget, item, text):
+def create_hover_message(master, widget, tool_tip, item, text):
     """
     Sert à appeler func tout HoverMessage
     """
-    tool_tip = HoverMessage(widget, item)
 
     def enter(event):
         is_running = master.rect.is_hover_message_running
         if not is_running:
             tool_tip.showtip(text, event)
             master.rect.change_is_running_value()
-            master.after(400, master.rect.change_is_running_value)
+            master.after(250, master.rect.change_is_running_value)
 
     def leave(event=None):
         tool_tip.hidetip()
 
     widget.tag_bind(item, '<Leave>', leave)
     widget.tag_bind(item, '<Enter>', enter)
+
+
+
 
 
 class CreateHoverMessRelPos:
@@ -133,7 +135,7 @@ class HoverMessRelPos:
         if not is_running:
             self.pop_up.showtip(self.text, event)
             self.master.rect.change_is_running_value()
-            self.master.after(400, self.master.rect.change_is_running_value)
+            self.master.after(250, self.master.rect.change_is_running_value)
 
     def hide_tip(self, event=None):
         """
