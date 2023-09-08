@@ -109,21 +109,24 @@ class GameEventHandler:
             # lire brochure cuisine
             self.is_pamphlet_kitchen_read = False
             reset_story_reader(self.master)
+            # cacher mess pop-up CUISINE
+            self.master.rect.orange_kitchen.hide_tip()
+            self.master.rect.drawer_open.hide_tip()
         elif self.get_current_room_img() == "pyimage2":
-            print(self.master.pages_file_location["room_1"])
+            # print(self.master.pages_file_location["room_1"])
             if 575 < self.rel_pos.get("x") < 1000 and 0 < self.rel_pos.get("y") < 300:
                 self.master.pages["room_1"] = bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_Cuisine.png")
                 self.master.fade.create_transition()
                 self.master.rect.change_background("app_background",
                                                    self.master.pages.get("room_1"))
-        elif self.get_current_room_img() == "pyimage23":
-            if 0 < self.rel_pos.get("x") < 500 and 600 < self.rel_pos.get("y") < 800:
+        elif self.get_current_room_img() == "pyimage23" or self.get_current_room_img() == "pyimage24":
+            if 0 < self.rel_pos.get("x") < 500 and 500 < self.rel_pos.get("y") < 650:
                 self.master.rect.orange_kitchen.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.change_background("app_background",
                                                                               self.master.kitchen_closeup.get(
                                                                                   "oranges")))
-            elif 800 < self.rel_pos.get("x") < 1385 and 0 < self.rel_pos.get("y") < 185:
+            elif 800 < self.rel_pos.get("x") < 1385 and 0 < self.rel_pos.get("y") < 210:
                 self.master.rect.drawer_open.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.change_background("app_background",
@@ -133,6 +136,9 @@ class GameEventHandler:
                 self.master.rect.orange_kitchen.hide_tip()
                 self.master.rect.drawer_open.hide_tip()
         elif self.get_current_room_img() == "pyimage6":
+            # cacher mess pop-up CUISINE
+            self.master.rect.orange_kitchen.hide_tip()
+            self.master.rect.drawer_open.hide_tip()
             # -15, 230
             x_range = 15
             # 180, 630
@@ -141,9 +147,10 @@ class GameEventHandler:
                     and y_range-420 < self.check_start_y < self.check_end_y < y_range+30:
                 print("Preuves pour activités paranormales.")
                 self.master.rect.create_dialog_box("preuve_parnm_oranges")
-                # reset valeur check
-                self.check_start_x, self.check_end_x, self.check_start_y, self.check_end_y = 0, 0, 0, 0
         elif self.get_current_room_img() == "pyimage7":
+            # cacher mess pop-up CUISINE
+            self.master.rect.orange_kitchen.hide_tip()
+            self.master.rect.drawer_open.hide_tip()
             if 250 < self.rel_pos.get("x") < 625 and 650 < self.rel_pos.get("y") < 725:
                 self.master.rect.read_pamphlet_drawer.show_tip(self.rel_pos)
                 if not self.is_pamphlet_kitchen_read:
@@ -156,6 +163,11 @@ class GameEventHandler:
         elif self.get_current_room_img() == "pyimage3":
             # lire brochure cuisine
             self.is_pamphlet_kitchen_read = False
+            # cacher mess pop-up CUISINE
+            self.master.rect.orange_kitchen.hide_tip()
+            self.master.rect.drawer_open.hide_tip()
+            # cacher mess pop-up BUREAU
+            self.master.rect.popup_draw.hide_tip()
             reset_story_reader(self.master)
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
             if self.camera_deleted:
@@ -164,9 +176,12 @@ class GameEventHandler:
                 # évite de retoggle cette partie du code. iImage "pickable caméra" = détruite
                 self.camera_deleted = False
         elif self.get_current_room_img() == "pyimage4":
-            # pour pyimage 8 (lire)
+            # pour pyimage 11 (lire)
             self.is_fam_book_read = False
             reset_story_reader(self.master)
+            # cacher mess pop-up BIBLIOTHEQUE
+            self.master.rect.see_books.hide_tip()
+            self.master.rect.open_family_book.hide_tip()
             if 575 < self.rel_pos.get("x") < 1000 and 565 < self.rel_pos.get("y") < 650:
                 print("DESSIN")
                 print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
@@ -193,6 +208,8 @@ class GameEventHandler:
         elif self.get_current_room_img() == "pyimage8":
             pass
         elif self.get_current_room_img() == "pyimage5":
+            # cacher mess pop-up BUREAU
+            self.master.rect.popup_draw.hide_tip()
             if 800 < self.rel_pos.get("x") < 1000 and 50 < self.rel_pos.get("y") < 250:
                 print("Livres ???!!!")
                 self.master.rect.see_books.show_tip(self.rel_pos)
@@ -217,7 +234,7 @@ class GameEventHandler:
         # joueur lit livre "famille"
         elif self.get_current_room_img() == "pyimage11":
             # print(self.rel_pos)
-            self.master.rect.read_fam_book.show_tip(self.rel_pos)
+            # self.master.rect.read_fam_book.show_tip(self.rel_pos)
             # quand joueur appuie sur E, ouvre image "read_fam_book" et enlève le texte affiché
             # self.master.bind("<E>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")), self.master.rect.read_fam_book.hide_tip())
             # self.master.bind("<e>", lambda x: self.master.rect.change_background("app_background", self.master.library_closeup.get("read_fam_book")))
@@ -243,7 +260,8 @@ class GameEventHandler:
         if not self.get_current_room_img() == "pyimage3" and not self.camera_deleted:
             self.master.rect.changing_state_canvas_item("camera_click", "hidden")
         else:
-            print("Rien à signaler...")
+            # print("Rien à signaler...")
+            pass
 
     def get_current_room_img(self):
         """
@@ -251,5 +269,5 @@ class GameEventHandler:
         """
         # bg = self.master.rect.get_bg_att()
         # print(bg)
-        # print(self.master.rect.get_key_val_canvas_obj("app_background", "image"))
+        print(self.master.rect.get_key_val_canvas_obj("app_background", "image"))
         return self.master.rect.get_key_val_canvas_obj("app_background", "image")  # background
