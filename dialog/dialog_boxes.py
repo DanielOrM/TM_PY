@@ -22,7 +22,8 @@ class DialogBoxes:
         self.text = {
             "intro": txt_files_reader("dialog/dialog_text/intro_text.txt"),
             "camera_trouvee": txt_files_reader("dialog/dialog_text/camera_trouvee.txt"),
-            "réveil": txt_files_reader("dialog/dialog_text/réveil.txt")
+            "réveil": txt_files_reader("dialog/dialog_text/réveil.txt"),
+            "preuve_parnm_oranges": txt_files_reader("dialog/dialog_text/preuve_parnm_oranges.txt")
         }
 
     def typewritten_effect(self, text_id, chosen_text):
@@ -46,7 +47,7 @@ class DialogBoxes:
         # new_text = str(self.prev_text + new_text)
         self.master.rect.canvas.itemconfigure(tag_or_id, text=new_text)
         self.prev_text = new_text
-        # appelle func text_iteration après 300 ms
+        # appelle func text_iteration après 80 ms
         self.master.after(80, self.text_iteration, tag_or_id, chosen_text)
 
     def text_iteration(self, tag_or_id, chosen_text):
