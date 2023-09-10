@@ -55,7 +55,7 @@ class DialogBoxes:
         Itère travers texte choisi + update le new_text dans func change_text
         """
         if not self.is_running:
-            print("RETURN STATEMENT")
+            # print("RETURN STATEMENT")
             self.is_running = True
             self.master.rect.canvas.itemconfigure(tag_or_id, text="")
             return
@@ -111,7 +111,7 @@ class DialogBoxes:
         return self.text.get(chosen_moment)
 
     def stop(self):
-        print("Still RUNNING")
+        # print("Still RUNNING")
         self.is_running = False
         self.prev_text = ""
         self.index_letter = 0
