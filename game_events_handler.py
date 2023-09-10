@@ -36,6 +36,7 @@ class GameEventHandler:
         self.is_desktop_visible = False
         self.is_fam_book_read = False
         self.is_pamphlet_kitchen_read = False
+        self.are_dots_drawn = False
 
         # intéractions / widgets
         self.skip_intro_butt = tk.Button(self.master, text='Skip intro', width=40, command=self.skip_intro)
@@ -82,7 +83,8 @@ class GameEventHandler:
         """
         """unbind tous les <Button-1> pour éviter:
         click n'importe où --> close-up"""
-        self.master.unbind("<Button-1>")
+        self.master.unbind("<Button-1>")  # temporaire --> reset_val++efficace
+        self.reset_val()
         if not self.intro_initialized and not self.intro_ended:
             # DialogBoxes().dialog_to_use("intro")
             print("INTRO COMMENCE")
@@ -106,13 +108,7 @@ class GameEventHandler:
             # Bouger la souris réappelle func motion de classe App
             self.master.bind("<Motion>", self.master.motion)
         elif self.get_current_room_img() == "pyimage1":
-            # lire brochure cuisine
-            self.is_pamphlet_kitchen_read = False
-            reset_story_reader(self.master)
-            # cacher mess pop-up CUISINE
-            self.master.rect.orange_kitchen.hide_tip()
-            self.master.rect.drawer_open.hide_tip()
-            self.master.rect.read_pamphlet_drawer.hide_tip()
+            pass
         elif self.get_current_room_img() == "pyimage2":
             # print(self.master.pages_file_location["room_1"])
             if 575 < self.rel_pos.get("x") < 1000 and 0 < self.rel_pos.get("y") < 300:
@@ -144,8 +140,8 @@ class GameEventHandler:
             x_range = 15
             # 180, 630
             y_range = 600
-            if x_range-30 < self.check_start_x < self.check_end_x < x_range+1525 \
-                    and y_range-420 < self.check_start_y < self.check_end_y < y_range+30:
+            if x_range - 30 < self.check_start_x < self.check_end_x < x_range + 1525 \
+                    and y_range - 420 < self.check_start_y < self.check_end_y < y_range + 30:
                 print("Preuves pour activités paranormales.")
                 self.master.rect.create_dialog_box("preuve_parnm_oranges")
         elif self.get_current_room_img() == "pyimage7":
@@ -207,11 +203,16 @@ class GameEventHandler:
                                                                                   "draw")))
             else:
                 self.master.rect.draw.hide_tip()
-        elif self.get_current_room_img() == "pyimage8":
-            pass
+        elif self.get_current_room_img() == "pyimage9":
+            if not self.are_dots_drawn:
+                self.master.dots.place_dots(self.master.dots.
+                                            get_connect_dots_position("./images/connect the dots/FishConnectDots.png"))
+                self.master.rect.canvas.bind("<Button-1>",
+                                             lambda x: self.master.dots.get_x_y(self.rel_pos))
+                self.master.rect.canvas.bind("<B1-Motion>",
+                                             lambda x: self.master.dots.paint(self.rel_pos))
+                self.are_dots_drawn = True
         elif self.get_current_room_img() == "pyimage5":
-            # cacher mess pop-up BUREAU
-            self.master.rect.popup_draw.hide_tip()
             if 800 < self.rel_pos.get("x") < 1000 and 50 < self.rel_pos.get("y") < 250:
                 print("Livres ???!!!")
                 self.master.rect.see_books.show_tip(self.rel_pos)
@@ -271,5 +272,25 @@ class GameEventHandler:
         """
         # bg = self.master.rect.get_bg_att()
         # print(bg)
-        print(self.master.rect.get_key_val_canvas_obj("app_background", "image"))
+        # print(self.master.rect.get_key_val_canvas_obj("app_background", "image"))
         return self.master.rect.get_key_val_canvas_obj("app_background", "image")  # background
+
+    def reset_val(self):
+        # cacher mess pop-up BUREAU (pyimage4)
+        if self.get_current_room_img() == "pyimage4":
+            self.master.rect.popup_draw.hide_tip()
+        # lire brochure cuisine (pyimage7)
+        if self.get_current_room_img() != "pyimage7":
+            self.is_pamphlet_kitchen_read = False
+            reset_story_reader(self.master)
+        # cacher mess pop-up CUISINE (pyimage2)
+        if self.get_current_room_img() != "pyimage2":
+            self.master.rect.orange_kitchen.hide_tip()
+            self.master.rect.drawer_open.hide_tip()
+            self.master.rect.read_pamphlet_drawer.hide_tip()
+        # connect the dots
+        elif self.get_current_room_img() != "pyimage9":
+            self.master.rect.canvas.unbind("<Button-1>")
+            self.master.rect.canvas.unbind("<B1-Motion>")
+            self.master.dots.reset()
+            self.are_dots_drawn = False

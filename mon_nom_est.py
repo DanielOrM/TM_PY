@@ -1,14 +1,15 @@
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 import tkinter as tk
+import pygame
 from tkinter import VERTICAL, HORIZONTAL
 from PIL import Image, ImageTk
-import pygame
 from images import bg_image_setup, open_image_setup_file
 from fade_transition import FadeTransition
 from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
 from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
+from connect_dots import ConnectDotsGame
 
 
 class HomeScreen:
@@ -155,6 +156,9 @@ class App(tk.Tk):
 
         # handler d'évents avec classe GameEventHandler
         self.game_e_handler = GameEventHandler(self)
+
+        # connect the dots
+        self.dots = ConnectDotsGame(self)
 
         # obtenir coords souris
         # self.bind("<Motion>", self.motion)
