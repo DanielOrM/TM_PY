@@ -66,5 +66,6 @@ class FadeTransition(tk.Label):
             self.fade_transition_ended = True
             if self.fade_transition_ended:
                 pygame.mixer.music.stop()
+                pygame.mixer.music.unload()
                 self.master.check_game_events()
                 self.fade_transition_ended = False

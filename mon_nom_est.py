@@ -1,14 +1,15 @@
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 import tkinter as tk
+import pygame
 from tkinter import VERTICAL, HORIZONTAL
 from PIL import Image, ImageTk
-import pygame
 from images import bg_image_setup, open_image_setup_file
 from fade_transition import FadeTransition
 from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
 from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
+from connect_dots import ConnectDotsGame
 
 
 class HomeScreen:
@@ -156,6 +157,9 @@ class App(tk.Tk):
         # handler d'évents avec classe GameEventHandler
         self.game_e_handler = GameEventHandler(self)
 
+        # connect the dots
+        self.dots = ConnectDotsGame(self)
+
         # obtenir coords souris
         # self.bind("<Motion>", self.motion)
 
@@ -176,6 +180,7 @@ class App(tk.Tk):
         """
         self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"] = event.x, event.y
         # print(self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"])
+        # print(self.game_e_handler.prev_and_current_room)
         self.check_game_events()
         # utile pour le débug pour les conditions sur classe GameEventHandler
         # print(self.rect.get_key_val_canvas_obj("app_background", "image"))
@@ -219,7 +224,6 @@ class Control(tk.Frame):
         super().__init__(master)
         master.bind("<a>", self.change_room_left) # aller à gauche
         master.bind("<d>", self.change_room_right) # aller à droite
-        # master.bind("<Button-1>", self.master.check_game_events)
         master.bind("<Button-2>", self.see_album) # button 2 => mid click
 
     def change_room_left(self, event=None):
@@ -229,7 +233,7 @@ class Control(tk.Frame):
         """
         if self.master.index > 0:
             self.master.index -= 1
-            print(self.master.index)
+            # print(self.master.index)
             self.master.view.change_room(self.master.pages_name[self.master.index])
         else:
             print("C'est un mur...")
@@ -242,7 +246,7 @@ class Control(tk.Frame):
         """
         if self.master.index < 4:
             self.master.index += 1
-            print(self.master.index)
+            # print(self.master.index)
             self.master.view.change_room(self.master.pages_name[self.master.index])
         else:
             print("C'est un mur...")
@@ -451,21 +455,22 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.rect)
         self.rect = None
         self.master.check_game_events()
-        print("ehriuheruheurheurheuruer")
-        print(f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
+        # print("ehriuheruheurheurheuruer")
+        # print(f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
         # reset valeur check
         self.master.game_e_handler.check_start_x = 0
         self.master.game_e_handler.check_end_x = 0
         self.master.game_e_handler.check_start_y = 0
         self.master.game_e_handler.check_end_y = 0
-        print(
-        f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
+        # print(
+        # f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
 
     def hightlight_items(self, image, event=None):
         """
         WIP Func, encadré en jaune autour obj. utilisables
         """
-        print(self.canvas.itemconfigure(self.clickable_camera_button))
+        pass
+        # print(self.canvas.itemconfigure(self.clickable_camera_button))
         # self.canvas.itemconfigure(image, activeimage="yellow")
 
     def take_camera(self, event=None):
@@ -544,7 +549,7 @@ class CanvasHandler(tk.Frame):
         # print(screen_width/8)
         # print(screen_height/16)
         pic_size_in_album = (int(screen_width/8), int(screen_height/7))
-        print(pic_size_in_album)
+        # print(pic_size_in_album)
         pic_taken_temp = image_to_crop.crop(crop_dimensions).resize(pic_size_in_album)
         pic_taken = ImageTk.PhotoImage(pic_taken_temp, master=self.master)
         self.images_pic_reference.append(pic_taken)
@@ -571,11 +576,12 @@ class CanvasHandler(tk.Frame):
         diff = updated_photos_set.difference(current_photos_set)
         # print(diff)
         if diff:
-            print("SOMETHING HAS CHANGED")
+            # print("SOMETHING HAS CHANGED")
             self.photos_list = self.photos_list_updated[:]
             self.listing_photos()
         else:
-            print("NOTHING HAS CHANGED")
+            # print("NOTHING HAS CHANGED")
+            pass
 
     def listing_photos(self, event=None):
         """
@@ -583,15 +589,17 @@ class CanvasHandler(tk.Frame):
         """
         max_num_pics = 4
         self.segmented_4_indexes_photos_list_updated=[self.photos_list[i:i + max_num_pics] for i in range(0, len(self.photos_list), max_num_pics)]
-        print(self.segmented_4_indexes_photos_list_updated)
+        # print(self.segmented_4_indexes_photos_list_updated)
 
     def change_background(self, tag_or_id, new_background):
         """
         Raccourci func pour changer image fond d'écran
         """
-        print("L'intro a bien débuté. Background changé")
+        # print("L'intro a bien débuté. Background changé")
         # print(self.canvas.itemconfigure(tagOrId))
         self.canvas.itemconfigure(tag_or_id, image=new_background)
+        self.master.game_e_handler.reset_val()
+        # print("perfect")
         # print(self.canvas.itemconfigure(tagOrId))
 
     def change_page_left(self, event=None):
