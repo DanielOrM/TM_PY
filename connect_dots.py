@@ -1,5 +1,7 @@
 """Utilisation de openCV python pour détecter positions points (x,y) et ensuite les dessiner sur CanvasHandler"""
 import cv2 as cv
+import pygame
+
 from global_var import screen_width, screen_height
 
 CENTER_POSITION_X = screen_width / 5
@@ -13,6 +15,8 @@ class ConnectDotsGame:
         self.current_drawing = []
         self.lastx = None
         self.lasty = None
+        # pygame
+        self.has_music_started = False
 
     def get_connect_dots_position(self, image_file):
         # Load image, filtre gris et tresh
@@ -51,8 +55,22 @@ class ConnectDotsGame:
 
     def get_x_y(self, mouse_position):
         self.lastx, self.lasty = mouse_position.get("x"), mouse_position.get("y")
+        # print(pygame.event.get())
+        # pygame.mixer.music.load(".\son\son-écrit-crayon.mp3")
+        # pygame.mixer.music.play()
 
     def paint(self, mouse_position):
+        if not self.has_music_started:
+            print("JUSTE UNE FOIS")
+            pygame.mixer.music.play()
+            self.has_music_started = True
+        else:
+            pygame.mixer.music.unpause()
+        # while pygame.mixer.music.get_busy():
+        #     # print("wiuehuzwe")
+        #     pygame.time.Clock().tick(10)
+        #     pygame.mixer.music.unpause()
+        # print("en train de dessiner")
         x = mouse_position.get("x")
         y = mouse_position.get("y")
         img = self.master.rect.canvas.create_line((self.lastx, self.lasty, x, y), fill="black", width=1)
@@ -67,4 +85,3 @@ class ConnectDotsGame:
             for img in self.current_drawing:
                 self.master.rect.canvas.delete(img)
         self.current_dots_img, self.current_drawing = [], []
-

@@ -1,5 +1,6 @@
 """Classe gérant tous les intéractions + event du jeu"""
 import tkinter as tk
+import pygame
 from global_var import screen_height, screen_width
 from images import bg_image_setup
 from dialog.txt_files_reader import txt_files_story
@@ -187,10 +188,13 @@ class GameEventHandler:
             if not self.are_dots_drawn:
                 self.master.dots.place_dots(self.master.dots.
                                             get_connect_dots_position("./images/connect the dots/FishConnectDots.png"))
+                pygame.mixer.music.load(".\son\son-écrit-crayon.mp3")
                 self.master.rect.canvas.bind("<Button-1>",
                                              lambda x: self.master.dots.get_x_y(self.rel_pos))
                 self.master.rect.canvas.bind("<B1-Motion>",
                                              lambda x: self.master.dots.paint(self.rel_pos))
+                self.master.rect.canvas.bind("<ButtonRelease-1>", lambda x:
+                                             pygame.mixer.music.pause())
                 self.are_dots_drawn = True
         elif current_room == "pyimage5":
             if 800 < self.rel_pos.get("x") < 1000 and 50 < self.rel_pos.get("y") < 250:
@@ -267,7 +271,7 @@ class GameEventHandler:
         if len(self.prev_and_current_room) > 1:
             # print(self.prev_and_current_room)
             current_room = self.prev_and_current_room[1]
-        print(self.prev_and_current_room)
+        # print(self.prev_and_current_room)
         # porte principale --> cuisine OU bureau
         if prev_room == "pyimage3" and current_room in {"pyimage2", "pyimage4"}:
             print("1")
@@ -309,7 +313,11 @@ class GameEventHandler:
         elif prev_room == "pyimage9" and current_room in {"pyimage3", "pyimage5"}:
             self.master.rect.canvas.unbind("<Button-1>")
             self.master.rect.canvas.unbind("<B1-Motion>")
+            self.master.rect.canvas.unbind("<ButtonRelease-1>")
+            pygame.mixer.music.stop()
+            pygame.mixer.music.unload()
             self.master.dots.reset()
+            self.master.dots.has_music_started = False
             self.are_dots_drawn = False
         # bibliothèque --> bureau
         elif prev_room == "pyimage5" and current_room == "pyimage4":
@@ -328,5 +336,3 @@ class GameEventHandler:
             self.master.rect.open_family_book.hide_tip()
             self.is_fam_book_read = False
             reset_story_reader(self.master)
-        else:
-            print("c'est quoi ce foutoir..")
