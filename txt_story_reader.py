@@ -1,4 +1,5 @@
-"""Importation de la fonction gérant le stockage de tout ce qui est écrit sur un fichier .txt en 1 string"""
+"""Importation de la fonction gérant le stockage de tout
+ce qui est écrit sur un fichier .txt en 1 string"""
 from dialog.txt_files_reader import txt_files_story
 
 
@@ -15,5 +16,10 @@ def txt_story_reader(app, txt_file):
 
 
 def reset_story_reader(app):
+    """
+    Reset les valeurs (false, 0, etc.) à leur état d'origine
+    Évite par ex les mess pop-up mauvaise fenêtre
+    OU click sur écran et close-up random (unbind)
+    """
     app.rect.changing_state_canvas_item(app.game_e_handler.text_box, "hidden")
     app.rect.changing_state_canvas_item(app.game_e_handler.text_readable, "hidden")

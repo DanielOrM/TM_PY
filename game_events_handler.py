@@ -30,9 +30,11 @@ class GameEventHandler:
                                                                  screen_width, screen_height,
                                                                  fill="grey", stipple="gray50")
         self.master.rect.changing_state_canvas_item(self.text_box, "hidden")
-        self.text_readable = self.master.rect.canvas.create_text(screen_width / 6 * 5, screen_height / 2,
-                                                                 text="",
-                                                                 fill="white", font=("Helvetica", 12, "italic"))
+        self.text_readable = self.master.rect.canvas.create_text(
+            screen_width / 6 * 5, screen_height / 2,
+            text="",
+            fill="white",
+            font=("Helvetica", 12, "italic"))
         self.master.rect.changing_state_canvas_item(self.text_readable, "hidden")
         self.is_desktop_visible = False
         self.is_fam_book_read = False
@@ -40,7 +42,8 @@ class GameEventHandler:
         self.are_dots_drawn = False
 
         # intéractions / widgets
-        self.skip_intro_butt = tk.Button(self.master, text='Skip intro', width=40, command=self.skip_intro)
+        self.skip_intro_butt = tk.Button(self.master,
+                                         text='Skip intro', width=40, command=self.skip_intro)
 
         # photos coords
         self.check_start_x = 0
@@ -49,7 +52,7 @@ class GameEventHandler:
         self.check_end_y = 0
 
         # reset val
-        self.prev_and_current_room = [] # max 2 pièces
+        self.prev_and_current_room = []  # max 2 pièces
 
     def skip_intro(self):
         """
@@ -64,12 +67,6 @@ class GameEventHandler:
         # self.master.view.change_room("room_0")
         self.master.rect.changing_state_canvas_item("camera_click", "normal")
         self.master.bind("<Motion>", self.master.motion)
-
-    def text_box_func(self):
-        return self.text_box
-
-    def text_readable_func(self):
-        return self.text_readable
 
     def events_to_check(self):
         """
@@ -106,7 +103,6 @@ class GameEventHandler:
             # self.master.view.change_room("room_0")
         elif not self.are_rooms_visible:
             # print("Je me réveille...")
-            print("intro skip")
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
             self.master.rect.create_dialog_box("réveil")
             self.are_rooms_visible = True
@@ -118,24 +114,22 @@ class GameEventHandler:
         elif current_room == "pyimage2":
             # print(self.master.pages_file_location["room_1"])
             if 575 < self.rel_pos.get("x") < 1000 and 0 < self.rel_pos.get("y") < 300:
-                self.master.pages["room_1"] = bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_Cuisine.png")
-                # self.master.fade.create_transition()
-                # self.master.rect.change_background("app_background",
-                #                                    self.master.pages.get("room_1"))
+                self.master.pages["room_1"] = \
+                    bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_Cuisine.png")
                 self.master.view.simple_transition("room_1")
         elif current_room in {"pyimage23", "pyimage24"}:
-            if 0 < self.rel_pos.get("x") < 500 and 500 < self.rel_pos.get("y") < 650:
+            if 0 < self.rel_pos.get("x") < 500 < self.rel_pos.get("y") < 650:
                 self.master.rect.orange_kitchen.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
-                                 lambda x: self.master.rect.change_background("app_background",
-                                                                              self.master.kitchen_closeup.get(
-                                                                                  "oranges")))
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.kitchen_closeup.get("oranges")))
             elif 800 < self.rel_pos.get("x") < 1385 and 0 < self.rel_pos.get("y") < 210:
                 self.master.rect.drawer_open.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
-                                 lambda x: self.master.rect.change_background("app_background",
-                                                                              self.master.kitchen_closeup.get(
-                                                                                  "drawer")))
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.kitchen_closeup.get("drawer")))
             else:
                 self.master.rect.orange_kitchen.hide_tip()
                 self.master.rect.drawer_open.hide_tip()
@@ -173,9 +167,9 @@ class GameEventHandler:
                 # print(pygame.mouse.get_pressed())
                 # print(pygame.mouse.get_pressed()[0])
                 self.master.bind("<Button-1>",
-                                 lambda x: self.master.rect.change_background("app_background",
-                                                                              self.master.desktop_closeup.get(
-                                                                                  "desktop")))
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.desktop_closeup.get("desktop")))
             else:
                 self.master.rect.popup_draw.hide_tip()
         elif current_room == "pyimage8":
@@ -184,9 +178,9 @@ class GameEventHandler:
                 print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
                 self.master.rect.draw.show_tip(self.rel_pos)
                 self.master.bind("<e>",
-                                 lambda x: self.master.rect.change_background("app_background",
-                                                                              self.master.desktop_closeup.get(
-                                                                                  "draw")))
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.desktop_closeup.get("draw")))
             else:
                 self.master.rect.draw.hide_tip()
         elif current_room == "pyimage9":
@@ -199,16 +193,16 @@ class GameEventHandler:
                 self.master.rect.canvas.bind("<B1-Motion>",
                                              lambda x: self.master.dots.paint(self.rel_pos))
                 self.master.rect.canvas.bind("<ButtonRelease-1>", lambda x:
-                                             pygame.mixer.music.pause())
+                pygame.mixer.music.pause())
                 self.are_dots_drawn = True
         elif current_room == "pyimage5":
             if 800 < self.rel_pos.get("x") < 1000 and 50 < self.rel_pos.get("y") < 250:
                 print("Livres ???!!!")
                 self.master.rect.see_books.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
-                                 lambda x: self.master.rect.change_background("app_background",
-                                                                              self.master.library_closeup.get(
-                                                                                  "see_books")))
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.library_closeup.get("see_books")))
             else:
                 self.master.rect.see_books.hide_tip()
         # regarde livres dispo
@@ -218,9 +212,9 @@ class GameEventHandler:
                 print("LIVRE A LIRE")
                 self.master.rect.open_family_book.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
-                                 lambda x: self.master.rect.change_background("app_background",
-                                                                              self.master.library_closeup.get(
-                                                                                  "family_book")))
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.library_closeup.get("family_book")))
             else:
                 self.master.rect.open_family_book.hide_tip()
         # joueur lit livre "famille"
@@ -282,7 +276,7 @@ class GameEventHandler:
             print("1")
             pass
         # cuisine --> toilette OU porte principale
-        elif prev_room in {"pyimage24", "pyimage24"} and current_room in {"pyimage1", "pyimage3"}:
+        elif prev_room in {"pyimage23", "pyimage24"} and current_room in {"pyimage1", "pyimage3"}:
             print("2")
             self.master.rect.orange_kitchen.hide_tip()
             self.master.rect.drawer_open.hide_tip()
