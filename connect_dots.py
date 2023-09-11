@@ -1,5 +1,5 @@
 """Utilisation de openCV python (cv2) pour détecter
-positions points (x,y) et ensuite les dessiner sur CanvasHandler"""
+position points (x,y) et ensuite les dessiner sur CanvasHandler"""
 import cv2 as cv
 import pygame
 from global_var import screen_width, screen_height
