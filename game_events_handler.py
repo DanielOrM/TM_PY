@@ -60,7 +60,8 @@ class GameEventHandler:
         self.are_rooms_visible = True
         self.skip_intro_butt.grid_remove()
         self.master.dial.stop()
-        self.master.view.change_room("room_0")
+        self.master.view.simple_transition("room_0")
+        # self.master.view.change_room("room_0")
         self.master.rect.changing_state_canvas_item("camera_click", "normal")
         self.master.bind("<Motion>", self.master.motion)
 
@@ -100,9 +101,12 @@ class GameEventHandler:
             self.intro_initialized = True
         elif self.intro_initialized and not self.intro_ended:
             self.intro_ended = True
-            self.master.view.change_room("room_0")
+            print("intro fini")
+            self.master.view.simple_transition("room_0")
+            # self.master.view.change_room("room_0")
         elif not self.are_rooms_visible:
             # print("Je me réveille...")
+            print("intro skip")
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
             self.master.rect.create_dialog_box("réveil")
             self.are_rooms_visible = True
@@ -115,9 +119,10 @@ class GameEventHandler:
             # print(self.master.pages_file_location["room_1"])
             if 575 < self.rel_pos.get("x") < 1000 and 0 < self.rel_pos.get("y") < 300:
                 self.master.pages["room_1"] = bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_Cuisine.png")
-                self.master.fade.create_transition()
-                self.master.rect.change_background("app_background",
-                                                   self.master.pages.get("room_1"))
+                # self.master.fade.create_transition()
+                # self.master.rect.change_background("app_background",
+                #                                    self.master.pages.get("room_1"))
+                self.master.view.simple_transition("room_1")
         elif current_room in {"pyimage23", "pyimage24"}:
             if 0 < self.rel_pos.get("x") < 500 and 500 < self.rel_pos.get("y") < 650:
                 self.master.rect.orange_kitchen.show_tip(self.rel_pos)

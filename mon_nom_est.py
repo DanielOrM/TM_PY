@@ -196,10 +196,21 @@ class View(tk.Frame):
     def change_room(self, room_name):
         """
         Change image pièce après transition
+        - avec son
+        """
+        self.master.fade.create_transition(True)
+        self.master.rect.change_background("app_background",
+                                            self.master.pages.get(f"{room_name}"))
+
+    def simple_transition(self, room_name):
+        """
+        Change image pièce après transition
+        - pas de son
         """
         self.master.fade.create_transition()
         self.master.rect.change_background("app_background",
-                                            self.master.pages.get(f"{room_name}"))
+                                           self.master.pages.get(f"{room_name}"))
+
 
     def show_album(self, event=None):
         """
