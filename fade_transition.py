@@ -23,10 +23,11 @@ class FadeTransition(tk.Label):
         self.ms_sleep_duration = 1000 // self.frames_per_second
         self.current_step = 0
         self.fade_transition_ended = False
+        self.is_walk_transition = False
         # self.create_transition()
         # self.new_color = None
 
-    def create_transition(self):
+    def create_transition(self, walk=False):
         """
         Transition en plein écran
         Bruits de pas enclenché
@@ -34,8 +35,11 @@ class FadeTransition(tk.Label):
         """
         self.grid(row=0, column=0, sticky="NSWE")
         # bruits de pas
-        pygame.mixer.music.load("./son/bruits-pas-son.mp3")
-        pygame.mixer.music.play(loops=0)
+        if walk:
+            print("marche...")
+            pygame.mixer.music.load("./son/bruits-pas-son.mp3")
+            pygame.mixer.music.play(loops=0)
+            self.is_walk_transition = True
         self.update_label()
 
     def interpolate(self, color_a, color_b, t):
@@ -65,7 +69,8 @@ class FadeTransition(tk.Label):
             self.grid_remove()
             self.fade_transition_ended = True
             if self.fade_transition_ended:
-                pygame.mixer.music.stop()
-                pygame.mixer.music.unload()
+                if self.is_walk_transition:
+                    pygame.mixer.music.stop()
+                    pygame.mixer.music.unload()
                 self.master.check_game_events()
                 self.fade_transition_ended = False
