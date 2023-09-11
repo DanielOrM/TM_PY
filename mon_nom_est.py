@@ -1,7 +1,7 @@
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 import tkinter as tk
-import pygame
 from tkinter import VERTICAL, HORIZONTAL
+import pygame
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file
 from fade_transition import FadeTransition
