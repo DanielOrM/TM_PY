@@ -1,4 +1,4 @@
-"""Utilisation de openCV python pour détecter
+"""Utilisation de openCV python (cv2) pour détecter
 positions points (x,y) et ensuite les dessiner sur CanvasHandler"""
 import cv2 as cv
 import pygame
