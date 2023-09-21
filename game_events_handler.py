@@ -3,7 +3,6 @@ import tkinter as tk
 import pygame
 from global_var import screen_height, screen_width
 from images import bg_image_setup
-from dialog.txt_files_reader import txt_files_story
 from txt_story_reader import txt_story_reader, reset_story_reader
 
 
@@ -54,6 +53,14 @@ class GameEventHandler:
         # reset val
         self.prev_and_current_room = []  # max 2 pièces
 
+        # dots
+        self.index_dot = 0
+        self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png",
+                    "./images/connect the dots/DotsCat.png",
+                    "./images/connect the dots/DotsWolfSide.png",
+                    "./images/connect the dots/DotsWerewolf.png"
+                    ]
+
     def skip_intro(self):
         """
         Skips intro and ends the dialog
@@ -98,7 +105,7 @@ class GameEventHandler:
             self.intro_initialized = True
         elif self.intro_initialized and not self.intro_ended:
             self.intro_ended = True
-            print("intro fini")
+            # print("intro fini")
             self.master.view.simple_transition("room_0")
             # self.master.view.change_room("room_0")
         elif not self.are_rooms_visible:
@@ -140,7 +147,7 @@ class GameEventHandler:
             y_range = 600
             if x_range - 30 < self.check_start_x < self.check_end_x < x_range + 1525 \
                     and y_range - 420 < self.check_start_y < self.check_end_y < y_range + 30:
-                print("Preuves pour activités paranormales.")
+                # print("Preuves pour activités paranormales.")
                 self.master.rect.create_dialog_box("preuve_parnm_oranges")
         elif current_room == "pyimage7":
             if 250 < self.rel_pos.get("x") < 625 and 650 < self.rel_pos.get("y") < 725:
@@ -155,14 +162,14 @@ class GameEventHandler:
         elif current_room == "pyimage3":
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
             if self.camera_deleted:
-                print("SALUT C'EST MOI LA CAMERA")
+                # print("SALUT C'EST MOI LA CAMERA")
                 self.master.rect.create_dialog_box("camera_trouvee")
                 # évite de retoggle cette partie du code. iImage "pickable caméra" = détruite
                 self.camera_deleted = False
         elif current_room == "pyimage4":
             if 575 < self.rel_pos.get("x") < 1000 and 565 < self.rel_pos.get("y") < 650:
-                print("DESSIN")
-                print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
+                # print("DESSIN")
+                # print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
                 self.master.rect.popup_draw.show_tip(self.rel_pos)
                 # print(pygame.mouse.get_pressed())
                 # print(pygame.mouse.get_pressed()[0])
@@ -174,8 +181,8 @@ class GameEventHandler:
                 self.master.rect.popup_draw.hide_tip()
         elif current_room == "pyimage8":
             if 340 < self.rel_pos.get("x") < 1125 and 380 < self.rel_pos.get("y") < 825:
-                print("DESSINEEEER")
-                print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
+                # print("DESSINEEEER")
+                # print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
                 self.master.rect.draw.show_tip(self.rel_pos)
                 self.master.bind("<e>",
                                  lambda x: self.master.rect.
@@ -184,9 +191,17 @@ class GameEventHandler:
             else:
                 self.master.rect.draw.hide_tip()
         elif current_room == "pyimage9":
+            # self.master.dots.check_collision(self.rel_pos)
             if not self.are_dots_drawn:
-                self.master.dots.place_dots(self.master.dots.
-                                            get_connect_dots_position("./images/connect the dots/FishConnectDots.png"))
+                # setup connect dots
+                # self.master.dots.place_dots(self.master.dots.
+                #                             get_connect_dots_position("./images/connect the dots/FishConnectDots.png"))
+                # print(self.master.desktop_closeup.get("draw"))
+                # self.master.dots.start_game("./images/connect the dots/FishConnectDots.png")
+                # img = "./images/connect the dots/FishDrawnDotsSize.png"
+                # img = "./images/connect the dots/DotsCat.png"
+                # img = "./images/connect the dots/DotsWolf.png"
+                self.master.dots.start_game(self.img_list[self.index_dot])
                 pygame.mixer.music.load(".\son\son-écrit-crayon.mp3")
                 self.master.rect.canvas.bind("<Button-1>",
                                              lambda x: self.master.dots.get_x_y(self.rel_pos))
@@ -197,7 +212,7 @@ class GameEventHandler:
                 self.are_dots_drawn = True
         elif current_room == "pyimage5":
             if 800 < self.rel_pos.get("x") < 1000 and 50 < self.rel_pos.get("y") < 250:
-                print("Livres ???!!!")
+                # print("Livres ???!!!")
                 self.master.rect.see_books.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.
@@ -207,9 +222,9 @@ class GameEventHandler:
                 self.master.rect.see_books.hide_tip()
         # regarde livres dispo
         elif current_room == "pyimage10":
-            print("Accès à tous les livres...")
+            # print("Accès à tous les livres...")
             if 380 < self.rel_pos.get("x") < 480:
-                print("LIVRE A LIRE")
+                # print("LIVRE A LIRE")
                 self.master.rect.open_family_book.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.
@@ -219,9 +234,9 @@ class GameEventHandler:
                 self.master.rect.open_family_book.hide_tip()
         # joueur lit livre "famille"
         elif current_room == "pyimage11":
-            print(self.is_fam_book_read)
+            # print(self.is_fam_book_read)
             if not self.is_fam_book_read:
-                print(txt_files_story("./dialog/dialog_text/lire_livre.txt"))
+                # print(txt_files_story("./dialog/dialog_text/lire_livre.txt"))
                 txt_story_reader(self.master, "./dialog/dialog_text/lire_livre.txt")
             self.is_fam_book_read = True
         if not current_room == "pyimage3" and not self.camera_deleted:
@@ -273,34 +288,35 @@ class GameEventHandler:
         # print(self.prev_and_current_room)
         # porte principale --> cuisine OU bureau
         if prev_room == "pyimage3" and current_room in {"pyimage2", "pyimage4"}:
-            print("1")
+            # print("1")
             pass
         # cuisine --> toilette OU porte principale
         elif prev_room in {"pyimage23", "pyimage24"} and current_room in {"pyimage1", "pyimage3"}:
-            print("2")
+            # print("2")
             self.master.rect.orange_kitchen.hide_tip()
             self.master.rect.drawer_open.hide_tip()
         # cuisine --> oranges
         elif prev_room in {"pyimage23", "pyimage24"} and current_room == "pyimage6":
-            print("4 condition")
+            # print("4 condition")
             self.master.rect.orange_kitchen.hide_tip()
         # cuisine --> brochure
         elif prev_room in {"pyimage23", "pyimage24"} and current_room == "pyimage7":
-            print("3 condition")
+            # print("3 condition")
             self.master.rect.drawer_open.hide_tip()
         # brochure --> toilette OU porte principale
         elif prev_room == "pyimage7" and current_room in {"pyimage1", "pyimage3"}:
-            print("5 condition")
+            # print("5 condition")
             self.master.rect.read_pamphlet_drawer.hide_tip()
             self.is_pamphlet_kitchen_read = False
             reset_story_reader(self.master)
+            self.master.unbind("<e>")
         # bureau --> porte principale OU bibliothèque
         elif prev_room == "pyimage4" and current_room in {"pyimage3", "pyimage5"}:
-            print("6 condition")
+            # print("6 condition")
             self.master.rect.popup_draw.hide_tip()
         # bureau --> cahier dessin
         elif prev_room == "pyimage4" and current_room == "pyimage8":
-            print("7 condition")
+            # print("7 condition")
             self.master.rect.popup_draw.hide_tip()
         # cahier dessin --> porte principale OU bureau
         elif prev_room == "pyimage8" and current_room in {"pyimage3", "pyimage5"}:
@@ -335,3 +351,4 @@ class GameEventHandler:
             self.master.rect.open_family_book.hide_tip()
             self.is_fam_book_read = False
             reset_story_reader(self.master)
+

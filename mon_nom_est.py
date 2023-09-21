@@ -4,7 +4,7 @@ from tkinter import VERTICAL, HORIZONTAL
 import pygame
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file
-from fade_transition import FadeTransition
+from fade_transition import FadeTransition, FadeIn
 from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
 from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
@@ -26,15 +26,15 @@ class HomeScreen:
         # configure de grid pour le reste du code
         self.master.grid_rowconfigure(0, weight=1)  # For row 0
         self.master.grid_columnconfigure(0, weight=1)  # For column 0
-        self.hs_image = bg_image_setup("./images/homescreen/PA_homescreenTest.png")
+        self.hs_image = bg_image_setup("./images/homescreen/PA_homescreenTest2.png")
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
         self.start_button = tk.Button(self.hs_canvas, text='Jouer', width=40, command=self.intro)
-        self.start_button.grid()
+        self.start_button.place(x=screen_width/2-150, y=screen_height/3*2+100)
         self.exit_game_button = tk.Button(self.hs_canvas,
                                           text='Quitter', width=40,
                                           command=self.master.destroy)
-        self.exit_game_button.grid()
+        self.exit_game_button.place(x=screen_width/2-150, y=screen_height/3*2+125)
         self.hs_canvas.grid_propagate(False)
         self.hs_canvas.grid()
         pygame.mixer.music.load("./son/DARKNESS.mp3")
@@ -159,6 +159,7 @@ class App(tk.Tk):
 
         # connect the dots
         self.dots = ConnectDotsGame(self)
+        self.fade_in = FadeIn(self)
 
         # obtenir coords souris
         # self.bind("<Motion>", self.motion)
