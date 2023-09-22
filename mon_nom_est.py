@@ -4,12 +4,13 @@ from tkinter import VERTICAL, HORIZONTAL
 import pygame
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file
-from fade_transition import FadeTransition
+from fade_transition import FadeTransition, FadeIn
 from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
 from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
 from connect_dots import ConnectDotsGame
+from fonts import RenderFont
 
 
 class HomeScreen:
@@ -26,20 +27,44 @@ class HomeScreen:
         # configure de grid pour le reste du code
         self.master.grid_rowconfigure(0, weight=1)  # For row 0
         self.master.grid_columnconfigure(0, weight=1)  # For column 0
-        self.hs_image = bg_image_setup("./images/homescreen/PA_homescreenTest.png")
+        # self.hs_image = bg_image_setup("./images/homescreen/PA_homescreenTest2.png")
+        self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png")
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
-        self.start_button = tk.Button(self.hs_canvas, text='Jouer', width=40, command=self.intro)
-        self.start_button.grid()
-        self.exit_game_button = tk.Button(self.hs_canvas,
-                                          text='Quitter', width=40,
-                                          command=self.master.destroy)
-        self.exit_game_button.grid()
+        # self.start_button = tk.Button(self.hs_canvas, text='Jouer', width=40, command=self.intro)
+        self.start_button = self.hs_canvas.create_text(
+            (screen_width/5*4, screen_height/3*2+80),
+            text="Jouer", fill="white", font=("Helvetica", 30, "italic"))
+        # self.start_button.place(x=screen_width/2-150, y=screen_height/3*2+100)
+        # self.exit_game_button = tk.Button(self.hs_canvas,
+        #                                   text='Quitter', width=40,
+        #                                   command=self.master.destroy)
+        # self.exit_game_button.place(x=screen_width/2-150, y=screen_height/3*2+125)
+        self.exit_game_button = self.hs_canvas.create_text(
+            (screen_width / 5 * 4, screen_height / 3 * 2 + 135),
+            text="Quitter le jeu", fill="white", font=("Helvetica", 30, "italic")
+        )
+        self.hs_canvas.tag_bind(self.start_button, "<Button-1>", lambda x: self.intro())
+        self.hs_canvas.tag_bind(self.start_button, "<Enter>", lambda x: self.hover_text(self.start_button))
+        self.hs_canvas.tag_bind(self.start_button, "<Leave>", lambda x: self.exit_text(self.start_button))
+        self.hs_canvas.tag_bind(self.exit_game_button, "<Button-1>", self.exit_game)
+        self.hs_canvas.tag_bind(self.exit_game_button, "<Enter>", lambda x: self.hover_text(self.exit_game_button))
+        self.hs_canvas.tag_bind(self.exit_game_button, "<Leave>", lambda x: self.exit_text(self.exit_game_button))
         self.hs_canvas.grid_propagate(False)
         self.hs_canvas.grid()
         pygame.mixer.music.load("./son/DARKNESS.mp3")
         pygame.mixer.music.play()
         self.master.mainloop()
+
+    def hover_text(self, tag_or_id):
+        # print(self.hs_canvas.itemconfigure(tag_or_id))
+        self.hs_canvas.itemconfigure(tag_or_id, fill="gray")
+
+    def exit_text(self, tag_or_id):
+        self.hs_canvas.itemconfigure(tag_or_id, fill="white")
+
+    def exit_game(self, event=None):
+        self.master.destroy()
 
     def apply_hs_canvas_image(self):
         """
@@ -53,12 +78,11 @@ class HomeScreen:
         title_width = self.master.winfo_screenwidth()/2
         center_height = self.master.winfo_screenheight()/2
         center_width = self.master.winfo_screenwidth()/2
-        self.hs_canvas.create_image(center_width, center_height, image=self.hs_image)
-        self.hs_canvas.create_text((title_width, title_height), text="MON NOM EST", fill="white",
-                                   font=("Helvetica", 40, "bold")
-                                   )
-        # rend l'écran d'accueil accessible à partir de master
         self.master.home_s = self.hs_canvas
+        self.hs_canvas.create_image(center_width, center_height, image=self.hs_image)
+        # self.label = tk.Label(self.master, image=horror_font)
+        # self.label.place(x=title_width-220, y=title_height)
+        # print(self.master.home_s.itemconfigure(horror_font))
 
     def intro(self):
         """
@@ -89,6 +113,8 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Mon nom est...")
+        # fonts
+        self.fonts_list = []
         # self.grid_rowconfigure(0, weight=1)  # For row 0
         # self.grid_columnconfigure(0, weight=1)  # For column 0
         self.index = 2
@@ -159,6 +185,7 @@ class App(tk.Tk):
 
         # connect the dots
         self.dots = ConnectDotsGame(self)
+        self.fade_in = FadeIn(self)
 
         # obtenir coords souris
         # self.bind("<Motion>", self.motion)

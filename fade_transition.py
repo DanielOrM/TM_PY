@@ -1,6 +1,7 @@
 """Transition de type fondu"""
 import tkinter as tk
 import pygame
+from PIL import ImageTk, Image
 
 
 class FadeTransition(tk.Label):
@@ -74,3 +75,54 @@ class FadeTransition(tk.Label):
                     pygame.mixer.music.unload()
                 self.master.check_game_events()
                 self.fade_transition_ended = False
+
+
+class FadeIn(tk.Label):
+    """
+    Transition de type fondu
+        - fin dessin --> fade-in
+        """
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+        self.imgs = ["./images/connect the dots/ref/Fish.png",
+                     "./images/connect the dots/ref/ChatIRL.png",
+                     "./images/connect the dots/ref/WolfSide.png",
+                     "./images/connect the dots/ref/Werewolf.png"
+                     ]
+        self.pic_list = []
+        self.fadetime = 1  # time between alpha channel changes in ms
+        self.fadestep = 2  # change to alpha channel
+        self.curstep = 0  # the current step through the transparency
+
+    def fade_in(self):
+        """
+        Transition en plein écran
+        Bruits de pas enclenché
+        Lancement transition
+        """
+        self.place(x=100, y=100)
+        self.update_label()
+
+    def update_label(self):
+        """
+        Changement blanc --> noir progressif (t)
+        Quand transition stop --> fin bruits de pas
+        """
+        print(self.master.game_e_handler.index_dot)
+        im_file = open(self.imgs[self.master.game_e_handler.index_dot], mode="rb")
+        current_im = Image.open(im_file)
+        alpha = min(self.curstep * self.fadestep, 255)  # clamp to 255 maximum
+        current_im.putalpha(alpha)
+        pic = ImageTk.PhotoImage(current_im)
+        self.pic_list.append(pic)
+        self.configure(image=pic)
+        self.curstep += 1
+        print('fade in: %i' % alpha)
+        if alpha == 255:
+            self.curstep = 0
+            self.master.after(1500, self.master.dots.next_drawing)
+        else:
+            self.after(self.fadetime, self.update_label)
+
+
