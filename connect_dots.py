@@ -6,7 +6,7 @@ import cv2 as cv
 import pygame
 import re
 from global_var import screen_width, screen_height
-from fade_transition import FadeIn
+
 
 CENTER_POSITION_X = screen_width / 5
 CENTER_POSITION_Y = screen_height / 4
@@ -109,14 +109,18 @@ class ConnectDotsGame:
             self.current_dot += 1
             if self.current_dot == len(self.current_dots_img):
                 print("Fini dessin!")
-                if self.master.game_e_handler.index_dot < len(self.master.game_e_handler.img_list) - 1:
-                    self.master.fade_in.fade_in()
+                self.master.fade_in.fade_in()
             print(f"Le prochain point est {self.current_dot}")
         # print(type(num_dot))
 
     def next_drawing(self):
         self.master.fade_in.place_forget()
-        self.master.game_e_handler.index_dot += 1
+        if self.master.game_e_handler.index_dot < len(self.master.game_e_handler.img_list) - 1:
+            self.master.game_e_handler.index_dot += 1
+        else:
+            print("ATTENDRE NOUVELLE UPDATE")
+            self.reset()
+            return
         self.reset()
         self.master.game_e_handler.are_dots_drawn = False
 
@@ -159,7 +163,7 @@ class ConnectDotsGame:
         """
         if not self.has_music_started:
             print("JUSTE UNE FOIS")
-            pygame.mixer.music.play()
+            pygame.mixer.music.play(-1)
             self.has_music_started = True
         else:
             pygame.mixer.music.unpause()
@@ -183,13 +187,16 @@ class ConnectDotsGame:
         """
         # condition évite erreur avec liste(=vide)
         self.current_dot = 0
-        if self.current_dots_img and self.current_line_img:
+        if self.current_dots_img:
             for img in self.current_dots_img:
                 self.master.rect.canvas.delete(img)
             for img in self.current_line_img:
                 self.master.rect.canvas.delete(img)
             for label in self.current_labels:
-                label.destroy()
+                label.place_forget()
+        # print(self.current_dots_img)
+        # print(self.current_line_img)
+        # print(self.current_labels)
         self.current_dots_img, self.current_line_img, self.dots_list, self.current_labels = [], [], [], []
 
     def start_game(self, image_file):
@@ -215,4 +222,9 @@ class ConnectDotsGame:
                 cy = int(M['m01'] / M['m00'])
                 dot_position = (cx, cy)
                 self.dots_list.append(dot_position)
+        # print(len(self.dots_list))
+        # print("duh1")
+        # print("duh2")
+        # print(self.dots_list[len(self.dots_list)-1])
+        # print(self.dots_list[40])
         return self.dots_list
