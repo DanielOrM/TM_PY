@@ -23,6 +23,8 @@ class DialogBoxes:
             "intro": txt_files_reader("dialog/dialog_text/intro_text.txt"),
             "camera_trouvee": txt_files_reader("dialog/dialog_text/camera_trouvee.txt"),
             "réveil": txt_files_reader("dialog/dialog_text/réveil.txt"),
+            "porte_essai": txt_files_reader("dialog/dialog_text/porte_essai.txt"),
+            "porte_essai_2": txt_files_reader("dialog/dialog_text/porte_essai_2.txt"),
             "preuve_parnm_oranges": txt_files_reader("dialog/dialog_text/preuve_parnm_oranges.txt")
         }
 
@@ -82,8 +84,11 @@ class DialogBoxes:
                     self.update_text(tag_or_id, new_letter, chosen_text)  # new_letter = new_text
                     self.index_letter += 1
             except IndexError:
-                if all(character == "." for character in list(chosen_text[self.index_line+1])):
-                    time.sleep(1.5)
+                if all(character == "." for character in list(chosen_text[self.index_line+1])) \
+                        and chosen_text[self.index_line] != "":
+                    print("STOP")
+                    time.sleep(1.15)
+                    print("RECOMMENCE")
                     self.prev_text = ""
                     # print("ça se vide...")
                 if self.master.rect.canvas.itemcget(tag_or_id, "text") == " ...":

@@ -122,7 +122,7 @@ class App(tk.Tk):
         self.pages_file_location = {
             "room_2": "./images/rooms/real_rooms/bathroom/PA_SalleDeBain.png",
             "room_1": "./images/rooms/real_rooms/kitchen/PA_Cuisine.png",
-            "room_0": "./images/rooms/real_rooms/main_door/PA_PorteOuverte.png",
+            "room_0": "./images/rooms/real_rooms/main_door/PA_PorteFermée.png",
             "room1": "./images/rooms/real_rooms/player_room/PA_CarnetDessinBureau.png",
             "room2": "./images/rooms/real_rooms/library/PA_Bibliothèque.png"
         }
@@ -362,8 +362,9 @@ class CanvasHandler(tk.Frame):
                                 image=self.master.pages.get(self.master.pages_name[self.master.index]),
                                 tag="app_background"
                                 )
-        # position du boutton camera à changer
-        self.clickable_camera_button = self.canvas.create_image(600,300,
+        #250, 690
+        self.clickable_camera_button = self.canvas.create_image(self.master.winfo_screenwidth()/(768/125),
+                                                                self.master.winfo_screenheight()/(144/115),
                                                                 image=self.master.camera,
                                                                 tag="camera_click")
         # print(self.canvas.itemconfigure(self.clickable_camera_button))
@@ -373,9 +374,10 @@ class CanvasHandler(tk.Frame):
         create_hover_message(self.master, self.canvas, self.tool_tip_cam,
                              self.clickable_camera_button,
                              text="[Click Gauche]") # prendre caméra
+        self.door_handle = HoverMessRelPos(self.master, self.canvas,
+                                           "[Click gauche] pour ouvrir la porte")
         self.draw = HoverMessRelPos(self.master, self.canvas,
-                                    "[E] pour dessiner"
-                                    )
+                                    "[E] pour dessiner")
         self.orange_kitchen = HoverMessRelPos(self.master, self.canvas,
                                               "[Click gauche] pour mieux observer")
         self.drawer_open = HoverMessRelPos(self.master, self.canvas,
