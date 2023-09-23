@@ -39,10 +39,15 @@ class GameEventHandler:
         self.is_fam_book_read = False
         self.is_pamphlet_kitchen_read = False
         self.are_dots_drawn = False
+        self.is_door_dial_1_running = False
+        self.is_door_dial_2_running = False
 
         # intéractions / widgets
         self.skip_intro_butt = tk.Button(self.master,
                                          text="Passer l'introduction", width=40, command=self.skip_intro)
+
+        # intéractions porte principale
+        self.door_try = 0
 
         # photos coords
         self.check_start_x = 0
@@ -108,11 +113,11 @@ class GameEventHandler:
         elif self.intro_initialized and not self.intro_ended:
             self.intro_ended = True
             # print("intro fini")
+            self.skip_intro_butt.grid_remove()
             self.master.view.simple_transition("room_0")
             # self.master.view.change_room("room_0")
         elif not self.are_rooms_visible:
             # print("Je me réveille...")
-            self.skip_intro_butt.grid_remove()
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
             self.master.rect.create_dialog_box("réveil")
             self.are_rooms_visible = True
@@ -120,7 +125,8 @@ class GameEventHandler:
             # Bouger la souris réappelle func motion de classe App
             self.master.bind("<Motion>", self.master.motion)
         elif current_room == "pyimage1":
-            pass
+           pass
+        # print("Preuves pour activités paranormales.")
         elif current_room == "pyimage2":
             # print(self.master.pages_file_location["room_1"])
             if screen_width/(1536/575) < self.rel_pos.get("x") < screen_width/(192/125) \
@@ -174,6 +180,27 @@ class GameEventHandler:
             else:
                 self.master.rect.read_pamphlet_drawer.hide_tip()
         elif current_room == "pyimage3":
+            # 1050, 1100
+            x_l_tol = screen_width / (256/175)
+            x_r_tol = screen_width / (384/275)
+            # 430, 470
+            y_l_tol = screen_height / (432/215)
+            y_r_tol = screen_height / (432/235)
+            if x_l_tol < self.rel_pos.get("x") < x_r_tol \
+                    and y_l_tol < self.rel_pos.get("y") < y_r_tol:
+                self.master.rect.door_handle.show_tip(self.rel_pos)
+                self.master.bind("<Button-1>", self.incr_door_try)
+                print(self.door_try)
+                if self.door_try == 1:
+                    if not self.is_door_dial_1_running:
+                        self.is_door_dial_1_running = True
+                        self.master.rect.create_dialog_box("porte_essai")
+                elif self.door_try == 2:
+                    if not self.is_door_dial_2_running:
+                        self.is_door_dial_2_running = True
+                        self.master.rect.create_dialog_box("porte_essai_2")
+            else:
+                self.master.rect.door_handle.hide_tip()
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
             if self.camera_deleted:
                 # print("SALUT C'EST MOI LA CAMERA")
@@ -295,6 +322,10 @@ class GameEventHandler:
         self.reset_val()
         return self.master.rect.get_key_val_canvas_obj("app_background", "image")  # background
 
+    def incr_door_try(self, event=None):
+        self.door_try = self.door_try+1
+        return
+
     def reset_val(self):
         """
         5 conditions principales:
@@ -317,8 +348,8 @@ class GameEventHandler:
         # print(self.prev_and_current_room)
         # porte principale --> cuisine OU bureau
         if prev_room == "pyimage3" and current_room in {"pyimage2", "pyimage4"}:
-            # print("1")
-            pass
+            self.master.rect.door_handle.hide_tip()
+            self.master.unbind("<Button-1>")
         # cuisine --> toilette OU porte principale
         elif prev_room in {"pyimage23", "pyimage24"} and current_room in {"pyimage1", "pyimage3"}:
             # print("2")

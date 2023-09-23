@@ -12,7 +12,6 @@ def txt_files_reader(text_to_read):
         # for line in lines:
         #     whole_text += line
         # print(whole_text)
-        # print(lines[1])
         return lines
 
 
