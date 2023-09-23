@@ -11,6 +11,7 @@ from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
 from connect_dots import ConnectDotsGame
 from fonts import RenderFont
+from son.channels import music
 
 
 class HomeScreen:
@@ -52,8 +53,12 @@ class HomeScreen:
         self.hs_canvas.tag_bind(self.exit_game_button, "<Leave>", lambda x: self.exit_text(self.exit_game_button))
         self.hs_canvas.grid_propagate(False)
         self.hs_canvas.grid()
-        pygame.mixer.music.load("./son/DARKNESS.mp3")
-        pygame.mixer.music.play()
+        # pygame.mixer.music.load("./son/DARKNESS.mp3")
+        music_path = "son/musiques/HomeScreenLoopMusic.mp3"
+        homescreen_music = pygame.mixer.Sound(music_path)
+        music.play(homescreen_music, loops=-1)
+        # pygame.mixer.music.load()
+        # pygame.mixer.music.play(-1)
         self.master.mainloop()
 
     def hover_text(self, tag_or_id):
@@ -88,8 +93,8 @@ class HomeScreen:
         """
         Lancement intro réveil
         """
-        pygame.mixer.music.stop()
-        pygame.mixer.music.unload()
+        music.stop()
+        # pygame.mixer.music.unload()
         self.hs_canvas.grid_remove()
         self.check_game_e()
 
@@ -174,7 +179,7 @@ class App(tk.Tk):
         # widgets
         self.view = View(self)
         self.full_w = FullScreenWindow(self)
-        self.game_control = Control(self)
+        self.game_controls = Control(self)
         self.rect = CanvasHandler(self) # rectangle photo dimensions
         self.fade = FadeTransition(self)
         self.dial = DialogBoxes(self)
@@ -248,21 +253,21 @@ class View(tk.Frame):
         # print("STILL THERE")
 
 
-class Control(tk.Frame):
+class Control:
     """
     Événements gérés:
         - a: déplacement pièce à gauche
         - d: déplacement pièce à droite
-        - click-gauche: appel func check events jeu (classe: GameEventHandler)
-        - click-droit: prend une photo (pas encore fonctionnel)
-        - middle-click: ouvre/ferme album photo (pas encore fonctionnel)
+        - middle-click: ouvre/ferme album photo
     """
 
     def __init__(self, master):
-        super().__init__(master)
-        master.bind("<a>", self.change_room_left) # aller à gauche
-        master.bind("<d>", self.change_room_right) # aller à droite
-        master.bind("<Button-2>", self.see_album) # button 2 => mid click
+        self.master = master
+
+    def initialize_controls(self):
+        self.master.bind("<a>", self.change_room_left)  # aller à gauche
+        self.master.bind("<d>", self.change_room_right)  # aller à droite
+        self.master.bind("<Button-2>", self.see_album)  # button 2 => mid click
 
     def change_room_left(self, event=None):
         """
@@ -438,10 +443,10 @@ class CanvasHandler(tk.Frame):
         self.sbarv.grid(row=0,column=1,stick="NS")
         self.sbarh.grid(row=1,column=0,sticky="EW")
 
-        # click droit
-        self.canvas.bind("<Button-3>", self.on_button_press)
-        self.canvas.bind("<B3-Motion>", self.on_move_press)
-        self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
+        # # click droit
+        # self.canvas.bind("<Button-3>", self.on_button_press)
+        # self.canvas.bind("<B3-Motion>", self.on_move_press)
+        # self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
         # self.canvas.bind("<q>", self.change_page_left)
         # self.canvas.bind("<e>", self.change_page_right)
 
@@ -524,6 +529,10 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.clickable_camera_button)
         self.canvas.itemconfigure(self.camera, state="normal")
         self.master.game_e_handler.camera_deleted = True
+        # click droit
+        self.canvas.bind("<Button-3>", self.on_button_press)
+        self.canvas.bind("<B3-Motion>", self.on_move_press)
+        self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
         self.tool_tip_cam.hidetip()
         self.master.check_game_events()
         # self.master.check_game_events()
@@ -749,7 +758,7 @@ class CanvasHandler(tk.Frame):
             except IndexError:
                 pass
 
-    def create_dialog_box(self, chosen_moment):
+    def create_dialog_box(self, chosen_moment, color="white"):
         """
             - crée sur demande bar dialogue + texte à display selon actions/moments joueur
             - détruit bar dialogue + texte à display après fin texte
@@ -765,7 +774,7 @@ class CanvasHandler(tk.Frame):
         # texte = positionné au centre de black_dialog_bar
         dialog_text = self.canvas.create_text(
             (dialog_position[0],self.master.winfo_screenheight()/1.25),
-            text="", fill="white", font=("Helvetica", 15, "italic"))
+            text="", fill=color, font=("Helvetica", 15, "italic"))
         self.master.dial.typewritten_effect(dialog_text, chosen_text)
         self.canvas.itemconfigure(black_dialog_bar, state="hidden")
 
@@ -777,7 +786,7 @@ def main():
     """
     Main func pour lancement programme(tkinter)
     """
-    pygame.init()
+    # pygame.init()
     # pygame.mixer.init()
     root = App()
     HomeScreen(root)

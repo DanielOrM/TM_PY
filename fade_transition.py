@@ -2,6 +2,7 @@
 import tkinter as tk
 import pygame
 from PIL import ImageTk, Image
+from son.channels import walk_sound_channel
 
 
 class FadeTransition(tk.Label):
@@ -38,8 +39,11 @@ class FadeTransition(tk.Label):
         # bruits de pas
         if walk:
             print("marche...")
-            pygame.mixer.music.load("./son/bruits-pas-son.mp3")
-            pygame.mixer.music.play(loops=0)
+            # pygame.mixer.music.load("son/actions jeu/bruits-pas-son.mp3")
+            # pygame.mixer.music.play(loops=0)
+            walk_sound_path = "son/actions jeu/bruits-pas-son.mp3"
+            walk_sound = pygame.mixer.Sound(walk_sound_path)
+            walk_sound_channel.play(walk_sound)
             self.is_walk_transition = True
         self.update_label()
 
@@ -71,8 +75,9 @@ class FadeTransition(tk.Label):
             self.fade_transition_ended = True
             if self.fade_transition_ended:
                 if self.is_walk_transition:
-                    pygame.mixer.music.stop()
-                    pygame.mixer.music.unload()
+                    walk_sound_channel.stop()
+                    # pygame.mixer.music.stop()
+                    # pygame.mixer.music.unload()
                 self.master.check_game_events()
                 self.fade_transition_ended = False
 
