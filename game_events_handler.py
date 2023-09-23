@@ -1,8 +1,9 @@
 """Classe gérant tous les intéractions + event du jeu"""
 import tkinter as tk
-import pygame
 from global_var import screen_height, screen_width
 from images import bg_image_setup
+from son.channels import pen_channel
+from son.random_sound_effects import play_sound_effect, set_interval
 from txt_story_reader import txt_story_reader, reset_story_reader
 
 
@@ -41,6 +42,10 @@ class GameEventHandler:
         self.are_dots_drawn = False
         self.is_door_dial_1_running = False
         self.is_door_dial_2_running = False
+        self.is_player_room_entered = False
+        self.is_drawing_book_discovered = False
+        self.are_drawings_discovered = False
+        self.are_randm_sound_activated = False
 
         # intéractions / widgets
         self.skip_intro_butt = tk.Button(self.master,
@@ -77,6 +82,7 @@ class GameEventHandler:
         self.master.dial.stop()
         self.master.view.simple_transition("room_0")
         # self.master.view.change_room("room_0")
+        self.master.game_controls.initialize_controls()
         self.master.rect.changing_state_canvas_item("camera_click", "normal")
         self.master.bind("<Motion>", self.master.motion)
 
@@ -115,9 +121,11 @@ class GameEventHandler:
             # print("intro fini")
             self.skip_intro_butt.grid_remove()
             self.master.view.simple_transition("room_0")
+            self.master.game_controls.initialize_controls()
             # self.master.view.change_room("room_0")
         elif not self.are_rooms_visible:
             # print("Je me réveille...")
+            # play_sound_effect()
             self.master.rect.changing_state_canvas_item("camera_click", "normal")
             self.master.rect.create_dialog_box("réveil")
             self.are_rooms_visible = True
@@ -181,6 +189,9 @@ class GameEventHandler:
             else:
                 self.master.rect.read_pamphlet_drawer.hide_tip()
         elif current_room == "pyimage3":
+            if not self.are_randm_sound_activated:
+                self.are_randm_sound_activated = True
+                set_interval(play_sound_effect, 300)
             # 1050, 1100
             x_l_tol = screen_width / (256 / 175)
             x_r_tol = screen_width / (384 / 275)
@@ -216,6 +227,9 @@ class GameEventHandler:
             y_l_tol = screen_height / (864 / 565)
             y_r_tol = screen_height / (432 / 325)
             if x_l_tol < self.rel_pos.get("x") < x_r_tol and y_l_tol < self.rel_pos.get("y") < y_r_tol:
+                if not self.is_player_room_entered:
+                    self.is_player_room_entered = True
+                    self.master.rect.create_dialog_box("player_room")
                 # print("DESSIN")
                 # print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
                 self.master.rect.popup_draw.show_tip(self.rel_pos)
@@ -234,6 +248,9 @@ class GameEventHandler:
             # 380, 825
             y_l_tol = screen_height / (216 / 95)
             y_r_tol = screen_height / (288 / 275)
+            if not self.is_drawing_book_discovered:
+                self.is_drawing_book_discovered = True
+                self.master.rect.create_dialog_box("découverte_cahier_dessin")
             if x_l_tol < self.rel_pos.get("x") < x_r_tol and y_l_tol < self.rel_pos.get("y") < y_r_tol:
                 # print("DESSINEEEER")
                 # print(f"x: {self.rel_pos.get('x')}, y: {self.rel_pos.get('y')}")
@@ -246,15 +263,17 @@ class GameEventHandler:
                 self.master.rect.draw.hide_tip()
         elif current_room == "pyimage9":
             # self.master.dots.check_collision(self.rel_pos)
+            if not self.are_drawings_discovered:
+                self.are_drawings_discovered = True
+                self.master.rect.create_dialog_box("dessins", "black")
             if not self.are_dots_drawn:
                 self.master.dots.start_game(self.img_list[self.index_dot])
-                pygame.mixer.music.load(".\son\son-écrit-crayon.mp3")
                 self.master.rect.canvas.bind("<Button-1>",
                                              lambda x: self.master.dots.get_x_y(self.rel_pos))
                 self.master.rect.canvas.bind("<B1-Motion>",
                                              lambda x: self.master.dots.paint(self.rel_pos))
                 self.master.rect.canvas.bind("<ButtonRelease-1>", lambda x:
-                pygame.mixer.music.pause())
+                pen_channel.pause())
                 self.are_dots_drawn = True
         elif current_room == "pyimage5":
             # 800, 1000
@@ -378,13 +397,14 @@ class GameEventHandler:
         # cahier dessin --> porte principale OU bureau OU dessiner
         elif prev_room == "pyimage8" and current_room in {"pyimage3", "pyimage5", "pyimage9"}:
             self.master.rect.draw.hide_tip()
+            self.master.unbind("<e>")
         # dessiner --> porte principale OU bibliothèque
         elif prev_room == "pyimage9" and current_room in {"pyimage3", "pyimage5"}:
             self.master.rect.canvas.unbind("<Button-1>")
             self.master.rect.canvas.unbind("<B1-Motion>")
             self.master.rect.canvas.unbind("<ButtonRelease-1>")
-            pygame.mixer.music.stop()
-            pygame.mixer.music.unload()
+            pen_channel.stop()
+            # pygame.mixer.music.unload()
             self.master.dots.reset()
             self.master.dots.has_music_started = False
             self.are_dots_drawn = False

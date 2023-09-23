@@ -25,7 +25,10 @@ class DialogBoxes:
             "réveil": txt_files_reader("dialog/dialog_text/réveil.txt"),
             "porte_essai": txt_files_reader("dialog/dialog_text/porte_essai.txt"),
             "porte_essai_2": txt_files_reader("dialog/dialog_text/porte_essai_2.txt"),
-            "preuve_parnm_oranges": txt_files_reader("dialog/dialog_text/preuve_parnm_oranges.txt")
+            "preuve_parnm_oranges": txt_files_reader("dialog/dialog_text/preuve_parnm_oranges.txt"),
+            "player_room": txt_files_reader("dialog/dialog_text/player_room.txt"),
+            "découverte_cahier_dessin": txt_files_reader("dialog/dialog_text/découverte_cahier_dessin.txt"),
+            "dessins": txt_files_reader("dialog/dialog_text/dessins.txt")
         }
 
     def typewritten_effect(self, text_id, chosen_text):
