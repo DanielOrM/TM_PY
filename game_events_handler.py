@@ -195,7 +195,7 @@ class GameEventHandler:
                     if not self.is_door_dial_1_running:
                         self.is_door_dial_1_running = True
                         self.master.rect.create_dialog_box("porte_essai")
-                elif self.door_try > 1:
+                elif self.door_try == 2:
                     if not self.is_door_dial_2_running:
                         self.is_door_dial_2_running = True
                         self.master.rect.create_dialog_box("porte_essai_2")
