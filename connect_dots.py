@@ -1,11 +1,15 @@
 """Utilisation de openCV python (cv2) pour détecter
 position points (x,y) et ensuite les dessiner sur CanvasHandler"""
+import threading
 from threading import Timer
 from tkinter import Label
 import re
 import cv2 as cv
 import pygame
+from PIL import Image, ImageTk
 from global_var import screen_width, screen_height
+from images import bg_image_setup
+from son.random_sound_effects import set_interval
 from son.channels import pen_channel
 
 CENTER_POSITION_X = screen_width / 5
@@ -36,37 +40,15 @@ class ConnectDotsGame:
         self.dot_hovering = False
         self.prev_dot_num = None
 
-    # def get_connect_dots_position(self, image_file):
-    #     """
-    #     Obtient position points
-    #     Return liste des tous les points (x,y) (centre)
-    #     """
-    #     # Load image, filtre gris et tresh
-    #     image = cv.imread(image_file)
-    #     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    #     thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1]
-    #
-    #     # filtre kernel
-    #     kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
-    #     opening = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel, iterations=3)
-    #
-    #     # Find circles et position x,y
-    #     cnts = cv.findContours(opening, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    #     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-    #     list_dots_position = []
-    #     for c in cnts:
-    #         # cv.contourArea(c)
-    #         M = cv.moments(c)
-    #         # print(M)
-    #         x_center = int(M['m10'] / M['m00'])
-    #         y_center = int(M['m01'] / M['m00'])
-    #         list_dots_position.append((x_center, y_center))
-    #         # print(f"{i} et x:{x_center}, y:{y_center}")
-    #     self.dots_list = list_dots_position
-    #     return list_dots_position
-    #
-    # def helper(self, img):
-    #     return lambda event: self.is_dot_hovered(img)
+        # monstre
+        self.monster_img = None
+        self.monster_final_img = None
+        self.monster_img_list = []
+        self.monster_canvas_item = None
+
+        # écran noir
+        self.black_background = bg_image_setup("./images/monster/BlackBackground.png")
+        self.white_background = bg_image_setup("./images/monster/WhiteBackground.png")
 
     def place_dots(self, dots_position):
         """
@@ -78,16 +60,10 @@ class ConnectDotsGame:
             x2, y2 = (d[0] + CENTER_POSITION_X + 3), (d[1] + CENTER_POSITION_Y + 3)
             canvas = self.master.rect.canvas
             img = canvas.create_oval(x1, y1, x2, y2, fill="black", tag=i)
-            # print(self.master.rect.canvas.itemconfig(img))
-            # print(self.master.rect.canvas.itemconfig(img))
             self.current_dots_img.append(img)
-            # self.master.rect.canvas.tag_bind(img, "<Enter-B1>", self.helper(img))
-            # self.master.bind("<B1-Motion>", lambda x: print("hehehehe"))
 
     def is_dot_hovered(self, dot):
-        # print(dot)
         # match x et y pos label
-        # print(len(self.current_dots_img))
         """
         Check quel point a été hover pendant dessin
         - obtient numéro (text) à partir de tag dot
@@ -115,18 +91,23 @@ class ConnectDotsGame:
                 print("Fini dessin!")
                 self.master.fade_in.fade_in()
             print(f"Le prochain point est {self.current_dot}")
-        # print(type(num_dot))
 
     def next_drawing(self):
         """
         Passe au prochain dessin dans liste (self.master.game_e_handler.img_list)
         """
-        self.master.fade_in.place_forget()
+        ref_pic = self.master.fade_in.initial_img
+        self.master.rect.canvas.delete(ref_pic)
         if self.master.game_e_handler.index_dot < len(self.master.game_e_handler.img_list) - 1:
             self.master.game_e_handler.index_dot += 1
         else:
             print("ATTENDRE NOUVELLE UPDATE")
+            self.master.game_e_handler.has_monster_appeared = True
             self.reset()
+            # monstre appari°
+            t = threading.Timer(1, self.activate_monster_smile)
+            t.start()
+            self.master.rect.canvas.bind("<Button-1>", lambda event: self.screamer)
             return
         self.reset()
         self.master.game_e_handler.are_dots_drawn = False
@@ -148,8 +129,8 @@ class ConnectDotsGame:
         Place label sur canvas (légèrement en haut à droite de position dot)
         """
         for i, dots in enumerate(dots_list):
-            label = Label(self.master.rect.canvas, text=f"{i}")
-            label.place(x=dots[0] + CENTER_POSITION_X + 10, y=dots[1] + CENTER_POSITION_Y - 15)
+            label = Label(self.master.rect.canvas, text=f"{i}", font=("Calibri", 9))
+            label.place(x=dots[0] + CENTER_POSITION_X + 5, y=dots[1] + CENTER_POSITION_Y - 10)
             self.current_labels.append(label)
 
     def get_x_y(self, mouse_position):
@@ -178,12 +159,10 @@ class ConnectDotsGame:
         Musique arrête si func paint =/ appelée
         """
         if not self.has_music_started:
-            print("JUSTE UNE FOIS")
+            # une fois
             pen_sound_path = "son/actions jeu/son-écrit-crayon.mp3"
             pen_sound = pygame.mixer.Sound(pen_sound_path)
             pen_channel.play(pen_sound, loops=-1)
-            # pygame.mixer.music.load()
-            # pygame.mixer.music.play(-1)
             self.has_music_started = True
         else:
             pen_channel.unpause()
@@ -195,12 +174,12 @@ class ConnectDotsGame:
         self.lastx, self.lasty = mouse_position.get("x"), mouse_position.get("y")
         closest_canvas_items = self.master.rect.canvas. \
             find_overlapping(self.lastx, self.lasty, x, y)
+        print(closest_canvas_items)
         if len(closest_canvas_items) == 3 and not self.dot_hovering:
             dot_id = closest_canvas_items[1]
             self.is_dot_hovered(dot_id)
             self.run_scheduled_task()
             self.dot_hovering = True
-            # self.is_dot_hovered(dot_id)
 
     def reset(self):
         """
@@ -215,9 +194,6 @@ class ConnectDotsGame:
                 self.master.rect.canvas.delete(img)
             for label in self.current_labels:
                 label.place_forget()
-        # print(self.current_dots_img)
-        # print(self.current_line_img)
-        # print(self.current_labels)
         self.current_dots_img, self.current_line_img, \
         self.dots_list, self.current_labels = [], [], [], []
 
@@ -225,7 +201,6 @@ class ConnectDotsGame:
         """
         Lance jeu pour 1 dessin
         """
-        # self.get_connect_dots_position(image_file)
         self.sort_points(image_file)
         self.place_dots(self.dots_list)
         self.place_label(self.dots_list)
@@ -254,3 +229,51 @@ class ConnectDotsGame:
                 dot_position = (cx, cy)
                 self.dots_list.append(dot_position)
         return self.dots_list
+
+    def screamer(self):
+        """
+        Appari° monstre, zoom avec délai
+        """""
+        w = self.master.rect.change_background("app_background", self.white_background)
+        t_w = threading.Timer(0.2, w)
+        t_b = threading.Timer(0.2, self.master.rect.change_background("app_background"), self.black_background)
+        t_b.start()
+        t_w.start()
+
+    def activate_monster_smile(self):
+        """
+        Scène monstre activée par cette func
+        Instance toutes les images nécessaires
+            - self.monster_img
+            - self.monster_final_img
+            - panel
+            - self.monster_canvas_item
+        """
+        print("START MONSTER")
+        self.monster_img = Image.open("./images/monster/PA_NB_SourireMonstre.png")
+        self.monster_final_img = ImageTk.PhotoImage(image=self.monster_img)
+        self.monster_img_list.append(self.monster_final_img)
+        panel = self.master.rect.canvas.create_image(screen_width / 2, screen_height / 2, image=self.monster_final_img)
+        print(panel)
+        self.monster_canvas_item = panel
+        self.monster_img_list.append(panel)
+        set_interval(self.monster_resize, 0.2)
+
+    def monster_resize(self):
+        """
+        Change la taille de l'image sourire monstre chaque 0.2s
+        Écran noir quand sourire atteint la hauteur de l'écran
+        """
+        print("scaling monster img")
+        pic_width, pic_height = self.monster_final_img.width(), self.monster_final_img.height()
+        pic_width_tenth, pic_height_tenth = int(pic_width/10), int(pic_height/10)
+        if pic_height >= screen_height:
+            print("BOO")
+            # self.label_monster.grid_remove()
+            self.master.rect.canvas.delete(self.monster_canvas_item)
+            self.master.rect.change_background("app_background", self.black_background)
+            return
+        new_image_resized = self.monster_img.resize\
+            ((pic_width+pic_width_tenth, pic_height+pic_height_tenth))
+        self.monster_final_img = ImageTk.PhotoImage(image=new_image_resized)
+        self.master.rect.canvas.itemconfigure(self.monster_canvas_item, image=self.monster_final_img)

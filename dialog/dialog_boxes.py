@@ -41,15 +41,8 @@ class DialogBoxes:
         """
         Update le texte à intervalles
         """
-        # print(self.prev_text)
-        # print(new_text)
-        # print(self.prev_text)
-        # print(self.index_letter)
-        # print(self.index_line)
-        # print(self.prev_text)
         if self.prev_text:
             new_text = str(self.prev_text+new_text)
-        # new_text = str(self.prev_text + new_text)
         self.master.rect.canvas.itemconfigure(tag_or_id, text=new_text)
         self.prev_text = new_text
         # appelle func text_iteration après 80 ms
@@ -60,25 +53,19 @@ class DialogBoxes:
         Itère travers texte choisi + update le new_text dans func change_text
         """
         if not self.is_running:
-            # print("RETURN STATEMENT")
             self.is_running = True
             self.master.rect.canvas.itemconfigure(tag_or_id, text="")
             return
         try:
             iterable_line = list(chosen_text[self.index_line])
-            # last_index_iterable_line = len(iterable_line)-1
-            # print(iterable_list)
             try:
                 # obtient prochaine lettre dans le texte choisi
                 new_letter = iterable_line[self.index_letter]
-                # print(new_letter)
                 if new_letter == "[":
-                    # print("STOP")
+                    # marque fin dialogue
                     self.index_line = 0
                     self.index_letter = 0
                     self.prev_text = ""
-                    # print(f"Ici c'est le reste: {self.prev_text}")
-                    # time.sleep(1.5)
                     # attends 1,5s avant clear texte pour que joueur puisse lire
                     self.master.after(1500,
                                       self.master.rect.canvas.itemconfigure(tag_or_id, text=""))
@@ -93,9 +80,7 @@ class DialogBoxes:
                     time.sleep(1.15)
                     print("RECOMMENCE")
                     self.prev_text = ""
-                    # print("ça se vide...")
                 if self.master.rect.canvas.itemcget(tag_or_id, "text") == " ...":
-                    # print("Normalement ça marche.")
                     time.sleep(0.9)
                     self.prev_text = ""
                 # clear le texte s'il y a trop de caractères
@@ -103,9 +88,6 @@ class DialogBoxes:
                     self.prev_text = ""
                 self.index_line += 1
                 self.index_letter = 0
-                # check_letter = iterable_line[self.index_letter]
-                # check_letter_2 = iterable_line[self.index_letter+1]
-                # check_letter_3 = iterable_line[self.index_letter+2]
                 self.prev_text += " "
                 time.sleep(0.5)
                 self.text_iteration(tag_or_id, chosen_text)
@@ -119,7 +101,9 @@ class DialogBoxes:
         return self.text.get(chosen_moment)
 
     def stop(self):
-        # print("Still RUNNING")
+        """
+        Dialog fini, reset
+        """
         self.is_running = False
         self.prev_text = ""
         self.index_letter = 0

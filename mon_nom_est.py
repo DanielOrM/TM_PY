@@ -2,6 +2,8 @@
 import tkinter as tk
 from tkinter import VERTICAL, HORIZONTAL
 import pygame
+import threading
+from threading import Thread
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file
 from fade_transition import FadeTransition, FadeIn
@@ -267,6 +269,7 @@ class Control:
     def initialize_controls(self):
         self.master.bind("<a>", self.change_room_left)  # aller à gauche
         self.master.bind("<d>", self.change_room_right)  # aller à droite
+        self.master.bind("<s>", self.remove_closeup) # enlève close-up
         self.master.bind("<Button-2>", self.see_album)  # button 2 => mid click
 
     def change_room_left(self, event=None):
@@ -294,6 +297,16 @@ class Control:
         else:
             print("C'est un mur...")
         return "break"
+
+    def remove_closeup(self, event=None):
+        """
+        Func appellée après <s>:
+            - change background avec prev_room (list dans game_e_handler)
+        """
+        current_room = self.master.game_e_handler.get_current_room_img()
+        if current_room in {"pyimage6", "pyimage7", "pyimage8", "pyimage9", "pyimage10", "pyimage11"}:
+            self.master.rect.change_background("app_background",
+                                               self.master.pages.get(self.master.pages_name[self.master.index]))
 
     def see_album(self, event=None):
         """
@@ -529,6 +542,7 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.clickable_camera_button)
         self.canvas.itemconfigure(self.camera, state="normal")
         self.master.game_e_handler.camera_deleted = True
+        self.master.game_e_handler.is_camera_available = True
         # click droit
         self.canvas.bind("<Button-3>", self.on_button_press)
         self.canvas.bind("<B3-Motion>", self.on_move_press)
@@ -644,12 +658,8 @@ class CanvasHandler(tk.Frame):
         """
         Raccourci func pour changer image fond d'écran
         """
-        # print("L'intro a bien débuté. Background changé")
-        # print(self.canvas.itemconfigure(tagOrId))
         self.canvas.itemconfigure(tag_or_id, image=new_background)
-        self.master.game_e_handler.reset_val()
-        # print("perfect")
-        # print(self.canvas.itemconfigure(tagOrId))
+        self.master.game_e_handler.get_current_room_img() # check reset_val quand souris bouge pas
 
     def change_page_left(self, event=None):
         """
