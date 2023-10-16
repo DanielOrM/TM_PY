@@ -2,6 +2,8 @@
 import tkinter as tk
 import pygame
 from PIL import ImageTk, Image
+
+from global_var import screen_width, screen_height
 from son.channels import walk_sound_channel
 
 
@@ -82,38 +84,27 @@ class FadeTransition(tk.Label):
                 self.fade_transition_ended = False
 
 
-class FadeIn(tk.Label):
+class FadeIn:
     """
     Transition de type fondu
         - fin dessin --> fade-in
         """
     def __init__(self, master):
-        super().__init__(master)
         self.master = master
         self.imgs = ["./images/connect the dots/ref/Fish.png",
                      "./images/connect the dots/ref/ChatIRL.png",
                      "./images/connect the dots/ref/WolfSide.png",
-                     "./images/connect the dots/ref/Werewolf.png"
+                     "./images/connect the dots/ref/Werewolf.png",
+                     "./images/connect the dots/ref/RorschackInktAlien.png"
                      ]
+        # self.imgs = ["./images/connect the dots/ref/RorschackInktAlien.png"]
+        self.initial_img = None
         self.pic_list = []
-        self.fadetime = 1  # time between alpha channel changes in ms
-        self.fadestep = 2  # change to alpha channel
-        self.curstep = 0  # the current step through the transparency
+        self.fadetime = 1  # temps nécessaire entre temp img (effet fade) en ms
+        self.fadestep = 2  # brutalité changement de transparence
+        self.curstep = 0  # étape du fade in
 
-    def fade_in(self):
-        """
-        Transition en plein écran
-        Bruits de pas enclenché
-        Lancement transition
-        """
-        self.place(x=100, y=100)
-        self.update_label()
-
-    def update_label(self):
-        """
-        Changement blanc --> noir progressif (t)
-        Quand transition stop --> fin bruits de pas
-        """
+    def initialiasize_pic(self):
         print(self.master.game_e_handler.index_dot)
         im_file = open(self.imgs[self.master.game_e_handler.index_dot], mode="rb")
         current_im = Image.open(im_file)
@@ -121,13 +112,33 @@ class FadeIn(tk.Label):
         current_im.putalpha(alpha)
         pic = ImageTk.PhotoImage(current_im)
         self.pic_list.append(pic)
-        self.configure(image=pic)
-        self.curstep += 1
+        return pic, alpha
+
+    def fade_in(self):
+        """
+        Transition en plein écran
+        Bruits de pas enclenché
+        Lancement transition
+        """
+        pic, alpha = self.initialiasize_pic()
+        self.initial_img = self.master.rect.canvas.create_image(screen_width / 2, screen_height / 2, image=pic)
+        self.pic_list.append(self.initial_img)
+        # self.place(x=100, y=100)
+        self.update_label()
+
+    def update_label(self):
+        """
+        Changement blanc --> noir progressif (t)
+        Quand transition stop --> fin bruits de pas
+        """
+        pic, alpha = self.initialiasize_pic()
+        self.master.rect.canvas.itemconfigure(self.initial_img, image=pic)
+        self.curstep += 2
         print('fade in: %i' % alpha)
         if alpha == 255:
             self.curstep = 0
             self.master.after(1500, self.master.dots.next_drawing)
         else:
-            self.after(self.fadetime, self.update_label)
+            self.master.after(self.fadetime, self.update_label)
 
 

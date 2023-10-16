@@ -1,0 +1,10 @@
+name: tm_env
+channels:
+  - defaults
+dependencies:
+  - python=3.9.16
+  - pip=23.0.1
+  - pip:
+    - opencv_python==4.8.0.76
+    - Pillow==10.1.0
+    - pygame==2.5.1
