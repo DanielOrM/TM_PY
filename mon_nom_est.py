@@ -31,7 +31,7 @@ class HomeScreen:
         self.master.grid_rowconfigure(0, weight=1)  # For row 0
         self.master.grid_columnconfigure(0, weight=1)  # For column 0
         # self.hs_image = bg_image_setup("./images/homescreen/PA_homescreenTest2.png")
-        self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png")
+        self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png", name="écran d'accueil")
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
         # self.start_button = tk.Button(self.hs_canvas, text='Jouer', width=40, command=self.intro)
@@ -134,31 +134,35 @@ class App(tk.Tk):
             "room2": "./images/rooms/real_rooms/library/PA_Bibliothèque.png"
         }
         self.pages = {
-            "room_2": bg_image_setup(self.pages_file_location.get("room_2")),
-            "room_1": bg_image_setup(self.pages_file_location.get("room_1")),
-            "room_0": bg_image_setup(self.pages_file_location.get("room_0")),
-            "room1": bg_image_setup(self.pages_file_location.get("room1")),
-            "room2": bg_image_setup(self.pages_file_location.get("room2"))
+            "room_2": bg_image_setup(self.pages_file_location.get("room_2"), name="salle de bain"),
+            "room_1": bg_image_setup(self.pages_file_location.get("room_1"), name="cuisine normale"),
+            "room_0": bg_image_setup(self.pages_file_location.get("room_0"), name="pièce porte"),
+            "room1": bg_image_setup(self.pages_file_location.get("room1"), name="pièce dessin"),
+            "room2": bg_image_setup(self.pages_file_location.get("room2"), name="bibliothèque")
         }
         # cuisine
         self.kitchen_closeup = {
             "oranges":
-                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineDésordreZoom.png"),
+                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineDésordreZoom.png",
+                               name="close-up oranges"),
             "drawer":
-                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineTiroir.png")
+                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineTiroir.png", name="tiroir cuisine")
         }
         # chambre dessin
         self.desktop_closeup = {
             "desktop":
-                bg_image_setup("./images/rooms/real_rooms/player_room/PA_CarnetDessinZoom.png"),
+                bg_image_setup("./images/rooms/real_rooms/player_room/PA_CarnetDessinZoom.png", name="close-up bureau"),
             "draw":
-                bg_image_setup("./images/rooms/real_rooms/player_room/PA_PapierDessin.png"),
+                bg_image_setup("./images/rooms/real_rooms/player_room/PA_PapierDessin.png", name="dessin"),
         }
         # bibliothèque
         self.library_closeup = {
-            "see_books": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreZoom.png"),
-            "family_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png"),
-            "read_fam_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png")
+            "see_books": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreZoom.png",
+                                        name="livres"),
+            "family_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png",
+                                          name="close-up livre famille"),
+            "read_fam_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png",
+                                            name="lire famille livre")
         }
         self.camera = open_image_setup_file("./images/player/PA_NB_PhotoCameraFromBehind.png")\
             .subsample(2,2) # image caméra 2 fois plus petite
@@ -167,7 +171,7 @@ class App(tk.Tk):
             .subsample(16, 16)
         self.right_arrow = open_image_setup_file("./images/player/red_arrow_right.png")\
             .subsample(16, 16)
-        self.black_background = bg_image_setup("images/intro/NB_BlackBox.png")
+        self.black_background = bg_image_setup("images/intro/NB_BlackBox.png", name="écran noir intro")
         # dimensions écran
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
@@ -777,8 +781,8 @@ class CanvasHandler(tk.Frame):
         dialog_position = (self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.35)
         # print(dialog_position)
         # crée barre noir dialogue
-        black_dialog_bar = self.canvas.create_image(dialog_position[0], dialog_position[1],
-                                                    image=self.dialog_box)
+        # black_dialog_bar = self.canvas.create_image(dialog_position[0], dialog_position[1],
+        #                                             image=self.dialog_box)
         # choisit texte à display selon action/moment joueur
         chosen_text = self.master.dial.dialog_to_use(chosen_moment)
         # texte = positionné au centre de black_dialog_bar
@@ -786,7 +790,7 @@ class CanvasHandler(tk.Frame):
             (dialog_position[0],self.master.winfo_screenheight()/1.25),
             text="", fill=color, font=("Helvetica", 15, "italic"))
         self.master.dial.typewritten_effect(dialog_text, chosen_text)
-        self.canvas.itemconfigure(black_dialog_bar, state="hidden")
+        # self.canvas.itemconfigure(black_dialog_bar, state="hidden")
 
 
 # if __name__ == "__main__":

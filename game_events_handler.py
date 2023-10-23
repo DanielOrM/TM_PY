@@ -108,6 +108,7 @@ class GameEventHandler:
             - 6, 7, 8, 9, 10, 11
         """
         current_room = self.get_current_room_img()
+        print(current_room)
         if not self.intro_initialized and not self.intro_ended:
             # enlève souris input, click et intéractions avec clavier
             self.master.rect.change_background("app_background", self.master.black_background)

@@ -47,8 +47,8 @@ class ConnectDotsGame:
         self.monster_canvas_item = None
 
         # écran noir
-        self.black_background = bg_image_setup("./images/monster/BlackBackground.png")
-        self.white_background = bg_image_setup("./images/monster/WhiteBackground.png")
+        self.black_background = bg_image_setup("./images/monster/BlackBackground.png", name="screamer écran noir")
+        self.white_background = bg_image_setup("./images/monster/WhiteBackground.png", name="screamer écran blanc")
 
     def place_dots(self, dots_position):
         """
