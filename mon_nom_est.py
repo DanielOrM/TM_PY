@@ -159,8 +159,6 @@ class App(tk.Tk):
         self.library_closeup = {
             "see_books": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreZoom.png",
                                         name="livres"),
-            "family_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png",
-                                          name="close-up livre famille"),
             "read_fam_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png",
                                             name="lire famille livre")
         }
@@ -308,7 +306,8 @@ class Control:
             - change background avec prev_room (list dans game_e_handler)
         """
         current_room = self.master.game_e_handler.get_current_room_img()
-        if current_room in {"pyimage6", "pyimage7", "pyimage8", "pyimage9", "pyimage10", "pyimage11"}:
+        if current_room in {"close-up oranges", "tiroir cuisine", "close-up bureau", "dessin",
+                            "livres", "lire famille livre"}:
             self.master.rect.change_background("app_background",
                                                self.master.pages.get(self.master.pages_name[self.master.index]))
 
@@ -412,8 +411,6 @@ class CanvasHandler(tk.Frame):
                                          "[Click gauche] pour regarder les livres")
         self.open_family_book = HoverMessRelPos(self.master, self.canvas,
                                                 "[Click gauche] pour prendre le livre")
-        self.read_fam_book = HoverMessRelPos(self.master, self.canvas,
-                                             "[E] pour lire le livre")
         self.canvas.tag_bind(self.clickable_camera_button,
                              "<Button-1>", self.take_camera)
         # print(self.master.camera.width(), self.master.camera.height())

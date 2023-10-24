@@ -108,7 +108,7 @@ class GameEventHandler:
             - 6, 7, 8, 9, 10, 11
         """
         current_room = self.get_current_room_img()
-        print(current_room)
+        # print(current_room)
         if not self.intro_initialized and not self.intro_ended:
             # enlève souris input, click et intéractions avec clavier
             self.master.rect.change_background("app_background", self.master.black_background)
@@ -126,16 +126,16 @@ class GameEventHandler:
             self.are_rooms_visible = True
             # Bouger la souris réappelle func motion de classe App
             self.master.bind("<Motion>", self.master.motion)
-        elif current_room == "pyimage1":
+        elif current_room == "salle de bain":
             pass
         # print("Preuves pour activités paranormales.")
-        elif current_room == "pyimage2":
+        elif current_room == "cuisine normale":
             if screen_width / (1536 / 575) < self.rel_pos.get("x") < screen_width / (192 / 125) \
                     and 0 < self.rel_pos.get("y") < screen_height / (72 / 25):
                 self.master.pages["room_1"] = \
-                    bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_Cuisine.png")
+                    bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_Cuisine.png", name="cuisine changée")
                 self.master.view.simple_transition("room_1")
-        elif current_room in {"pyimage25", "pyimage26"}:
+        elif current_room == "cuisine changée":
             if 0 < self.rel_pos.get("x") < screen_width / (384 / 125) < self.rel_pos.get("y") < screen_height / (
                     432 / 325):
                 self.master.rect.orange_kitchen.show_tip(self.rel_pos)
@@ -153,7 +153,7 @@ class GameEventHandler:
             else:
                 self.master.rect.orange_kitchen.hide_tip()
                 self.master.rect.drawer_open.hide_tip()
-        elif current_room == "pyimage6":
+        elif current_room == "close-up oranges":
             # -15, 1540
             x_l_tol = screen_width / (-512 / 5)
             x_r_tol = screen_width / (384 / 385)
@@ -164,7 +164,7 @@ class GameEventHandler:
                     and y_l_tol < self.check_start_y < self.check_end_y < y_r_tol:
                 # action paranm.
                 self.master.rect.create_dialog_box("preuve_parnm_oranges")
-        elif current_room == "pyimage7":
+        elif current_room == "tiroir cuisine":
             # 250, 625
             x_l_tol = screen_width / (768 / 125)
             x_r_tol = screen_width / (1536 / 625)
@@ -181,7 +181,7 @@ class GameEventHandler:
                 self.is_pamphlet_kitchen_read = True
             else:
                 self.master.rect.read_pamphlet_drawer.hide_tip()
-        elif current_room == "pyimage3":
+        elif current_room == "pièce porte":
             if not self.are_randm_sound_activated:
                 self.are_randm_sound_activated = True
                 set_interval(play_sound_effect, 300)
@@ -210,7 +210,7 @@ class GameEventHandler:
                 self.master.rect.create_dialog_box("camera_trouvee")
                 # évite de retoggle cette partie du code. Image "pickable caméra" = détruite
                 self.camera_deleted = False
-        elif current_room == "pyimage4":
+        elif current_room == "pièce dessin":
             # 575, 1000
             x_l_tol = screen_width / (1563 / 575)
             x_r_tol = screen_width / (192 / 125)
@@ -228,7 +228,7 @@ class GameEventHandler:
                                                    self.master.desktop_closeup.get("desktop")))
             else:
                 self.master.rect.popup_draw.hide_tip()
-        elif current_room == "pyimage8":
+        elif current_room == "close-up bureau":
             # 340, 1125
             x_l_tol = screen_width / (384 / 85)
             x_r_tol = screen_width / (512 / 375)
@@ -246,7 +246,7 @@ class GameEventHandler:
                                                    self.master.desktop_closeup.get("draw")))
             else:
                 self.master.rect.draw.hide_tip()
-        elif current_room == "pyimage9":
+        elif current_room == "dessin":
             # self.master.dots.check_collision(self.rel_pos)
             self.master.rect.changing_state_canvas_item(self.master.rect.camera, "hidden")
             if not self.are_drawings_discovered:
@@ -261,7 +261,7 @@ class GameEventHandler:
                 self.master.rect.canvas.bind("<ButtonRelease-1>", lambda x:
                 pen_channel.pause())
                 self.are_dots_drawn = True
-        elif current_room == "pyimage5":
+        elif current_room == "bibliothèque":
             # 800, 1000
             x_l_tol = screen_width / (48 / 25)
             x_r_tol = screen_width / (192 / 125)
@@ -279,7 +279,7 @@ class GameEventHandler:
             else:
                 self.master.rect.see_books.hide_tip()
         # regarde livres dispo
-        elif current_room == "pyimage10":
+        elif current_room == "livres":
             # print("Accès à tous les livres...")
             # 380, 480
             x_l_tol = screen_width / (384 / 95)
@@ -290,17 +290,17 @@ class GameEventHandler:
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.
                                  change_background("app_background",
-                                                   self.master.library_closeup.get("family_book")))
+                                                   self.master.library_closeup.get("read_fam_book")))
             else:
                 self.master.rect.open_family_book.hide_tip()
         # joueur lit livre "famille"
-        elif current_room == "pyimage11":
+        elif current_room == "lire famille livre":
             # print(self.is_fam_book_read)
             if not self.is_fam_book_read:
                 # print(txt_files_story("./dialog/dialog_text/lire_livre.txt"))
                 txt_story_reader(self.master, "./dialog/dialog_text/lire_livre.txt")
             self.is_fam_book_read = True
-        if not current_room == "pyimage3" and not self.camera_deleted:
+        if not current_room == "pièce porte" and not self.camera_deleted:
             self.master.rect.changing_state_canvas_item("camera_click", "hidden")
         else:
             # print("Rien à signaler...")
@@ -353,42 +353,43 @@ class GameEventHandler:
             current_room = self.prev_and_current_room[1]
         # print(self.prev_and_current_room)
         # porte principale --> cuisine OU bureau
-        if prev_room == "pyimage3" and current_room in {"pyimage2", "pyimage4"}:
+        if prev_room == "pièce porte" and current_room in {"cuisine normale", "pièce dessin"}:
             self.master.rect.door_handle.hide_tip()
             self.master.unbind("<Button-1>")
         # cuisine --> toilette OU porte principale
-        elif prev_room in {"pyimage25", "pyimage26"} and current_room in {"pyimage1", "pyimage3"}:
+        elif prev_room == "cuisine changée" and current_room in {"salle de bain", "pièce porte"}:
             # print("2")
             self.master.rect.orange_kitchen.hide_tip()
             self.master.rect.drawer_open.hide_tip()
         # cuisine --> oranges
-        elif prev_room in {"pyimage25", "pyimage26"} and current_room == "pyimage6":
+        elif prev_room == "cuisine changée" and current_room == "close-up oranges":
             # print("4 condition")
             self.master.rect.orange_kitchen.hide_tip()
         # cuisine --> brochure
-        elif prev_room in {"pyimage25", "pyimage26"} and current_room == "pyimage7":
+        elif prev_room == "cuisine changée" and current_room == "tiroir cuisine":
             # print("3 condition")
             self.master.rect.drawer_open.hide_tip()
         # orange --> cuisine (=/close-up)
-        elif prev_room == "pyimage6" and current_room in {"pyimage25", "pyimage26"}:
+        elif prev_room == "close-up oranges" and current_room == "cuisine changée":
             self.master.rect.orange_kitchen.hide_tip()
         # brochure --> toilette OU porte principale OU CUISINE
-        elif prev_room == "pyimage7" and current_room in {"pyimage1", "pyimage3", "pyimage25", "pyimage26"}:
+        elif prev_room == "tiroir cuisine" and current_room in {"salle de bain", "pièce porte", "cuisine changée"}:
             # print("5 condition")
             self.master.rect.read_pamphlet_drawer.hide_tip()
             self.is_pamphlet_kitchen_read = False
             reset_story_reader(self.master)
             self.master.unbind("<e>")
-        # bureau --> porte principale OU bibliothèque OU cahier dessin
-        elif prev_room == "pyimage4" and current_room in {"pyimage3", "pyimage5", "pyimage8"}:
+        # bureau --> porte principale OU bibliothèque OU close-up bureau
+        elif prev_room == "pièce dessin" and current_room in {"pièce porte", "bibliothèque", "close-up bureau"}:
             # print("6 condition")
             self.master.rect.popup_draw.hide_tip()
         # cahier dessin --> porte principale OU bibliothèque OU dessiner OU bureau
-        elif prev_room == "pyimage8" and current_room in {"pyimage3", "pyimage5", "pyimage9", "pyimage4"}:
+        elif prev_room == "close-up bureau" and current_room in {"pièce porte",
+                                                                 "bibliothèque", "dessin", "pièce dessin"}:
             self.master.rect.draw.hide_tip()
             self.master.unbind("<e>")
         # dessiner --> porte principale OU bibliothèque OU bureau
-        elif prev_room == "pyimage9" and current_room in {"pyimage3", "pyimage5", "pyimage4"}:
+        elif prev_room == "dessin" and current_room in {"pièce porte", "bibliothèque", "pièce dessin"}:
             self.master.rect.canvas.unbind("<Button-1>")
             self.master.rect.canvas.unbind("<B1-Motion>")
             self.master.rect.canvas.unbind("<ButtonRelease-1>")
@@ -401,13 +402,13 @@ class GameEventHandler:
             self.master.dots.has_music_started = False
             self.are_dots_drawn = False
         # bibliothèque --> bureau OU close-up livres dispo
-        elif prev_room == "pyimage5" and current_room in {"pyimage4", "pyimage10"}:
+        elif prev_room == "bibliothèque" and current_room in {"pièce dessin", "livres"}:
             self.master.rect.see_books.hide_tip()
         # close-up livres dispo --> bureau OU lire livre famille OU bibliothèque
-        elif prev_room == "pyimage10" and current_room in {"pyimage4", "pyimage11", "pyimage5"}:
+        elif prev_room == "livres" and current_room in {"pièce dessin", "lire famille livre", "bibliothèque"}:
             self.master.rect.open_family_book.hide_tip()
         # lire livre famille --> bureau OU bibliothèque
-        elif prev_room == "pyimage11" and current_room in {"pyimage4", "pyimage5"}:
+        elif prev_room == "lire famille livre" and current_room in {"pièce dessin", "bibliothèque"}:
             self.master.rect.open_family_book.hide_tip()
             self.is_fam_book_read = False
             reset_story_reader(self.master)
