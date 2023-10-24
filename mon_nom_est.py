@@ -1,6 +1,8 @@
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 import tkinter as tk
 from tkinter import VERTICAL, HORIZONTAL
+import sys
+import os
 import pygame
 import threading
 from threading import Thread
@@ -25,24 +27,15 @@ class HomeScreen:
     """
     def __init__(self, master):
         self.master = master
-        # super().__init__(master)
-        # self.config(background="black")
         # configure de grid pour le reste du code
         self.master.grid_rowconfigure(0, weight=1)  # For row 0
         self.master.grid_columnconfigure(0, weight=1)  # For column 0
-        # self.hs_image = bg_image_setup("./images/homescreen/PA_homescreenTest2.png")
         self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png", name="écran d'accueil")
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
-        # self.start_button = tk.Button(self.hs_canvas, text='Jouer', width=40, command=self.intro)
         self.start_button = self.hs_canvas.create_text(
             (screen_width/5*4, screen_height/3*2+80),
             text="Jouer", fill="white", font=("Helvetica", 30, "italic"))
-        # self.start_button.place(x=screen_width/2-150, y=screen_height/3*2+100)
-        # self.exit_game_button = tk.Button(self.hs_canvas,
-        #                                   text='Quitter', width=40,
-        #                                   command=self.master.destroy)
-        # self.exit_game_button.place(x=screen_width/2-150, y=screen_height/3*2+125)
         self.exit_game_button = self.hs_canvas.create_text(
             (screen_width / 5 * 4, screen_height / 3 * 2 + 135),
             text="Quitter le jeu", fill="white", font=("Helvetica", 30, "italic")
@@ -55,16 +48,13 @@ class HomeScreen:
         self.hs_canvas.tag_bind(self.exit_game_button, "<Leave>", lambda x: self.exit_text(self.exit_game_button))
         self.hs_canvas.grid_propagate(False)
         self.hs_canvas.grid()
-        # pygame.mixer.music.load("./son/DARKNESS.mp3")
         music_path = "son/musiques/HomeScreenLoopMusic.mp3"
         homescreen_music = pygame.mixer.Sound(music_path)
         music.play(homescreen_music, loops=-1)
-        # pygame.mixer.music.load()
-        # pygame.mixer.music.play(-1)
+        # self.master.exit_game = self.exit_game
         self.master.mainloop()
 
     def hover_text(self, tag_or_id):
-        # print(self.hs_canvas.itemconfigure(tag_or_id))
         self.hs_canvas.itemconfigure(tag_or_id, fill="gray")
 
     def exit_text(self, tag_or_id):
@@ -72,6 +62,7 @@ class HomeScreen:
 
     def exit_game(self, event=None):
         self.master.destroy()
+        sys.exit()
 
     def apply_hs_canvas_image(self):
         """
@@ -80,16 +71,12 @@ class HomeScreen:
             - position
             - titre
         """
-        # print(self.HS_image)
         title_height = self.master.winfo_screenheight()/4
         title_width = self.master.winfo_screenwidth()/2
         center_height = self.master.winfo_screenheight()/2
         center_width = self.master.winfo_screenwidth()/2
         self.master.home_s = self.hs_canvas
         self.hs_canvas.create_image(center_width, center_height, image=self.hs_image)
-        # self.label = tk.Label(self.master, image=horror_font)
-        # self.label.place(x=title_width-220, y=title_height)
-        # print(self.master.home_s.itemconfigure(horror_font))
 
     def intro(self):
         """
@@ -196,10 +183,7 @@ class App(tk.Tk):
         self.dots = ConnectDotsGame(self)
         self.fade_in = FadeIn(self)
 
-        # obtenir coords souris
-        # self.bind("<Motion>", self.motion)
-
-        # HS widget
+        # HS canvas
         self.home_s = None
 
     def check_game_events(self, event=None):
@@ -216,10 +200,7 @@ class App(tk.Tk):
         """
         self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"] = event.x, event.y
         # print(self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"])
-        # print(self.game_e_handler.prev_and_current_room)
         self.check_game_events()
-        # utile pour le débug pour les conditions sur classe GameEventHandler
-        # print(self.rect.get_key_val_canvas_obj("app_background", "image"))
 
 
 class View(tk.Frame):
@@ -253,8 +234,6 @@ class View(tk.Frame):
         Ouvre le
         """
         self.master.rect.open_album()
-        # self.master.dial.create_frame()
-        # print("STILL THERE")
 
 
 class Control:
@@ -273,6 +252,14 @@ class Control:
         self.master.bind("<d>", self.change_room_right)  # aller à droite
         self.master.bind("<s>", self.remove_closeup) # enlève close-up
         self.master.bind("<Button-2>", self.see_album)  # button 2 => mid click
+        self.master.bind("<q>", self.exit_game)  # quitte programme
+
+    def exit_game(self, event=None):
+        """
+        Mieux d'utiliser exit_game de class HomeScreen
+            - problème: ne termine pas complètement python (arrière-plan)
+        """
+        os._exit(0)
 
     def change_room_left(self, event=None):
         """
@@ -388,7 +375,8 @@ class CanvasHandler(tk.Frame):
                                                                 self.master.winfo_screenheight()/(144/115),
                                                                 image=self.master.camera,
                                                                 tag="camera_click")
-        # print(self.canvas.itemconfigure(self.clickable_camera_button))
+        self.canvas.tag_bind(self.clickable_camera_button,
+                             "<Button-1>", self.take_camera)
         self.is_hover_message_running = False
         # messages intéractions
         self.tool_tip_cam = HoverMessage(self.canvas, self.clickable_camera_button)
@@ -411,9 +399,6 @@ class CanvasHandler(tk.Frame):
                                          "[Click gauche] pour regarder les livres")
         self.open_family_book = HoverMessRelPos(self.master, self.canvas,
                                                 "[Click gauche] pour prendre le livre")
-        self.canvas.tag_bind(self.clickable_camera_button,
-                             "<Button-1>", self.take_camera)
-        # print(self.master.camera.width(), self.master.camera.height())
         self.camera = self.canvas.create_image(self.master.winfo_screenwidth()/2,
                                                self.master.winfo_screenheight()/1.5,
                                                image=self.master.camera
@@ -433,18 +418,14 @@ class CanvasHandler(tk.Frame):
         self.canvas.tag_bind(self.change_page_to_right_arrow,
                              "<Button-1>", self.change_page_right)
         self.images_pic_reference = []
-        # self.canvas.itemconfigure(self.background, state="hidden")
         self.canvas.itemconfigure("camera_click", state="hidden")
         self.canvas.itemconfigure(self.album, state="hidden")
         self.canvas.itemconfigure(self.camera, state="hidden")
-        # self.canvas.itemconfigure(self.background, state="hidden")
-        # self.dialog_box = open_image_setup_file("./images/dialog/NB_BlackBarDialogBoxShrunk.png")
         self.dialog_box = open_image_setup_file("./images/intro/NB_RedBarTest.png")
         self.page_num = 1
         self.photos_list = []
         self.photos_list_updated = [] # sert à check si la liste a changé
         self.segmented_4_indexes_photos_list_updated = []
-        # print(self.canvas.itemconfigure(self.album).get("state")[4])
         self.sbarv = tk.Scrollbar(self, orient=VERTICAL)
         self.sbarh = tk.Scrollbar(self, orient=HORIZONTAL)
         self.sbarv.config(command=self.canvas.yview)
@@ -456,14 +437,6 @@ class CanvasHandler(tk.Frame):
         self.canvas.grid(row=0,column=0,sticky="NSEW")
         self.sbarv.grid(row=0,column=1,stick="NS")
         self.sbarh.grid(row=1,column=0,sticky="EW")
-
-        # # click droit
-        # self.canvas.bind("<Button-3>", self.on_button_press)
-        # self.canvas.bind("<B3-Motion>", self.on_move_press)
-        # self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
-        # self.canvas.bind("<q>", self.change_page_left)
-        # self.canvas.bind("<e>", self.change_page_right)
-
         self.rect = None
         self.start_x = None
         self.start_y = None
@@ -475,7 +448,6 @@ class CanvasHandler(tk.Frame):
         Enregistre coords initial souris
             - si pas de rect (cadre photo), création avec coords initial
         """
-        #
         self.start_x = self.canvas.canvasx(event.x)
         self.start_y = self.canvas.canvasy(event.y)
         # create rectangle if not yet exist
@@ -502,11 +474,9 @@ class CanvasHandler(tk.Frame):
             - delete cadre photo
             - self.rect = None
         """
-        # print("FINALLY")
         cur_x = self.canvas.canvasx(event.x)
         cur_y = self.canvas.canvasy(event.y)
         self.place_photo_album_list((self.start_x, self.start_y, cur_x, cur_y))
-        # print(f"coin haut gauche: {self.start_x, self.start_y}, coin bas droit: {cur_x, cur_y}.")
         self.master.game_e_handler.check_start_x = self.start_x
         self.master.game_e_handler.check_start_y = self.start_y
         self.master.game_e_handler.check_end_x = cur_x
@@ -514,15 +484,11 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.rect)
         self.rect = None
         self.master.check_game_events()
-        # print("ehriuheruheurheurheuruer")
-        # print(f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
         # reset valeur check
         self.master.game_e_handler.check_start_x = 0
         self.master.game_e_handler.check_end_x = 0
         self.master.game_e_handler.check_start_y = 0
         self.master.game_e_handler.check_end_y = 0
-        # print(
-        # f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
 
     def hightlight_items(self, image, event=None):
         """
@@ -537,9 +503,7 @@ class CanvasHandler(tk.Frame):
         Intéraction caméra-joueur
             - image caméra = détruise
             - caméra "de base" --> normal
-            -
         """
-        # print(self.canvas.gettags("camera_click"))
         self.canvas.delete(self.clickable_camera_button)
         self.canvas.itemconfigure(self.camera, state="normal")
         self.master.game_e_handler.camera_deleted = True
@@ -550,8 +514,6 @@ class CanvasHandler(tk.Frame):
         self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
         self.tool_tip_cam.hidetip()
         self.master.check_game_events()
-        # self.master.check_game_events()
-        # print(self.canvas.gettags("camera_click"))
 
     def open_album(self, event=None):
         """
