@@ -251,7 +251,7 @@ class GameEventHandler:
             self.master.rect.changing_state_canvas_item(self.master.rect.camera, "hidden")
             if not self.are_drawings_discovered:
                 self.are_drawings_discovered = True
-                # self.master.rect.create_dialog_box("dessins", "black")
+                self.master.rect.create_dialog_box("dessins", "black")
             if not self.are_dots_drawn and not self.has_monster_appeared:
                 self.master.dots.start_game(self.img_list[self.index_dot])
                 self.master.rect.canvas.bind("<Button-1>",

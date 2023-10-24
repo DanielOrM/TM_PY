@@ -77,13 +77,11 @@ class DialogBoxes:
                 if all(character == "." for character in list(chosen_text[self.index_line+1])) \
                         and chosen_text[self.index_line] != "":
                     # time.sleep(1.15)
-                    self.master.after(700, self.reset_prev_text)
-                    print("test")
+                    self.master.after(1150, self.reset_prev_text)
                     # self.prev_text = ""
                 if self.master.rect.canvas.itemcget(tag_or_id, "text") == " ...":
                     # time.sleep(0.9)
                     self.master.after(800, self.reset_prev_text)
-                    print("test")
                     # self.prev_text = ""
                 # clear le texte s'il y a trop de caractères
                 if len(self.master.rect.canvas.itemcget(tag_or_id, "text")) > 50:
