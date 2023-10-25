@@ -45,8 +45,8 @@ class DialogBoxes:
             new_text = str(self.prev_text+new_text)
         self.master.rect.canvas.itemconfigure(tag_or_id, text=new_text)
         self.prev_text = new_text
-        # appelle func text_iteration après 80 ms
-        self.master.after(80, self.text_iteration, tag_or_id, chosen_text)
+        # appelle func text_iteration après 60 ms
+        self.master.after(60, self.text_iteration, tag_or_id, chosen_text)
 
     def text_iteration(self, tag_or_id, chosen_text):
         """
@@ -66,8 +66,8 @@ class DialogBoxes:
                     self.index_line = 0
                     self.index_letter = 0
                     self.prev_text = ""
-                    # attends 1,5s avant clear texte pour que joueur puisse lire
-                    self.master.after(1500,
+                    # attends 1,2s avant clear texte pour que joueur puisse lire
+                    self.master.after(1200,
                                       self.master.rect.canvas.itemconfigure(tag_or_id, text=""))
                     self.master.check_game_events() # vérifie events jeu à la fin du dialogue
                 else:
@@ -76,21 +76,22 @@ class DialogBoxes:
             except IndexError:
                 if all(character == "." for character in list(chosen_text[self.index_line+1])) \
                         and chosen_text[self.index_line] != "":
-                    print("STOP")
-                    time.sleep(1.15)
-                    print("RECOMMENCE")
-                    self.prev_text = ""
+                    # time.sleep(1.15)
+                    self.master.after(1150, self.reset_prev_text)
+                    # self.prev_text = ""
                 if self.master.rect.canvas.itemcget(tag_or_id, "text") == " ...":
-                    time.sleep(0.9)
-                    self.prev_text = ""
+                    # time.sleep(0.9)
+                    self.master.after(800, self.reset_prev_text)
+                    # self.prev_text = ""
                 # clear le texte s'il y a trop de caractères
                 if len(self.master.rect.canvas.itemcget(tag_or_id, "text")) > 50:
                     self.prev_text = ""
                 self.index_line += 1
                 self.index_letter = 0
                 self.prev_text += " "
-                time.sleep(0.5)
-                self.text_iteration(tag_or_id, chosen_text)
+                # time.sleep(0.5)
+                self.master.after(900, self.text_iteration, tag_or_id, chosen_text)
+                # self.text_iteration(tag_or_id, chosen_text)
         except IndexError:
             return
 
@@ -99,6 +100,12 @@ class DialogBoxes:
         Choisit quel texte à return
         """
         return self.text.get(chosen_moment)
+
+    def reset_prev_text(self):
+        """
+        Assigne attribut "self.prev_text" à une string vide
+        """
+        self.prev_text = ""
 
     def stop(self):
         """

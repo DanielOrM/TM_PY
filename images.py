@@ -12,13 +12,13 @@ def open_image_setup_file(file_location):
     return image
 
 
-def bg_image_setup(file_location):
+def bg_image_setup(file_location, name):
     """
     Return image resize au plein écran [Image/ImageTk]
     """
     # bg_image = PhotoImage(file=file_location)
     bg_image_temp = Image.open(file_location)
-    bg_image = ImageTk.PhotoImage(bg_image_temp.resize((screen_width, screen_height)))
+    bg_image = ImageTk.PhotoImage(bg_image_temp.resize((screen_width, screen_height)), name=name)
     return bg_image
 
 

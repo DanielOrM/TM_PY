@@ -1,6 +1,8 @@
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 import tkinter as tk
 from tkinter import VERTICAL, HORIZONTAL
+import sys
+import os
 import pygame
 import threading
 from threading import Thread
@@ -25,24 +27,15 @@ class HomeScreen:
     """
     def __init__(self, master):
         self.master = master
-        # super().__init__(master)
-        # self.config(background="black")
         # configure de grid pour le reste du code
         self.master.grid_rowconfigure(0, weight=1)  # For row 0
         self.master.grid_columnconfigure(0, weight=1)  # For column 0
-        # self.hs_image = bg_image_setup("./images/homescreen/PA_homescreenTest2.png")
-        self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png")
+        self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png", name="écran d'accueil")
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
-        # self.start_button = tk.Button(self.hs_canvas, text='Jouer', width=40, command=self.intro)
         self.start_button = self.hs_canvas.create_text(
             (screen_width/5*4, screen_height/3*2+80),
             text="Jouer", fill="white", font=("Helvetica", 30, "italic"))
-        # self.start_button.place(x=screen_width/2-150, y=screen_height/3*2+100)
-        # self.exit_game_button = tk.Button(self.hs_canvas,
-        #                                   text='Quitter', width=40,
-        #                                   command=self.master.destroy)
-        # self.exit_game_button.place(x=screen_width/2-150, y=screen_height/3*2+125)
         self.exit_game_button = self.hs_canvas.create_text(
             (screen_width / 5 * 4, screen_height / 3 * 2 + 135),
             text="Quitter le jeu", fill="white", font=("Helvetica", 30, "italic")
@@ -55,16 +48,13 @@ class HomeScreen:
         self.hs_canvas.tag_bind(self.exit_game_button, "<Leave>", lambda x: self.exit_text(self.exit_game_button))
         self.hs_canvas.grid_propagate(False)
         self.hs_canvas.grid()
-        # pygame.mixer.music.load("./son/DARKNESS.mp3")
         music_path = "son/musiques/HomeScreenLoopMusic.mp3"
         homescreen_music = pygame.mixer.Sound(music_path)
         music.play(homescreen_music, loops=-1)
-        # pygame.mixer.music.load()
-        # pygame.mixer.music.play(-1)
+        # self.master.exit_game = self.exit_game
         self.master.mainloop()
 
     def hover_text(self, tag_or_id):
-        # print(self.hs_canvas.itemconfigure(tag_or_id))
         self.hs_canvas.itemconfigure(tag_or_id, fill="gray")
 
     def exit_text(self, tag_or_id):
@@ -72,6 +62,7 @@ class HomeScreen:
 
     def exit_game(self, event=None):
         self.master.destroy()
+        sys.exit()
 
     def apply_hs_canvas_image(self):
         """
@@ -80,16 +71,12 @@ class HomeScreen:
             - position
             - titre
         """
-        # print(self.HS_image)
         title_height = self.master.winfo_screenheight()/4
         title_width = self.master.winfo_screenwidth()/2
         center_height = self.master.winfo_screenheight()/2
         center_width = self.master.winfo_screenwidth()/2
         self.master.home_s = self.hs_canvas
         self.hs_canvas.create_image(center_width, center_height, image=self.hs_image)
-        # self.label = tk.Label(self.master, image=horror_font)
-        # self.label.place(x=title_width-220, y=title_height)
-        # print(self.master.home_s.itemconfigure(horror_font))
 
     def intro(self):
         """
@@ -134,31 +121,33 @@ class App(tk.Tk):
             "room2": "./images/rooms/real_rooms/library/PA_Bibliothèque.png"
         }
         self.pages = {
-            "room_2": bg_image_setup(self.pages_file_location.get("room_2")),
-            "room_1": bg_image_setup(self.pages_file_location.get("room_1")),
-            "room_0": bg_image_setup(self.pages_file_location.get("room_0")),
-            "room1": bg_image_setup(self.pages_file_location.get("room1")),
-            "room2": bg_image_setup(self.pages_file_location.get("room2"))
+            "room_2": bg_image_setup(self.pages_file_location.get("room_2"), name="salle de bain"),
+            "room_1": bg_image_setup(self.pages_file_location.get("room_1"), name="cuisine normale"),
+            "room_0": bg_image_setup(self.pages_file_location.get("room_0"), name="pièce porte"),
+            "room1": bg_image_setup(self.pages_file_location.get("room1"), name="pièce dessin"),
+            "room2": bg_image_setup(self.pages_file_location.get("room2"), name="bibliothèque")
         }
         # cuisine
         self.kitchen_closeup = {
             "oranges":
-                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineDésordreZoom.png"),
+                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineDésordreZoom.png",
+                               name="close-up oranges"),
             "drawer":
-                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineTiroir.png")
+                bg_image_setup("./images/rooms/changed_rooms/kitchen/PA_CH_CuisineTiroir.png", name="tiroir cuisine")
         }
         # chambre dessin
         self.desktop_closeup = {
             "desktop":
-                bg_image_setup("./images/rooms/real_rooms/player_room/PA_CarnetDessinZoom.png"),
+                bg_image_setup("./images/rooms/real_rooms/player_room/PA_CarnetDessinZoom.png", name="close-up bureau"),
             "draw":
-                bg_image_setup("./images/rooms/real_rooms/player_room/PA_PapierDessin.png"),
+                bg_image_setup("./images/rooms/real_rooms/player_room/PA_PapierDessin.png", name="dessin"),
         }
         # bibliothèque
         self.library_closeup = {
-            "see_books": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreZoom.png"),
-            "family_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png"),
-            "read_fam_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png")
+            "see_books": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreZoom.png",
+                                        name="livres"),
+            "read_fam_book": bg_image_setup("./images/rooms/real_rooms/library/PA_LivreTrouvé.png",
+                                            name="lire famille livre")
         }
         self.camera = open_image_setup_file("./images/player/PA_NB_PhotoCameraFromBehind.png")\
             .subsample(2,2) # image caméra 2 fois plus petite
@@ -167,7 +156,7 @@ class App(tk.Tk):
             .subsample(16, 16)
         self.right_arrow = open_image_setup_file("./images/player/red_arrow_right.png")\
             .subsample(16, 16)
-        self.black_background = bg_image_setup("images/intro/NB_BlackBox.png")
+        self.black_background = bg_image_setup("images/intro/NB_BlackBox.png", name="écran noir intro")
         # dimensions écran
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
@@ -194,10 +183,7 @@ class App(tk.Tk):
         self.dots = ConnectDotsGame(self)
         self.fade_in = FadeIn(self)
 
-        # obtenir coords souris
-        # self.bind("<Motion>", self.motion)
-
-        # HS widget
+        # HS canvas
         self.home_s = None
 
     def check_game_events(self, event=None):
@@ -214,10 +200,7 @@ class App(tk.Tk):
         """
         self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"] = event.x, event.y
         # print(self.game_e_handler.rel_pos["x"], self.game_e_handler.rel_pos["y"])
-        # print(self.game_e_handler.prev_and_current_room)
         self.check_game_events()
-        # utile pour le débug pour les conditions sur classe GameEventHandler
-        # print(self.rect.get_key_val_canvas_obj("app_background", "image"))
 
 
 class View(tk.Frame):
@@ -251,8 +234,6 @@ class View(tk.Frame):
         Ouvre le
         """
         self.master.rect.open_album()
-        # self.master.dial.create_frame()
-        # print("STILL THERE")
 
 
 class Control:
@@ -271,6 +252,14 @@ class Control:
         self.master.bind("<d>", self.change_room_right)  # aller à droite
         self.master.bind("<s>", self.remove_closeup) # enlève close-up
         self.master.bind("<Button-2>", self.see_album)  # button 2 => mid click
+        self.master.bind("<q>", self.exit_game)  # quitte programme
+
+    def exit_game(self, event=None):
+        """
+        Mieux d'utiliser exit_game de class HomeScreen
+            - problème: ne termine pas complètement python (arrière-plan)
+        """
+        os._exit(0)
 
     def change_room_left(self, event=None):
         """
@@ -304,7 +293,8 @@ class Control:
             - change background avec prev_room (list dans game_e_handler)
         """
         current_room = self.master.game_e_handler.get_current_room_img()
-        if current_room in {"pyimage6", "pyimage7", "pyimage8", "pyimage9", "pyimage10", "pyimage11"}:
+        if current_room in {"close-up oranges", "tiroir cuisine", "close-up bureau", "dessin",
+                            "livres", "lire famille livre"}:
             self.master.rect.change_background("app_background",
                                                self.master.pages.get(self.master.pages_name[self.master.index]))
 
@@ -385,7 +375,8 @@ class CanvasHandler(tk.Frame):
                                                                 self.master.winfo_screenheight()/(144/115),
                                                                 image=self.master.camera,
                                                                 tag="camera_click")
-        # print(self.canvas.itemconfigure(self.clickable_camera_button))
+        self.canvas.tag_bind(self.clickable_camera_button,
+                             "<Button-1>", self.take_camera)
         self.is_hover_message_running = False
         # messages intéractions
         self.tool_tip_cam = HoverMessage(self.canvas, self.clickable_camera_button)
@@ -408,11 +399,6 @@ class CanvasHandler(tk.Frame):
                                          "[Click gauche] pour regarder les livres")
         self.open_family_book = HoverMessRelPos(self.master, self.canvas,
                                                 "[Click gauche] pour prendre le livre")
-        self.read_fam_book = HoverMessRelPos(self.master, self.canvas,
-                                             "[E] pour lire le livre")
-        self.canvas.tag_bind(self.clickable_camera_button,
-                             "<Button-1>", self.take_camera)
-        # print(self.master.camera.width(), self.master.camera.height())
         self.camera = self.canvas.create_image(self.master.winfo_screenwidth()/2,
                                                self.master.winfo_screenheight()/1.5,
                                                image=self.master.camera
@@ -432,18 +418,14 @@ class CanvasHandler(tk.Frame):
         self.canvas.tag_bind(self.change_page_to_right_arrow,
                              "<Button-1>", self.change_page_right)
         self.images_pic_reference = []
-        # self.canvas.itemconfigure(self.background, state="hidden")
         self.canvas.itemconfigure("camera_click", state="hidden")
         self.canvas.itemconfigure(self.album, state="hidden")
         self.canvas.itemconfigure(self.camera, state="hidden")
-        # self.canvas.itemconfigure(self.background, state="hidden")
-        # self.dialog_box = open_image_setup_file("./images/dialog/NB_BlackBarDialogBoxShrunk.png")
         self.dialog_box = open_image_setup_file("./images/intro/NB_RedBarTest.png")
         self.page_num = 1
         self.photos_list = []
         self.photos_list_updated = [] # sert à check si la liste a changé
         self.segmented_4_indexes_photos_list_updated = []
-        # print(self.canvas.itemconfigure(self.album).get("state")[4])
         self.sbarv = tk.Scrollbar(self, orient=VERTICAL)
         self.sbarh = tk.Scrollbar(self, orient=HORIZONTAL)
         self.sbarv.config(command=self.canvas.yview)
@@ -455,14 +437,6 @@ class CanvasHandler(tk.Frame):
         self.canvas.grid(row=0,column=0,sticky="NSEW")
         self.sbarv.grid(row=0,column=1,stick="NS")
         self.sbarh.grid(row=1,column=0,sticky="EW")
-
-        # # click droit
-        # self.canvas.bind("<Button-3>", self.on_button_press)
-        # self.canvas.bind("<B3-Motion>", self.on_move_press)
-        # self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
-        # self.canvas.bind("<q>", self.change_page_left)
-        # self.canvas.bind("<e>", self.change_page_right)
-
         self.rect = None
         self.start_x = None
         self.start_y = None
@@ -474,7 +448,6 @@ class CanvasHandler(tk.Frame):
         Enregistre coords initial souris
             - si pas de rect (cadre photo), création avec coords initial
         """
-        #
         self.start_x = self.canvas.canvasx(event.x)
         self.start_y = self.canvas.canvasy(event.y)
         # create rectangle if not yet exist
@@ -501,11 +474,9 @@ class CanvasHandler(tk.Frame):
             - delete cadre photo
             - self.rect = None
         """
-        # print("FINALLY")
         cur_x = self.canvas.canvasx(event.x)
         cur_y = self.canvas.canvasy(event.y)
         self.place_photo_album_list((self.start_x, self.start_y, cur_x, cur_y))
-        # print(f"coin haut gauche: {self.start_x, self.start_y}, coin bas droit: {cur_x, cur_y}.")
         self.master.game_e_handler.check_start_x = self.start_x
         self.master.game_e_handler.check_start_y = self.start_y
         self.master.game_e_handler.check_end_x = cur_x
@@ -513,15 +484,11 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.rect)
         self.rect = None
         self.master.check_game_events()
-        # print("ehriuheruheurheurheuruer")
-        # print(f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
         # reset valeur check
         self.master.game_e_handler.check_start_x = 0
         self.master.game_e_handler.check_end_x = 0
         self.master.game_e_handler.check_start_y = 0
         self.master.game_e_handler.check_end_y = 0
-        # print(
-        # f"coin haut gauche: {self.master.game_e_handler.check_start_x, self.master.game_e_handler.check_start_y}, coin bas droit: {self.master.game_e_handler.check_end_x, self.master.game_e_handler.check_end_y}.")
 
     def hightlight_items(self, image, event=None):
         """
@@ -536,9 +503,7 @@ class CanvasHandler(tk.Frame):
         Intéraction caméra-joueur
             - image caméra = détruise
             - caméra "de base" --> normal
-            -
         """
-        # print(self.canvas.gettags("camera_click"))
         self.canvas.delete(self.clickable_camera_button)
         self.canvas.itemconfigure(self.camera, state="normal")
         self.master.game_e_handler.camera_deleted = True
@@ -549,8 +514,6 @@ class CanvasHandler(tk.Frame):
         self.canvas.bind("<ButtonRelease-3>", self.on_button_released)
         self.tool_tip_cam.hidetip()
         self.master.check_game_events()
-        # self.master.check_game_events()
-        # print(self.canvas.gettags("camera_click"))
 
     def open_album(self, event=None):
         """
@@ -562,27 +525,17 @@ class CanvasHandler(tk.Frame):
                 - montre images page demandée
         """
         state = self.canvas.itemcget(self.album, "state")
-        # print(state)
         if state == "hidden":
-            # self.canvas.itemconfigure(self.album, state="normal")
-            # self.canvas.lift(self.album, self.background)
             self.changing_state_canvas_item(self.album, "normal")
             self.changing_state_canvas_item(self.change_page_to_left_arrow, "normal")
             self.changing_state_canvas_item(self.change_page_to_right_arrow, "normal")
-            # print(state)
-            # self.canvas.lift(self.album)
             self.is_album_photos_updated()
             self.show_pics_by_page_num(self.page_num)
-            # print("I am visible!!!!!")
         elif state == "normal":
-            # self.canvas.itemconfigure(self.album, state="hidden")
             self.changing_state_canvas_item(self.album, "hidden")
             self.changing_state_canvas_item(self.change_page_to_left_arrow, "hidden")
             self.changing_state_canvas_item(self.change_page_to_right_arrow, "hidden")
-            # print(state)
-            # self.canvas.lower(self.album)
             self.hide_photos_album()
-            # print("shhhh I am hidden...")
 
     def changing_state_canvas_item(self, canvas_item_id, new_state):
         """
@@ -608,11 +561,7 @@ class CanvasHandler(tk.Frame):
         # ajoute photo prise dans liste des photos
         image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
         image_to_crop = image_to_crop_temp.resize((screen_width,screen_height)).convert("RGBA")
-        # resize pour que photo ait assez de place dans album
-        # print(screen_width/8)
-        # print(screen_height/16)
         pic_size_in_album = (int(screen_width/8), int(screen_height/7))
-        # print(pic_size_in_album)
         pic_taken_temp = image_to_crop.crop(crop_dimensions).resize(pic_size_in_album)
         pic_taken = ImageTk.PhotoImage(pic_taken_temp, master=self.master)
         self.images_pic_reference.append(pic_taken)
@@ -713,15 +662,11 @@ class CanvasHandler(tk.Frame):
         """
         print(f"This is page {page_num}")
         index_segmented_list = page_num-1
-        # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
         if len(self.segmented_4_indexes_photos_list_updated) != 0:
             try:
                 current_pics_on_album = self.segmented_4_indexes_photos_list_updated[index_segmented_list]
                 for index, pic in enumerate(current_pics_on_album):
-                    # print("HEY FOR LOOP")
-                    # print(pic)
                     print(pic, index)
-                    # print(self.canvas.itemconfigure(pic), index)
                     if index == 0:
                         print("premier")
                         relx = int(screen_width/2.36)
@@ -746,18 +691,11 @@ class CanvasHandler(tk.Frame):
                     print(self.canvas.itemcget(pic, "state"))
             except IndexError:
                 print("Il n'y a pas encore de nouvelles images...")
-                # state_key = self.canvas.itemconfigure(pic)["state"]
-                # self.canvas.itemconfigure(self.canvas.itemconfigure(pic), state="normal")
-                # print(self.canvas.itemconfigure(pic))
-                # print(self.segmented_4_indexes_photos_list_updated)
-                # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
-            # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
 
     def hide_photos_album(self, event=None):
         """
         Photos présentes sur les 2 pages (normal --> hidden)
         """
-        # print("J'étais normal et maintenant je suis invisible")
         index_list = self.page_num-1
         print(index_list)
         if len(self.segmented_4_indexes_photos_list_updated) != 0:
@@ -773,12 +711,8 @@ class CanvasHandler(tk.Frame):
             - crée sur demande bar dialogue + texte à display selon actions/moments joueur
             - détruit bar dialogue + texte à display après fin texte
         """
-        # position black_dialog_bar
+        # position texte
         dialog_position = (self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.35)
-        # print(dialog_position)
-        # crée barre noir dialogue
-        black_dialog_bar = self.canvas.create_image(dialog_position[0], dialog_position[1],
-                                                    image=self.dialog_box)
         # choisit texte à display selon action/moment joueur
         chosen_text = self.master.dial.dialog_to_use(chosen_moment)
         # texte = positionné au centre de black_dialog_bar
@@ -786,18 +720,13 @@ class CanvasHandler(tk.Frame):
             (dialog_position[0],self.master.winfo_screenheight()/1.25),
             text="", fill=color, font=("Helvetica", 15, "italic"))
         self.master.dial.typewritten_effect(dialog_text, chosen_text)
-        self.canvas.itemconfigure(black_dialog_bar, state="hidden")
 
 
-# if __name__ == "__main__":
-#     App().mainloop()
 
 def main():
     """
     Main func pour lancement programme(tkinter)
     """
-    # pygame.init()
-    # pygame.mixer.init()
     root = App()
     HomeScreen(root)
 
