@@ -1,9 +1,10 @@
 """Classe gérant tous les intéractions + event du jeu"""
+import threading
 import tkinter as tk
 from global_var import screen_height, screen_width
 from images import bg_image_setup
 from son.channels import pen_channel
-from son.random_sound_effects import play_sound_effect, set_interval
+from son.random_sound_effects import play_sound_effect, SetInterval
 from txt_story_reader import txt_story_reader, reset_story_reader
 
 
@@ -67,13 +68,13 @@ class GameEventHandler:
 
         # dots
         self.index_dot = 0
-        self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png",
-                         "./images/connect the dots/DotsCat.png",
-                         "./images/connect the dots/DotsWolfSide.png",
-                         "./images/connect the dots/DotsWerewolf.png",
-                         "./images/connect the dots/DotsInkAlien.png"
-                         ]
-        # self.img_list = ["./images/connect the dots/DotsInkAlien.png"]
+        # self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png",
+        #                  "./images/connect the dots/DotsCat.png",
+        #                  "./images/connect the dots/DotsWolfSide.png",
+        #                  "./images/connect the dots/DotsWerewolf.png",
+        #                  "./images/connect the dots/DotsInkAlien.png"
+        #                  ]
+        self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png"]
 
     def skip_intro(self):
         """
@@ -184,7 +185,7 @@ class GameEventHandler:
         elif current_room == "pièce porte":
             if not self.are_randm_sound_activated:
                 self.are_randm_sound_activated = True
-                set_interval(play_sound_effect, 300)
+                SetInterval(play_sound_effect, 300)
             # 1050, 1100
             x_l_tol = screen_width / (256 / 175)
             x_r_tol = screen_width / (384 / 275)
@@ -238,7 +239,8 @@ class GameEventHandler:
             if not self.is_drawing_book_discovered:
                 self.is_drawing_book_discovered = True
                 # self.master.rect.create_dialog_box("découverte_cahier_dessin")
-            if x_l_tol < self.rel_pos.get("x") < x_r_tol and y_l_tol < self.rel_pos.get("y") < y_r_tol:
+            if x_l_tol < self.rel_pos.get("x") < x_r_tol and y_l_tol < self.rel_pos.get("y") < y_r_tol and \
+                    not self.has_monster_appeared:
                 self.master.rect.draw.show_tip(self.rel_pos)
                 self.master.bind("<e>",
                                  lambda x: self.master.rect.
@@ -252,7 +254,7 @@ class GameEventHandler:
             if not self.are_drawings_discovered:
                 self.are_drawings_discovered = True
                 self.master.rect.create_dialog_box("dessins", "black")
-            if not self.are_dots_drawn and not self.has_monster_appeared:
+            if not self.are_dots_drawn:
                 self.master.dots.start_game(self.img_list[self.index_dot])
                 self.master.rect.canvas.bind("<Button-1>",
                                              lambda x: self.master.dots.get_x_y(self.rel_pos))

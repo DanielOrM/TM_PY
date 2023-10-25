@@ -28,8 +28,6 @@ class FadeTransition(tk.Label):
         self.current_step = 0
         self.fade_transition_ended = False
         self.is_walk_transition = False
-        # self.create_transition()
-        # self.new_color = None
 
     def create_transition(self, walk=False):
         """
@@ -40,9 +38,6 @@ class FadeTransition(tk.Label):
         self.grid(row=0, column=0, sticky="NSWE")
         # bruits de pas
         if walk:
-            print("marche...")
-            # pygame.mixer.music.load("son/actions jeu/bruits-pas-son.mp3")
-            # pygame.mixer.music.play(loops=0)
             walk_sound_path = "son/actions jeu/bruits-pas-son.mp3"
             walk_sound = pygame.mixer.Sound(walk_sound_path)
             walk_sound_channel.play(walk_sound)
@@ -78,8 +73,6 @@ class FadeTransition(tk.Label):
             if self.fade_transition_ended:
                 if self.is_walk_transition:
                     walk_sound_channel.stop()
-                    # pygame.mixer.music.stop()
-                    # pygame.mixer.music.unload()
                 self.master.check_game_events()
                 self.fade_transition_ended = False
 
@@ -91,13 +84,13 @@ class FadeIn:
         """
     def __init__(self, master):
         self.master = master
-        self.imgs = ["./images/connect the dots/ref/Fish.png",
-                     "./images/connect the dots/ref/ChatIRL.png",
-                     "./images/connect the dots/ref/WolfSide.png",
-                     "./images/connect the dots/ref/Werewolf.png",
-                     "./images/connect the dots/ref/RorschackInktAlien.png"
-                     ]
-        # self.imgs = ["./images/connect the dots/ref/RorschackInktAlien.png"]
+        # self.imgs = ["./images/connect the dots/ref/Fish.png",
+        #              "./images/connect the dots/ref/ChatIRL.png",
+        #              "./images/connect the dots/ref/WolfSide.png",
+        #              "./images/connect the dots/ref/Werewolf.png",
+        #              "./images/connect the dots/ref/RorschackInktAlien.png"
+        #              ]
+        self.imgs = ["./images/connect the dots/ref/Fish.png"]
         self.initial_img = None
         self.pic_list = []
         self.fadetime = 1  # temps nécessaire entre temp img (effet fade) en ms
@@ -105,7 +98,6 @@ class FadeIn:
         self.curstep = 0  # étape du fade in
 
     def initialiasize_pic(self):
-        print(self.master.game_e_handler.index_dot)
         im_file = open(self.imgs[self.master.game_e_handler.index_dot], mode="rb")
         current_im = Image.open(im_file)
         alpha = min(self.curstep * self.fadestep, 255)  # clamp to 255 maximum
@@ -134,7 +126,6 @@ class FadeIn:
         pic, alpha = self.initialiasize_pic()
         self.master.rect.canvas.itemconfigure(self.initial_img, image=pic)
         self.curstep += 2
-        print('fade in: %i' % alpha)
         if alpha == 255:
             self.curstep = 0
             self.master.after(1500, self.master.dots.next_drawing)

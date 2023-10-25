@@ -525,27 +525,17 @@ class CanvasHandler(tk.Frame):
                 - montre images page demandée
         """
         state = self.canvas.itemcget(self.album, "state")
-        # print(state)
         if state == "hidden":
-            # self.canvas.itemconfigure(self.album, state="normal")
-            # self.canvas.lift(self.album, self.background)
             self.changing_state_canvas_item(self.album, "normal")
             self.changing_state_canvas_item(self.change_page_to_left_arrow, "normal")
             self.changing_state_canvas_item(self.change_page_to_right_arrow, "normal")
-            # print(state)
-            # self.canvas.lift(self.album)
             self.is_album_photos_updated()
             self.show_pics_by_page_num(self.page_num)
-            # print("I am visible!!!!!")
         elif state == "normal":
-            # self.canvas.itemconfigure(self.album, state="hidden")
             self.changing_state_canvas_item(self.album, "hidden")
             self.changing_state_canvas_item(self.change_page_to_left_arrow, "hidden")
             self.changing_state_canvas_item(self.change_page_to_right_arrow, "hidden")
-            # print(state)
-            # self.canvas.lower(self.album)
             self.hide_photos_album()
-            # print("shhhh I am hidden...")
 
     def changing_state_canvas_item(self, canvas_item_id, new_state):
         """
@@ -571,11 +561,7 @@ class CanvasHandler(tk.Frame):
         # ajoute photo prise dans liste des photos
         image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
         image_to_crop = image_to_crop_temp.resize((screen_width,screen_height)).convert("RGBA")
-        # resize pour que photo ait assez de place dans album
-        # print(screen_width/8)
-        # print(screen_height/16)
         pic_size_in_album = (int(screen_width/8), int(screen_height/7))
-        # print(pic_size_in_album)
         pic_taken_temp = image_to_crop.crop(crop_dimensions).resize(pic_size_in_album)
         pic_taken = ImageTk.PhotoImage(pic_taken_temp, master=self.master)
         self.images_pic_reference.append(pic_taken)
@@ -676,15 +662,11 @@ class CanvasHandler(tk.Frame):
         """
         print(f"This is page {page_num}")
         index_segmented_list = page_num-1
-        # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
         if len(self.segmented_4_indexes_photos_list_updated) != 0:
             try:
                 current_pics_on_album = self.segmented_4_indexes_photos_list_updated[index_segmented_list]
                 for index, pic in enumerate(current_pics_on_album):
-                    # print("HEY FOR LOOP")
-                    # print(pic)
                     print(pic, index)
-                    # print(self.canvas.itemconfigure(pic), index)
                     if index == 0:
                         print("premier")
                         relx = int(screen_width/2.36)
@@ -709,18 +691,11 @@ class CanvasHandler(tk.Frame):
                     print(self.canvas.itemcget(pic, "state"))
             except IndexError:
                 print("Il n'y a pas encore de nouvelles images...")
-                # state_key = self.canvas.itemconfigure(pic)["state"]
-                # self.canvas.itemconfigure(self.canvas.itemconfigure(pic), state="normal")
-                # print(self.canvas.itemconfigure(pic))
-                # print(self.segmented_4_indexes_photos_list_updated)
-                # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
-            # print(self.segmented_4_indexes_photos_list_updated[index_segmented_list])
 
     def hide_photos_album(self, event=None):
         """
         Photos présentes sur les 2 pages (normal --> hidden)
         """
-        # print("J'étais normal et maintenant je suis invisible")
         index_list = self.page_num-1
         print(index_list)
         if len(self.segmented_4_indexes_photos_list_updated) != 0:
@@ -736,12 +711,8 @@ class CanvasHandler(tk.Frame):
             - crée sur demande bar dialogue + texte à display selon actions/moments joueur
             - détruit bar dialogue + texte à display après fin texte
         """
-        # position black_dialog_bar
+        # position texte
         dialog_position = (self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.35)
-        # print(dialog_position)
-        # crée barre noir dialogue
-        # black_dialog_bar = self.canvas.create_image(dialog_position[0], dialog_position[1],
-        #                                             image=self.dialog_box)
         # choisit texte à display selon action/moment joueur
         chosen_text = self.master.dial.dialog_to_use(chosen_moment)
         # texte = positionné au centre de black_dialog_bar
@@ -749,18 +720,13 @@ class CanvasHandler(tk.Frame):
             (dialog_position[0],self.master.winfo_screenheight()/1.25),
             text="", fill=color, font=("Helvetica", 15, "italic"))
         self.master.dial.typewritten_effect(dialog_text, chosen_text)
-        # self.canvas.itemconfigure(black_dialog_bar, state="hidden")
 
 
-# if __name__ == "__main__":
-#     App().mainloop()
 
 def main():
     """
     Main func pour lancement programme(tkinter)
     """
-    # pygame.init()
-    # pygame.mixer.init()
     root = App()
     HomeScreen(root)
 

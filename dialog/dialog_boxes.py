@@ -91,7 +91,6 @@ class DialogBoxes:
                 self.prev_text += " "
                 # time.sleep(0.5)
                 self.master.after(900, self.text_iteration, tag_or_id, chosen_text)
-                print("Après 5 sec")
                 # self.text_iteration(tag_or_id, chosen_text)
         except IndexError:
             return

@@ -9,7 +9,7 @@ import pygame
 from PIL import Image, ImageTk
 from global_var import screen_width, screen_height
 from images import bg_image_setup
-from son.random_sound_effects import set_interval
+from son.random_sound_effects import SetInterval
 from son.channels import pen_channel
 
 CENTER_POSITION_X = screen_width / 5
@@ -45,6 +45,10 @@ class ConnectDotsGame:
         self.monster_final_img = None
         self.monster_img_list = []
         self.monster_canvas_item = None
+        self.monster_smile_timer = None
+        self.t_w = None
+        self.t_b = None
+        self.w_b_delay = 0.2
 
         # écran noir
         self.black_background = bg_image_setup("./images/monster/BlackBackground.png", name="screamer écran noir")
@@ -63,7 +67,6 @@ class ConnectDotsGame:
             self.current_dots_img.append(img)
 
     def is_dot_hovered(self, dot):
-        # match x et y pos label
         """
         Check quel point a été hover pendant dessin
         - obtient numéro (text) à partir de tag dot
@@ -71,26 +74,19 @@ class ConnectDotsGame:
         num_dot_string = self.master.rect.canvas.itemcget(dot, "tag")
         num_dot = int(re.search(r'\d+', num_dot_string).group())
         if self.prev_dot_num == num_dot:
-            print("Lent!")
-            print(num_dot)
-            print(self.current_dot)
             return
         if self.current_dot != num_dot:
             if self.current_dots_img:
                 for img in self.current_line_img:
                     self.master.rect.canvas.delete(img)
             self.current_dot = 0
-            print("OUPS! Mauvais point!!!!!")
-            print(num_dot)
-            print(self.current_dot)
         else:
-            print(f"C'est le point {num_dot}")
+            # print(f"C'est le point {num_dot}")
             self.prev_dot_num = self.current_dot
             self.current_dot += 1
             if self.current_dot == len(self.current_dots_img):
-                print("Fini dessin!")
                 self.master.fade_in.fade_in()
-            print(f"Le prochain point est {self.current_dot}")
+            # print(f"Le prochain point est {self.current_dot}")
 
     def next_drawing(self):
         """
@@ -101,7 +97,6 @@ class ConnectDotsGame:
         if self.master.game_e_handler.index_dot < len(self.master.game_e_handler.img_list) - 1:
             self.master.game_e_handler.index_dot += 1
         else:
-            print("ATTENDRE NOUVELLE UPDATE")
             self.master.game_e_handler.has_monster_appeared = True
             self.reset()
             # monstre appari°
@@ -138,9 +133,8 @@ class ConnectDotsGame:
         x,y quand "paint" activé
         """
         self.lastx, self.lasty = mouse_position.get("x"), mouse_position.get("y")
-        # self.highlightNext()
 
-    def run_scheduled_task(self):
+    def check_point_delay(self):
         """
         Évite de recommencer à chaque fois (call func pour point plus d'une fois)
         """
@@ -174,11 +168,10 @@ class ConnectDotsGame:
         self.lastx, self.lasty = mouse_position.get("x"), mouse_position.get("y")
         closest_canvas_items = self.master.rect.canvas. \
             find_overlapping(self.lastx, self.lasty, x, y)
-        print(closest_canvas_items)
         if len(closest_canvas_items) == 3 and not self.dot_hovering:
             dot_id = closest_canvas_items[1]
             self.is_dot_hovered(dot_id)
-            self.run_scheduled_task()
+            self.check_point_delay()
             self.dot_hovering = True
 
     def reset(self):
@@ -233,12 +226,40 @@ class ConnectDotsGame:
     def screamer(self):
         """
         Appari° monstre, zoom avec délai
-        """""
-        w = self.master.rect.change_background("app_background", self.white_background)
-        t_w = threading.Timer(0.2, w)
-        t_b = threading.Timer(0.2, self.master.rect.change_background("app_background"), self.black_background)
-        t_b.start()
-        t_w.start()
+        """
+        self.all_black_and_monster()
+        self.epileptic_background(self.w_b_delay)  # changement noir/blanc chaque 0.1s
+        remove_epileptic_bg_timer = threading.Timer(3, self.remove_epileptic_bg)  # pendant 3s
+        remove_epileptic_bg_timer.start()
+
+    def all_white(self):
+        self.master.rect.change_background("app_background", self.white_background)
+        self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "normal")
+
+    def all_black_and_monster(self):
+        self.master.rect.change_background("app_background", self.black_background)
+        self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "hidden")
+
+    def epileptic_background(self, sec):
+        white_timer = threading.Timer(sec, self.white_inter)
+        white_timer.start()
+        black_and_monster_timer = threading.Timer(sec*2, self.black_monster_inter)
+        black_and_monster_timer.start()
+
+    def white_inter(self):
+        self.all_white()
+        self.t_w = SetInterval(self.all_white, self.w_b_delay*2)
+
+    def black_monster_inter(self):
+        self.all_black_and_monster()
+        self.t_b = SetInterval(self.all_black_and_monster, self.w_b_delay*2)
+
+    def remove_epileptic_bg(self):
+        self.t_w.cancel()
+        self.t_b.cancel()
+        self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "hidden")
+        self.master.rect.change_background("app_background", "pièce dessin")
+        self.master.game_e_handler.has_monster_appeared = True
 
     def activate_monster_smile(self):
         """
@@ -257,7 +278,7 @@ class ConnectDotsGame:
         print(panel)
         self.monster_canvas_item = panel
         self.monster_img_list.append(panel)
-        set_interval(self.monster_resize, 0.2)
+        self.monster_smile_timer = SetInterval(self.monster_resize, 0.2)
 
     def monster_resize(self):
         """
@@ -266,14 +287,12 @@ class ConnectDotsGame:
         """
         print("scaling monster img")
         pic_width, pic_height = self.monster_final_img.width(), self.monster_final_img.height()
-        pic_width_tenth, pic_height_tenth = int(pic_width/10), int(pic_height/10)
+        pic_width_tenth, pic_height_tenth = int(pic_width / 10), int(pic_height / 10)
         if pic_height >= screen_height:
-            print("BOO")
-            # self.label_monster.grid_remove()
-            self.master.rect.canvas.delete(self.monster_canvas_item)
-            self.master.rect.change_background("app_background", self.black_background)
-            return
-        new_image_resized = self.monster_img.resize\
-            ((pic_width+pic_width_tenth, pic_height+pic_height_tenth))
+            print("")
+            self.monster_smile_timer.cancel()
+            self.screamer()
+        new_image_resized = self.monster_img.resize \
+            ((pic_width + pic_width_tenth, pic_height + pic_height_tenth))
         self.monster_final_img = ImageTk.PhotoImage(image=new_image_resized)
         self.master.rect.canvas.itemconfigure(self.monster_canvas_item, image=self.monster_final_img)
