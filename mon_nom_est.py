@@ -15,7 +15,7 @@ from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
 from connect_dots import ConnectDotsGame
 from fonts import RenderFont
-from son.channels import music
+from son.channels import music, monster_music
 
 
 class HomeScreen:
@@ -28,8 +28,8 @@ class HomeScreen:
     def __init__(self, master):
         self.master = master
         # configure de grid pour le reste du code
-        self.master.grid_rowconfigure(0, weight=1)  # For row 0
-        self.master.grid_columnconfigure(0, weight=1)  # For column 0
+        self.master.grid_rowconfigure(0, weight=1)  # pour row 0
+        self.master.grid_columnconfigure(0, weight=1)  # pour column 0
         self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png", name="écran d'accueil")
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
@@ -51,8 +51,7 @@ class HomeScreen:
         music_path = "son/musiques/HomeScreenLoopMusic.mp3"
         homescreen_music = pygame.mixer.Sound(music_path)
         music.play(homescreen_music, loops=-1)
-        # self.master.exit_game = self.exit_game
-        self.master.mainloop()
+        self.master.mainloop()  # A NE PAS CHANGER --> risque d'erreurs
 
     def hover_text(self, tag_or_id):
         self.hs_canvas.itemconfigure(tag_or_id, fill="gray")
@@ -83,7 +82,6 @@ class HomeScreen:
         Lancement intro réveil
         """
         music.stop()
-        # pygame.mixer.music.unload()
         self.hs_canvas.grid_remove()
         self.check_game_e()
 
@@ -109,8 +107,6 @@ class App(tk.Tk):
         self.title("Mon nom est...")
         # fonts
         self.fonts_list = []
-        # self.grid_rowconfigure(0, weight=1)  # For row 0
-        # self.grid_columnconfigure(0, weight=1)  # For column 0
         self.index = 2
         self.pages_name = ["room_2", "room_1", "room_0", "room1", "room2"]
         self.pages_file_location = {
@@ -186,6 +182,9 @@ class App(tk.Tk):
         # HS canvas
         self.home_s = None
 
+        # monstre widget
+        self.monster = Monster(self)
+
     def check_game_events(self, event=None):
         """
         Raccourci pour func events_to_check
@@ -205,7 +204,7 @@ class App(tk.Tk):
 
 class View(tk.Frame):
     """
-    Fenêtre principale
+    Classe gérant quelques aspects visuels de la fenêtre principale (App)
     """
     def __init__(self, master):
         super().__init__(master)
@@ -468,7 +467,7 @@ class CanvasHandler(tk.Frame):
 
     def on_button_released(self, event=None):
         """
-        Appelle func quand <Button-3> relâché
+        Appelle func quand <Button-3> relâché (=photo prise)
             - appelle func place_photos_album_list
             - cur_x/cur_y (coords photos prises)
             - delete cadre photo
@@ -484,6 +483,8 @@ class CanvasHandler(tk.Frame):
         self.canvas.delete(self.rect)
         self.rect = None
         self.master.check_game_events()
+        # check si photo encadre posi° monstre
+        self.master.check_monster_taken_by_camera()
         # reset valeur check
         self.master.game_e_handler.check_start_x = 0
         self.master.game_e_handler.check_end_x = 0
@@ -581,12 +582,9 @@ class CanvasHandler(tk.Frame):
                 - set vielles photos s'update
                 - Reproduction d'une nv. liste de photos
         """
-        # print(self.photos_list)
-        # print(self.photos_list_updated)
         updated_photos_set = set(self.photos_list_updated)
         current_photos_set = set(self.photos_list)
         diff = updated_photos_set.difference(current_photos_set)
-        # print(diff)
         if diff:
             # print("SOMETHING HAS CHANGED")
             self.photos_list = self.photos_list_updated[:]
@@ -600,8 +598,8 @@ class CanvasHandler(tk.Frame):
         Crée image pour chaque photo dans album => grid
         """
         max_num_pics = 4
-        self.segmented_4_indexes_photos_list_updated=[self.photos_list[i:i + max_num_pics] for i in range(0, len(self.photos_list), max_num_pics)]
-        # print(self.segmented_4_indexes_photos_list_updated)
+        self.segmented_4_indexes_photos_list_updated=\
+            [self.photos_list[i:i + max_num_pics] for i in range(0, len(self.photos_list), max_num_pics)]
 
     def change_background(self, tag_or_id, new_background):
         """
@@ -618,8 +616,6 @@ class CanvasHandler(tk.Frame):
                 - Check si photos récentes prises
                 - Photos présentes page demandée (hidden --> normal)
         """
-        # self.canvas.focus_set(event)
-        print("test")
         if self.page_num > 1:
             self.hide_photos_album()
             self.page_num -= 1
@@ -633,8 +629,6 @@ class CanvasHandler(tk.Frame):
             - Check si photos récentes prises
             - Photos présentes page demandée (hidden --> normal)
         """
-        # self.canvas.focus_set(event)
-        print("TEST")
         self.hide_photos_album()
         self.page_num += 1
         self.is_album_photos_updated()
@@ -722,6 +716,75 @@ class CanvasHandler(tk.Frame):
         self.master.dial.typewritten_effect(dialog_text, chosen_text)
 
 
+class Monster:
+    """
+    Classe gérant monstre:
+        - "active" uniquement dès que self.monster_has_appeared = True
+        - position monstre
+        - image monstre
+        - musique apparition monstre
+    """
+    def __init__(self, master):
+        self.master = master
+        # self.monster_design_img = [open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign.png"),
+        #                            open_image_setup_file(""),
+        #                            open_image_setup_file(""),
+        #                            open_image_setup_file(""),
+        #                            open_image_setup_file(""),
+        #                            open_image_setup_file(""),
+        #                            open_image_setup_file(""),
+        #                            ]
+        self.monster_design_img = [open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign.png"),
+                                   open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign2.png")
+                                   ]
+        self.monster_design = None
+        self.monster_timer = None
+        self.is_monster_hunting = False
+        self.monster_sound = pygame.mixer.Sound("./son/MonsterMusic.mp3")
+
+    def show_monster(self):
+        """
+        Monstre apparaît sur l'écran (pièce où se trouve joueur)
+        """
+        index = randrange(len(self.monster_design_img) - 1)
+        x = randrange(screen_width-screen_width/100)
+        y = randrange(screen_height-screen_height/200)
+        self.monster_design = self.master.rect.canvas.create_image(x, y, image=self.monster_design_img[index])
+        # toggle monstre
+        self.is_monster_hunting = True
+        # musique monstre
+        monster_music.play(self.monster_sound)
+        monster_music_length = monster_music.get_length()+0.3   # 0.3 = marge de sécurité
+        # timer pour tuer joueur
+        self.monster_timer = threading.Timer(monster_music_length, self.kill_player)
+        self.monster_timer.start()
+
+    def hide_monster(self):
+        """
+        Monstre disparaît de la pièce où se trouve joueur
+        """
+        self.is_monster_hunting = False
+        self.monster_timer.cancel()
+        self.master.rect.canvas.delete(self.monster_design)
+
+    def kill_player(self):
+        """
+        Tue le joueur
+            - affiche écran de mort
+            - revient à écran d'accueil
+        """
+        # attend pour action (ex: bouton) de l'écran de mort
+        print("UPDATE PLS")
+        # relance programme
+        print("shine")
+        self.restart_program()
+
+    def restart_program():
+        """
+        Relance programme en entier
+        """
+        python = sys.executable
+        os.execl(python, python, *sys.argv)
 
 def main():
     """

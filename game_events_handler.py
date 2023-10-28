@@ -1,9 +1,9 @@
 """Classe gérant tous les intéractions + event du jeu"""
-import threading
 import tkinter as tk
+import pygame
 from global_var import screen_height, screen_width
 from images import bg_image_setup
-from son.channels import pen_channel
+from son.channels import pen_channel, music
 from son.random_sound_effects import play_sound_effect, SetInterval
 from txt_story_reader import txt_story_reader, reset_story_reader
 
@@ -86,10 +86,13 @@ class GameEventHandler:
         self.skip_intro_butt.grid_remove()
         self.master.dial.stop()
         self.master.view.simple_transition("room_0")
-        # self.master.view.change_room("room_0")
         self.master.game_controls.initialize_controls()
         self.master.rect.changing_state_canvas_item("camera_click", "normal")
         self.master.bind("<Motion>", self.master.motion)
+        bg_music_path = "./son/musiques/MusiqueFond.mp3"
+        bg_music = pygame.mixer.Sound(bg_music_path)
+        music.play(bg_music, loops=-1)
+        music.set_volume(0.3)
 
     def events_to_check(self):
         """
@@ -127,6 +130,11 @@ class GameEventHandler:
             self.are_rooms_visible = True
             # Bouger la souris réappelle func motion de classe App
             self.master.bind("<Motion>", self.master.motion)
+            # activer musique de fond
+            bg_music_path = "./son/musiques/MusiqueFond.mp3"
+            bg_music = pygame.mixer.Sound(bg_music_path)
+            music.play(bg_music, loops=-1)
+            music.set_volume(0.3)
         elif current_room == "salle de bain":
             pass
         # print("Preuves pour activités paranormales.")
@@ -185,6 +193,7 @@ class GameEventHandler:
         elif current_room == "pièce porte":
             if not self.are_randm_sound_activated:
                 self.are_randm_sound_activated = True
+                # sons random chaque 5 minutes
                 SetInterval(play_sound_effect, 300)
             # 1050, 1100
             x_l_tol = screen_width / (256 / 175)
@@ -308,6 +317,28 @@ class GameEventHandler:
             # print("Rien à signaler...")
             pass
 
+    def check_monster_taken_by_camera(self):
+        """
+        Func pour appari° monstre
+        """
+        if not self.has_monster_appeared:
+            return
+        else:
+            if self.master.monster.is_monster_hunting:
+                monster_pos = self.master.rect.canvas.coords(self.master)
+                x_monster_range = monster_pos[0], monster_pos[2]
+                y_monster_range = monster_pos[1], monster_pos[3]
+                # check si photo prend au moins une partie du monstre
+                if x_monster_range[0] < self.check_start_x or self.check_end_x < x_monster_range[1] or \
+                        y_monster_range[0] < self.check_start_y or self.check_end_y < y_monster_range[1]:
+                    print("Monstre pris en photo")
+                    # enlève monstre, joueur a réussi
+                    self.master.monster.hide_monster()
+                else:
+                    print("Monstre PAS pris en photo")
+            else:
+                print("Bah.. le monstre chasse pas donc c'est bon")
+
     def get_current_room_img(self):
         """
         Return n° pyimage actuelle (image fond d'écran)
@@ -324,9 +355,6 @@ class GameEventHandler:
             if self.prev_and_current_room[1] != current_bg:
                 self.prev_and_current_room.pop(0)
                 self.prev_and_current_room.append(current_bg)
-        # print(self.master.rect.get_key_val_canvas_obj("app_background", "image"))
-        # print(self.prev_and_current_room)
-        # print(self.prev_and_current_room)
         self.reset_val()
         return self.master.rect.get_key_val_canvas_obj("app_background", "image")  # background
 
@@ -396,7 +424,7 @@ class GameEventHandler:
             self.master.rect.canvas.unbind("<B1-Motion>")
             self.master.rect.canvas.unbind("<ButtonRelease-1>")
             if self.is_camera_available and \
-                self.master.rect.canvas.itemcget(self.master.rect.camera, "state") == "hidden":
+                    self.master.rect.canvas.itemcget(self.master.rect.camera, "state") == "hidden":
                 self.master.rect.changing_state_canvas_item(self.master.rect.camera, "normal")
             pen_channel.stop()
             # pygame.mixer.music.unload()

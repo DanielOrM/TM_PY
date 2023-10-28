@@ -225,7 +225,7 @@ class ConnectDotsGame:
 
     def screamer(self):
         """
-        Appari° monstre, zoom avec délai
+        Sourire monstre (noir/blanc)
         """
         self.all_black_and_monster()
         self.epileptic_background(self.w_b_delay)  # changement noir/blanc chaque 0.1s
@@ -233,33 +233,61 @@ class ConnectDotsGame:
         remove_epileptic_bg_timer.start()
 
     def all_white(self):
+        """
+        Définit func pour :
+            - bg = blanc
+            - rendre visible (hidden --> normal) sourire monstre
+        """
         self.master.rect.change_background("app_background", self.white_background)
         self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "normal")
 
     def all_black_and_monster(self):
+        """
+        Définit func pour :
+            - bg = noir
+            - cacher (normal --> hidden) sourire monstre
+        """
         self.master.rect.change_background("app_background", self.black_background)
         self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "hidden")
 
     def epileptic_background(self, sec):
+        """
+        Set les intervalles pour blanc/noir
+        """
         white_timer = threading.Timer(sec, self.white_inter)
         white_timer.start()
         black_and_monster_timer = threading.Timer(sec*2, self.black_monster_inter)
         black_and_monster_timer.start()
 
     def white_inter(self):
+        """
+        Délai pour blanc
+        """
         self.all_white()
         self.t_w = SetInterval(self.all_white, self.w_b_delay*2)
 
     def black_monster_inter(self):
+        """
+        Délai pour noir
+        """
         self.all_black_and_monster()
         self.t_b = SetInterval(self.all_black_and_monster, self.w_b_delay*2)
 
     def remove_epileptic_bg(self):
+        """
+        Fin à screamer monstre
+        Cache (normal --> hidden) sourire monstre
+        Switch à "pièce dessin"
+        1st "vraie" appari° monstre
+        """
         self.t_w.cancel()
         self.t_b.cancel()
         self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "hidden")
         self.master.rect.change_background("app_background", "pièce dessin")
         self.master.game_e_handler.has_monster_appeared = True
+        self.master.monster.show_monster()  # 1st appari° monstre
+        # interval d'apparition monstre chaque 5 minutes
+        SetInterval(self.master.monster.show_monster, 300)
 
     def activate_monster_smile(self):
         """
