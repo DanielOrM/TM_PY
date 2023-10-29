@@ -41,6 +41,7 @@ class FadeTransition(tk.Label):
             walk_sound_path = "son/actions jeu/bruits-pas-son.mp3"
             walk_sound = pygame.mixer.Sound(walk_sound_path)
             walk_sound_channel.play(walk_sound)
+            walk_sound_channel.set_volume(0.4)
             self.is_walk_transition = True
         self.update_label()
 

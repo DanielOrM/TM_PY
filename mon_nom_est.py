@@ -5,6 +5,7 @@ import sys
 import os
 import pygame
 import threading
+import time
 from threading import Thread
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file
@@ -16,7 +17,11 @@ from global_var import screen_width, screen_height
 from connect_dots import ConnectDotsGame
 from fonts import RenderFont
 from son.channels import music, monster_music
+from random import randrange
 
+
+global restart
+restart = False
 
 class HomeScreen:
     """
@@ -108,6 +113,7 @@ class App(tk.Tk):
         # fonts
         self.fonts_list = []
         self.index = 2
+        self.death_screen = bg_image_setup("./images/death screen/PA_DeathScreenFinal.png", name="death screen")
         self.pages_name = ["room_2", "room_1", "room_0", "room1", "room2"]
         self.pages_file_location = {
             "room_2": "./images/rooms/real_rooms/bathroom/PA_SalleDeBain.png",
@@ -227,7 +233,6 @@ class View(tk.Frame):
         self.master.rect.change_background("app_background",
                                            self.master.pages.get(f"{room_name}"))
 
-
     def show_album(self, event=None):
         """
         Ouvre le
@@ -313,35 +318,36 @@ class FullScreenWindow(tk.Frame):
 
     def __init__(self, master):
         super().__init__(master)
-        self.is_fullscreen = False
-        self.is_same_action = 0
+        self.is_fullscreen = True
+        self.initial_fullscreen()
         # self.pages
         master.bind("<F11>" or "<Fn> + <F11>", self.toggle_fullscreen)
         master.bind("<Escape>", self.exit_fullscreen)
 
+    def initial_fullscreen(self, event=None):
+        self.master.attributes("-fullscreen", self.is_fullscreen)
+
     def toggle_fullscreen(self, event=None):
         """
         Écran jeu = plein écran
-        Check si <Esc> ou <F11>/<Fn> + <F11> appuyés conséc.
+        Check si écran déjà fullscreen.
         """
-        if self.is_same_action == 0:
+        if self.is_fullscreen == True:
+            return
+        else:
             self.is_fullscreen = not self.is_fullscreen  # toggle boolean
             self.master.attributes("-fullscreen", self.is_fullscreen)
-            # plein écran augmente de 1 self.is_same action
-            self.is_same_action += 1
-        else:
-            pass
         return "break"
 
     def exit_fullscreen(self, event=None):
         """
         <Esc>: quitte plein écran
         """
-        if self.is_same_action == 1:
+        if self.is_fullscreen == False:
+            return
+        else:
             self.is_fullscreen = not self.is_fullscreen  # toggle boolean self.is_fullscreen
             self.master.attributes("-fullscreen", self.is_fullscreen)
-            # réduire écran diminue de 1 self.is_same action
-            self.is_same_action -= 1
         return "break"
 
 
@@ -747,14 +753,16 @@ class Monster:
         Monstre apparaît sur l'écran (pièce où se trouve joueur)
         """
         index = randrange(len(self.monster_design_img) - 1)
-        x = randrange(screen_width-screen_width/100)
-        y = randrange(screen_height-screen_height/200)
+        x = randrange(int(screen_width-screen_width/100))
+        y = randrange(int(screen_height-screen_height/200))
         self.monster_design = self.master.rect.canvas.create_image(x, y, image=self.monster_design_img[index])
         # toggle monstre
         self.is_monster_hunting = True
         # musique monstre
+        music.pause()
         monster_music.play(self.monster_sound)
-        monster_music_length = monster_music.get_length()+0.3   # 0.3 = marge de sécurité
+        monster_music.set_volume(0.4)
+        monster_music_length = self.monster_sound.get_length()+0.3   # 0.3 = marge de sécurité
         # timer pour tuer joueur
         self.monster_timer = threading.Timer(monster_music_length, self.kill_player)
         self.monster_timer.start()
@@ -763,6 +771,7 @@ class Monster:
         """
         Monstre disparaît de la pièce où se trouve joueur
         """
+        music.unpause()
         self.is_monster_hunting = False
         self.monster_timer.cancel()
         self.master.rect.canvas.delete(self.monster_design)
@@ -773,26 +782,31 @@ class Monster:
             - affiche écran de mort
             - revient à écran d'accueil
         """
+        # cache monstre
+        self.master.rect.canvas.delete(self.monster_design)
         # attend pour action (ex: bouton) de l'écran de mort
-        print("UPDATE PLS")
+        self.master.rect.change_background("app_background", self.master.death_screen)
         # relance programme
-        print("shine")
-        self.restart_program()
+        self.master.rect.canvas.bind("<Button-1>", self.restart)
 
-    def restart_program():
+    def restart(self, event=None):
         """
         Relance programme en entier
         """
-        python = sys.executable
-        os.execl(python, python, *sys.argv)
+        global restart
+        restart = True
+        self.master.destroy()
 
 def main():
     """
     Main func pour lancement programme(tkinter)
     """
+    global restart
     root = App()
     HomeScreen(root)
-
+    # code en-dessous uniquement atteignable si fenêtre self.master = détruite
+    if restart == True:
+        os.system('python "C:/Users/alpha/MyCode/Python Scripts/TM/mon_nom_est/mon_nom_est.py"')    # relance fichier
 
 if __name__ == '__main__':
     main()

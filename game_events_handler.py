@@ -419,7 +419,8 @@ class GameEventHandler:
             self.master.rect.draw.hide_tip()
             self.master.unbind("<e>")
         # dessiner --> porte principale OU bibliothèque OU bureau
-        elif prev_room == "dessin" and current_room in {"pièce porte", "bibliothèque", "pièce dessin"}:
+        elif prev_room == "dessin" and current_room in {"pièce porte", "bibliothèque", "pièce dessin",
+                                                        "screamer écran noir", "screamer écran blanc"}:
             self.master.rect.canvas.unbind("<Button-1>")
             self.master.rect.canvas.unbind("<B1-Motion>")
             self.master.rect.canvas.unbind("<ButtonRelease-1>")
