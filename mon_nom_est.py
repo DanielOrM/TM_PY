@@ -490,7 +490,7 @@ class CanvasHandler(tk.Frame):
         self.rect = None
         self.master.check_game_events()
         # check si photo encadre posi° monstre
-        self.master.check_monster_taken_by_camera()
+        self.master.game_e_handler.check_monster_taken_by_camera()
         # reset valeur check
         self.master.game_e_handler.check_start_x = 0
         self.master.game_e_handler.check_end_x = 0
@@ -752,7 +752,7 @@ class Monster:
         """
         Monstre apparaît sur l'écran (pièce où se trouve joueur)
         """
-        index = randrange(len(self.monster_design_img) - 1)
+        index = randrange(len(self.monster_design_img))
         x = randrange(int(screen_width-screen_width/100))
         y = randrange(int(screen_height-screen_height/200))
         self.monster_design = self.master.rect.canvas.create_image(x, y, image=self.monster_design_img[index])
@@ -784,6 +784,8 @@ class Monster:
         """
         # cache monstre
         self.master.rect.canvas.delete(self.monster_design)
+        # cache caméra en main
+        self.master.rect.changing_state_canvas_item(self.master.rect.camera, "hidden")
         # attend pour action (ex: bouton) de l'écran de mort
         self.master.rect.change_background("app_background", self.master.death_screen)
         # relance programme
@@ -796,6 +798,7 @@ class Monster:
         global restart
         restart = True
         self.master.destroy()
+
 
 def main():
     """

@@ -3,7 +3,7 @@ import tkinter as tk
 import pygame
 from global_var import screen_height, screen_width
 from images import bg_image_setup
-from son.channels import pen_channel, music
+from son.channels import pen_channel, music, monster_music
 from son.random_sound_effects import play_sound_effect, SetInterval
 from txt_story_reader import txt_story_reader, reset_story_reader
 
@@ -314,7 +314,6 @@ class GameEventHandler:
         if not current_room == "pièce porte" and not self.camera_deleted:
             self.master.rect.changing_state_canvas_item("camera_click", "hidden")
         else:
-            # print("Rien à signaler...")
             pass
 
     def check_monster_taken_by_camera(self):
@@ -325,13 +324,15 @@ class GameEventHandler:
             return
         else:
             if self.master.monster.is_monster_hunting:
-                monster_pos = self.master.rect.canvas.coords(self.master)
+                monster_pos = self.master.rect.canvas.bbox(self.master.monster.monster_design)  # x1, y1, x2, y2
                 x_monster_range = monster_pos[0], monster_pos[2]
                 y_monster_range = monster_pos[1], monster_pos[3]
-                # check si photo prend au moins une partie du monstre
-                if x_monster_range[0] < self.check_start_x or self.check_end_x < x_monster_range[1] or \
-                        y_monster_range[0] < self.check_start_y or self.check_end_y < y_monster_range[1]:
-                    print("Monstre pris en photo")
+                # check si photo prise DANS img monstre
+                # print(f"x range: {x_monster_range}, start x: {self.check_start_x}, end x: {self.check_end_x}")
+                # print(f"x range: {y_monster_range}, start x: {self.check_start_y}, end x: {self.check_end_y}")
+                if x_monster_range[0] < self.check_start_x < self.check_end_x < x_monster_range[1] and \
+                        y_monster_range[0] < self.check_start_y < self.check_end_y < y_monster_range[1]:
+                    monster_music.stop()
                     # enlève monstre, joueur a réussi
                     self.master.monster.hide_monster()
                 else:
@@ -425,7 +426,8 @@ class GameEventHandler:
             self.master.rect.canvas.unbind("<B1-Motion>")
             self.master.rect.canvas.unbind("<ButtonRelease-1>")
             if self.is_camera_available and \
-                    self.master.rect.canvas.itemcget(self.master.rect.camera, "state") == "hidden":
+                    self.master.rect.canvas.itemcget(self.master.rect.camera, "state") == "hidden" and \
+                    current_room not in {"screamer écran noir", "screamer écran blanc"}:
                 self.master.rect.changing_state_canvas_item(self.master.rect.camera, "normal")
             pen_channel.stop()
             # pygame.mixer.music.unload()
