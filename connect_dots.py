@@ -72,21 +72,24 @@ class ConnectDotsGame:
         - obtient numéro (text) à partir de tag dot
         """
         num_dot_string = self.master.rect.canvas.itemcget(dot, "tag")
-        num_dot = int(re.search(r'\d+', num_dot_string).group())
-        if self.prev_dot_num == num_dot:
-            return
-        if self.current_dot != num_dot:
-            if self.current_dots_img:
-                for img in self.current_line_img:
-                    self.master.rect.canvas.delete(img)
-            self.current_dot = 0
-        else:
-            # print(f"C'est le point {num_dot}")
-            self.prev_dot_num = self.current_dot
-            self.current_dot += 1
-            if self.current_dot == len(self.current_dots_img):
-                self.master.fade_in.fade_in()
-            # print(f"Le prochain point est {self.current_dot}")
+        try:
+            num_dot = int(re.search(r'\d+', num_dot_string).group())
+            if self.prev_dot_num == num_dot:
+                return
+            if self.current_dot != num_dot:
+                if self.current_dots_img:
+                    for img in self.current_line_img:
+                        self.master.rect.canvas.delete(img)
+                self.current_dot = 0
+            else:
+                # print(f"C'est le point {num_dot}")
+                self.prev_dot_num = self.current_dot
+                self.current_dot += 1
+                if self.current_dot == len(self.current_dots_img):
+                    self.master.fade_in.fade_in()
+                # print(f"Le prochain point est {self.current_dot}")
+        except AttributeError:
+            print("Dot trop loin!")
 
     def next_drawing(self):
         """
@@ -157,6 +160,7 @@ class ConnectDotsGame:
             pen_sound_path = "son/actions jeu/son-écrit-crayon.mp3"
             pen_sound = pygame.mixer.Sound(pen_sound_path)
             pen_channel.play(pen_sound, loops=-1)
+            pen_channel.set_volume(0.5)
             self.has_music_started = True
         else:
             pen_channel.unpause()
@@ -284,7 +288,6 @@ class ConnectDotsGame:
         self.t_b.cancel()
         self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "hidden")
         self.master.rect.change_background("app_background", "pièce dessin")
-        self.master.game_e_handler.has_monster_appeared = True
         self.master.monster.show_monster()  # 1st appari° monstre
         # interval d'apparition monstre chaque 5 minutes
         SetInterval(self.master.monster.show_monster, 300)
@@ -313,11 +316,9 @@ class ConnectDotsGame:
         Change la taille de l'image sourire monstre chaque 0.2s
         Écran noir quand sourire atteint la hauteur de l'écran
         """
-        print("scaling monster img")
         pic_width, pic_height = self.monster_final_img.width(), self.monster_final_img.height()
         pic_width_tenth, pic_height_tenth = int(pic_width / 10), int(pic_height / 10)
         if pic_height >= screen_height:
-            print("")
             self.monster_smile_timer.cancel()
             self.screamer()
         new_image_resized = self.monster_img.resize \
