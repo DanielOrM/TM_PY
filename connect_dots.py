@@ -231,6 +231,7 @@ class ConnectDotsGame:
         """
         Sourire monstre (noir/blanc)
         """
+        self.master.rect.changing_state_canvas_item(self.master.rect.camera, "hidden")
         self.all_black_and_monster()
         self.epileptic_background(self.w_b_delay)  # changement noir/blanc chaque 0.1s
         remove_epileptic_bg_timer = threading.Timer(3, self.remove_epileptic_bg)  # pendant 3s
@@ -288,6 +289,8 @@ class ConnectDotsGame:
         self.t_b.cancel()
         self.master.rect.changing_state_canvas_item(self.monster_canvas_item, "hidden")
         self.master.rect.change_background("app_background", "pièce dessin")
+        if self.master.game_e_handler.is_camera_available:
+            self.master.rect.changing_state_canvas_item(self.master.rect.camera, "normal")
         self.master.monster.show_monster()  # 1st appari° monstre
         # interval d'apparition monstre chaque 5 minutes
         SetInterval(self.master.monster.show_monster, 300)

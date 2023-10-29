@@ -15,7 +15,7 @@ def play_sound_effect():
     Joue un son de manière "random" dans une liste d'effets sonores
     """
     print("SON RANDOM")
-    index = randrange(len(SOUND_EFFECTS)-1)
+    index = randrange(len(SOUND_EFFECTS))
     randm_effect_path = SOUND_PATH+SOUND_EFFECTS[index]
     randm_effect = pygame.mixer.Sound(randm_effect_path)
     sound_effects_channel.play(randm_effect)
