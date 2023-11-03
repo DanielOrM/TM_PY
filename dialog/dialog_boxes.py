@@ -76,22 +76,19 @@ class DialogBoxes:
             except IndexError:
                 if all(character == "." for character in list(chosen_text[self.index_line+1])) \
                         and chosen_text[self.index_line] != "":
-                    # time.sleep(1.15)
+                    # reset le texte visible après 1150 ms
                     self.master.after(1150, self.reset_prev_text)
-                    # self.prev_text = ""
                 if self.master.rect.canvas.itemcget(tag_or_id, "text") == " ...":
-                    # time.sleep(0.9)
+                    # reset le texte visible après 800 ms
                     self.master.after(800, self.reset_prev_text)
-                    # self.prev_text = ""
                 # clear le texte s'il y a trop de caractères
                 if len(self.master.rect.canvas.itemcget(tag_or_id, "text")) > 50:
                     self.prev_text = ""
                 self.index_line += 1
                 self.index_letter = 0
                 self.prev_text += " "
-                # time.sleep(0.5)
+                # recommence la loop après 900 ms
                 self.master.after(900, self.text_iteration, tag_or_id, chosen_text)
-                # self.text_iteration(tag_or_id, chosen_text)
         except IndexError:
             return
 

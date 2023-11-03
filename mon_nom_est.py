@@ -708,8 +708,8 @@ class CanvasHandler(tk.Frame):
 
     def create_dialog_box(self, chosen_moment, color="white"):
         """
-            - crée sur demande bar dialogue + texte à display selon actions/moments joueur
-            - détruit bar dialogue + texte à display après fin texte
+            - crée sur demande texte à display selon actions/moments joueur
+            - détruit texte à display après fin texte
         """
         # position texte
         dialog_position = (self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.35)
