@@ -85,13 +85,13 @@ class FadeIn:
         """
     def __init__(self, master):
         self.master = master
-        # self.imgs = ["./images/connect the dots/ref/Fish.png",
-        #              "./images/connect the dots/ref/ChatIRL.png",
-        #              "./images/connect the dots/ref/WolfSide.png",
-        #              "./images/connect the dots/ref/Werewolf.png",
-        #              "./images/connect the dots/ref/RorschackInktAlien.png"
-        #              ]
-        self.imgs = ["./images/connect the dots/ref/Fish.png"]
+        self.imgs = ["./images/connect the dots/ref/Fish.png",
+                     "./images/connect the dots/ref/ChatIRL.png",
+                     "./images/connect the dots/ref/WolfSide.png",
+                     "./images/connect the dots/ref/Werewolf.png",
+                     "./images/connect the dots/ref/RorschackInktAlien.png"
+                     ]
+        # self.imgs = ["./images/connect the dots/ref/Fish.png"]
         self.initial_img = None
         self.pic_list = []
         self.fadetime = 1  # temps nécessaire entre temp img (effet fade) en ms

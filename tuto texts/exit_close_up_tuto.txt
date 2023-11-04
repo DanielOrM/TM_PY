@@ -1,0 +1,3 @@
+Quand vous observez attentivement un objet,
+appuyez sur <s> afin d'observer
+globalement la pièce où vous êtes.

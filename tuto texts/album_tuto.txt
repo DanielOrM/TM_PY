@@ -1,0 +1,3 @@
+Appuyez sur le <clic du milieu> afin
+d'ouvrir le journal. Les flèches s'y trouvant
+permettent de changer de page.

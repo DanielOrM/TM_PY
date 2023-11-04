@@ -1,0 +1,2 @@
+Appuyer sur <a> pour aller à gauche et
+Appuyer sur <d> pour aller à droite

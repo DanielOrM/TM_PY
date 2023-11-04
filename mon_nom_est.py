@@ -1,11 +1,11 @@
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 import tkinter as tk
-from tkinter import VERTICAL, HORIZONTAL
+from tkinter import VERTICAL, HORIZONTAL, PhotoImage
 import sys
 import os
 import pygame
 import threading
-import time
+from txt_story_reader import txt_files_story
 from threading import Thread
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file
@@ -35,19 +35,59 @@ class HomeScreen:
         # configure de grid pour le reste du code
         self.master.grid_rowconfigure(0, weight=1)  # pour row 0
         self.master.grid_columnconfigure(0, weight=1)  # pour column 0
+        # écran d'accueil initial
         self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png", name="écran d'accueil")
+        self.hs_tuto = bg_image_setup("./images/homescreen/GradientBlue.png", name="tuto bg")    # tuto img
+        self.hs_canvas_img = None
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
+        # commencer le jeu
         self.start_button = self.hs_canvas.create_text(
-            (screen_width/5*4, screen_height/3*2+80),
+            (screen_width/5*4, screen_height/3*2+40),
             text="Jouer", fill="white", font=("Helvetica", 30, "italic"))
+        # regarder touches, donc mouvements, actions, etc.
+        self.tuto = self.hs_canvas.create_text(
+            (screen_width/5*4,  screen_height/3*2+100),
+            text="Tutoriel", fill="white", font=("Helvetica", 30, "italic"))
+        """
+        Tuto icon
+            - recommended size: 147x95
+        """
+        self.camera = self.master.camera
+        self.camera_icon = None
+        self.camera_tuto_txt = None
+        self.album_ref = self.master.album
+        self.album = self.resizeImage(self.album_ref, 147, 95)
+        self.album_icon = None
+        self.album_tuto_txt = None
+        self.motion_img = open_image_setup_file("./images/homescreen/icons/PA_NB_MotionIcon.png")
+        self.motion_icon = None
+        self.motion_tuto_txt = None
+        self.pencil_img = open_image_setup_file("./images/homescreen/icons/PA_NB_Pencil.png")
+        self.pencil_icon = None
+        self.pencil_tuto_txt = None
+        self.red_button_img = open_image_setup_file("./images/homescreen/icons/PA_NB_RedButton.png")
+        self.red_button_icon = None
+        self.red_button_tuto_txt = None
+        self.unzoom_img = open_image_setup_file("./images/homescreen/icons/PA_NB_Unzoom.png")
+        self.unzoom_icon = None
+        self.unzoom_tuto_txt = None
+
+        # quitter tuto
+        self.exit_tuto = None
+        # quitter le jeu
         self.exit_game_button = self.hs_canvas.create_text(
-            (screen_width / 5 * 4, screen_height / 3 * 2 + 135),
-            text="Quitter le jeu", fill="white", font=("Helvetica", 30, "italic")
-        )
-        self.hs_canvas.tag_bind(self.start_button, "<Button-1>", lambda x: self.intro())
+            (screen_width / 5 * 4, screen_height / 3 * 2 + 160),
+            text="Quitter le jeu", fill="white", font=("Helvetica", 30, "italic"))
+        # commencer le jeu-bind
+        self.hs_canvas.tag_bind(self.start_button, "<Button-1>", self.intro)
         self.hs_canvas.tag_bind(self.start_button, "<Enter>", lambda x: self.hover_text(self.start_button))
         self.hs_canvas.tag_bind(self.start_button, "<Leave>", lambda x: self.exit_text(self.start_button))
+        # regarder tuto-bind
+        self.hs_canvas.tag_bind(self.tuto, "<Button-1>", self.show_tuto)
+        self.hs_canvas.tag_bind(self.tuto, "<Enter>", lambda x: self.hover_text(self.tuto))
+        self.hs_canvas.tag_bind(self.tuto, "<Leave>", lambda x: self.exit_text(self.tuto))
+        # quitter jeu-bind
         self.hs_canvas.tag_bind(self.exit_game_button, "<Button-1>", self.exit_game)
         self.hs_canvas.tag_bind(self.exit_game_button, "<Enter>", lambda x: self.hover_text(self.exit_game_button))
         self.hs_canvas.tag_bind(self.exit_game_button, "<Leave>", lambda x: self.exit_text(self.exit_game_button))
@@ -58,6 +98,21 @@ class HomeScreen:
         music.play(homescreen_music, loops=-1)
         self.master.mainloop()  # A NE PAS CHANGER --> risque d'erreurs
 
+    def resizeImage(self, img, newWidth, newHeight):
+        """
+        Redimensionne image
+        """
+        oldWidth = img.width()
+        oldHeight = img.height()
+        newPhotoImage = PhotoImage(width=newWidth, height=newHeight)
+        for x in range(newWidth):
+            for y in range(newHeight):
+                xOld = int(x * oldWidth / newWidth)
+                yOld = int(y * oldHeight / newHeight)
+                rgb = '#%02x%02x%02x' % img.get(xOld, yOld)
+                newPhotoImage.put(rgb, (x, y))
+        return newPhotoImage
+
     def hover_text(self, tag_or_id):
         self.hs_canvas.itemconfigure(tag_or_id, fill="gray")
 
@@ -67,6 +122,17 @@ class HomeScreen:
     def exit_game(self, event=None):
         self.master.destroy()
         sys.exit()
+
+    def exit_tuto_button(self, event=None):
+        """
+        Crée bouton pour quitter tuto
+        """
+        self.exit_tuto = self.hs_canvas.create_text(
+            (screen_width / 5 * 4, screen_height / 3 * 2 + 200),
+            text="Quitter le tutoriel", fill="white", font=("Helvetica", 26, "italic"))
+        self.hs_canvas.tag_bind(self.exit_tuto, "<Button-1>", self.hide_tuto)
+        self.hs_canvas.tag_bind(self.exit_tuto, "<Enter>", lambda x: self.hover_text(self.exit_tuto))
+        self.hs_canvas.tag_bind(self.exit_tuto, "<Leave>", lambda x: self.exit_text(self.exit_tuto))
 
     def apply_hs_canvas_image(self):
         """
@@ -80,15 +146,162 @@ class HomeScreen:
         center_height = self.master.winfo_screenheight()/2
         center_width = self.master.winfo_screenwidth()/2
         self.master.home_s = self.hs_canvas
-        self.hs_canvas.create_image(center_width, center_height, image=self.hs_image)
+        self.hs_canvas_img = self.hs_canvas.create_image(center_width, center_height, image=self.hs_image)
 
-    def intro(self):
+    def intro(self, event=None):
         """
         Lancement intro réveil
         """
         music.stop()
         self.hs_canvas.grid_remove()
         self.check_game_e()
+
+    def show_hs_buttons(self, event=None):
+        """
+        Montre écran avec:
+            - jouer
+            - tutoriel
+            - quitter le jeu
+        Enlève:
+            - quitter tuto
+        """
+        self.hs_canvas.itemconfig(self.start_button, state="normal")
+        self.hs_canvas.itemconfig(self.tuto, state="normal")
+        self.hs_canvas.itemconfig(self.exit_game_button, state="normal")
+        self.hs_canvas.itemconfig(self.exit_tuto, state="hidden")
+
+    def hide_hs_buttons(self, event=None):
+        """
+        Cache écran avec:
+            - jouer
+            - tutoriel
+            - quitter le jeu
+        """
+        self.hs_canvas.itemconfig(self.start_button, state="hidden")
+        self.hs_canvas.itemconfig(self.tuto, state="hidden")
+        self.hs_canvas.itemconfig(self.exit_game_button, state="hidden")
+        if self.exit_tuto:
+            self.hs_canvas.itemconfig(self.exit_tuto, state="normal")
+
+    def create_all_tuto_icons_txt(self):
+        """
+        Initialise les icônes
+        """
+        screen_w_space = self.master.screen_width / 3
+        screen_w_img_text = screen_w_space / 3
+        screen_w_img_pos = self.master.screen_width / 12 * 5 / 3
+        screen_h_space = self.master.screen_height / 6 * (3 / 2)
+        screen_h_img_text = screen_h_space / 8
+        screen_h_img_pos = self.master.screen_width / 4
+        # création icônes + textes
+        # camera + texte
+        self.camera_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_space), image=self.camera)
+        self.camera_tuto_txt = self.hs_canvas.create_text(
+            (screen_w_img_pos * 3 / 2 + screen_w_img_text, screen_h_space + screen_h_img_text),
+            text=txt_files_story("./tuto texts/camera_tuto.txt"),
+            fill="white", font=("Helvetica", 15, "italic"))
+        # album photo + texte
+        self.album_icon = self.hs_canvas.create_image((screen_w_img_pos * 4, screen_h_space), image=self.album)
+        self.album_tuto_txt = self.hs_canvas.create_text(((screen_w_img_pos * 3 / 2) * 3 + screen_w_img_text,
+                                                          screen_h_space),
+                                                         text=txt_files_story("./tuto texts/album_tuto.txt"),
+                                                         fill="white", font=("Helvetica", 15, "italic"))
+        # mouvement + texte
+        self.motion_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_img_pos*11/10), image=self.motion_img)
+        self.motion_tuto_txt = self.hs_canvas.create_text((screen_w_img_pos * 3 / 2 + screen_w_img_text,
+                                                          screen_h_img_pos*11/10),
+                                                         text=txt_files_story("./tuto texts/motion_tuto.txt"),
+                                                         fill="white", font=("Helvetica", 15, "italic"))
+        # quitter le jeu + texte
+        self.red_button_icon = self.hs_canvas.create_image((screen_w_img_pos * 4,
+                                                          screen_h_img_pos*11/10), image=self.red_button_img)
+        self.red_button_tuto_txt = self.hs_canvas.create_text(((screen_w_img_pos * 3 / 2) * 3 + screen_w_img_text/3*2,
+                                                          screen_h_img_pos*11/10),
+                                                          text=txt_files_story("./tuto texts/exit_game_tuto.txt"),
+                                                          fill="white", font=("Helvetica", 15, "italic"))
+        # dessiner + texte
+        self.pencil_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_space+screen_h_img_pos),
+                                                       image=self.pencil_img)
+        self.pencil_tuto_txt = self.hs_canvas.create_text((screen_w_img_pos*3/2 + screen_w_img_text*6/5,
+                                                           screen_h_space+screen_h_img_pos),
+                                                          text=txt_files_story("./tuto texts/draw_tuto.txt"),
+                                                          fill="white", font=("Helvetica", 15, "italic"))
+        # quitter close-up + texte
+        self.unzoom_icon = self.hs_canvas.create_image((screen_w_img_pos*4, screen_h_space+screen_h_img_pos),
+                                                       image=self.unzoom_img)
+        self.unzoom_tuto_txt = self.hs_canvas.create_text(((screen_w_img_pos * 3 / 2) * 3 + screen_w_img_text,
+                                                           screen_h_space+screen_h_img_pos),
+                                                          text=txt_files_story("./tuto texts/exit_close_up_tuto.txt"),
+                                                          fill="white", font=("Helvetica", 15, "italic"))
+
+    def show_all_tuto_icons_txt(self):
+        """
+        Montre tous les icônes + textes dans tuto
+            - évite de les récréer
+        """
+        self.hs_canvas.itemconfigure(self.camera_icon, state="normal")
+        self.hs_canvas.itemconfigure(self.camera_tuto_txt, state="normal")
+        self.hs_canvas.itemconfigure(self.album_icon, state="normal")
+        self.hs_canvas.itemconfigure(self.album_tuto_txt, state="normal")
+        self.hs_canvas.itemconfigure(self.motion_icon, state="normal")
+        self.hs_canvas.itemconfigure(self.motion_tuto_txt, state="normal")
+        self.hs_canvas.itemconfigure(self.red_button_icon, state="normal")
+        self.hs_canvas.itemconfigure(self.red_button_tuto_txt, state="normal")
+        self.hs_canvas.itemconfigure(self.pencil_icon, state="normal")
+        self.hs_canvas.itemconfigure(self.pencil_tuto_txt, state="normal")
+        self.hs_canvas.itemconfigure(self.unzoom_icon, state="normal")
+        self.hs_canvas.itemconfigure(self.unzoom_tuto_txt, state="normal")
+
+    def hide_all_icons(self, event=None):
+        """
+        Cache tous les icônes + textes dans le tuto
+        """
+        self.hs_canvas.itemconfigure(self.camera_icon, state="hidden")
+        self.hs_canvas.itemconfigure(self.camera_tuto_txt, state="hidden")
+        self.hs_canvas.itemconfigure(self.album_icon, state="hidden")
+        self.hs_canvas.itemconfigure(self.album_tuto_txt, state="hidden")
+        self.hs_canvas.itemconfigure(self.motion_icon, state="hidden")
+        self.hs_canvas.itemconfigure(self.motion_tuto_txt, state="hidden")
+        self.hs_canvas.itemconfigure(self.red_button_icon, state="hidden")
+        self.hs_canvas.itemconfigure(self.red_button_tuto_txt, state="hidden")
+        self.hs_canvas.itemconfigure(self.pencil_icon, state="hidden")
+        self.hs_canvas.itemconfigure(self.pencil_tuto_txt, state="hidden")
+        self.hs_canvas.itemconfigure(self.unzoom_icon, state="hidden")
+        self.hs_canvas.itemconfigure(self.unzoom_tuto_txt, state="hidden")
+
+    def show_tuto(self, event=None):
+        """
+        Crée une image contenant plusieurs canvas item avec textes
+            - caméra
+                - drag + drop
+            - ouvrir album photo
+                - middle click
+            - mouvement
+                - a, d
+            - quitter le jeu
+                - q
+            - dessiner
+                - click gauche
+            - quitter un close-up
+                - s
+        """
+        self.hs_canvas.itemconfigure(self.hs_canvas_img, image="tuto bg")
+        self.hide_hs_buttons()
+        if not self.exit_tuto:
+            self.exit_tuto_button()
+        if not self.camera_icon:    # juste besoin de check pour le 1er (suffisant)
+            self.create_all_tuto_icons_txt()
+        else:
+            self.show_all_tuto_icons_txt()
+
+    def hide_tuto(self, event=None):
+        """
+        Cache img tuto
+            - change img state de
+        """
+        self.hide_all_icons()
+        self.show_hs_buttons()
+        self.hs_canvas.itemconfigure(self.hs_canvas_img, image="écran d'accueil")
 
     def check_game_e(self, event=None):
         """
