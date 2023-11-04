@@ -712,12 +712,12 @@ class CanvasHandler(tk.Frame):
             - détruit texte à display après fin texte
         """
         # position texte
-        dialog_position = (self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.35)
+        dialog_position = (self.master.winfo_screenwidth()/2, self.master.winfo_screenheight()/1.25)
         # choisit texte à display selon action/moment joueur
         chosen_text = self.master.dial.dialog_to_use(chosen_moment)
         # texte = positionné au centre de black_dialog_bar
         dialog_text = self.canvas.create_text(
-            (dialog_position[0],self.master.winfo_screenheight()/1.25),
+            (dialog_position[0], dialog_position[1]),
             text="", fill=color, font=("Helvetica", 15, "italic"))
         self.master.dial.typewritten_effect(dialog_text, chosen_text)
 
