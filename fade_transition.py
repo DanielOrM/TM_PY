@@ -2,8 +2,6 @@
 import tkinter as tk
 import pygame
 from PIL import ImageTk, Image
-
-from global_var import screen_width, screen_height
 from son.channels import walk_sound_channel
 
 
@@ -85,6 +83,7 @@ class FadeIn:
         """
     def __init__(self, master):
         self.master = master
+        self.base_file_img_ref = "./images/connect the dots/ref/"
         self.imgs = ["./images/connect the dots/ref/Fish.png",
                      "./images/connect the dots/ref/ChatIRL.png",
                      "./images/connect the dots/ref/WolfSide.png",
@@ -93,16 +92,39 @@ class FadeIn:
                      ]
         # self.imgs = ["./images/connect the dots/ref/Fish.png"]
         self.initial_img = None
+        self.middle_x_point = None
+        self.middle_y_point = None
         self.pic_list = []
         self.fadetime = 1  # temps nécessaire entre temp img (effet fade) en ms
-        self.fadestep = 2  # brutalité changement de transparence
+        self.fadestep = 3  # brutalité changement de transparence
         self.curstep = 0  # étape du fade in
 
+    def remove_fully_transparent_pixels(self, drawing_ref, alpha, event=None):
+        """
+        Enlève bg transparent d'img
+        """
+        # channel alpha
+        img = Image.open(drawing_ref)
+        A = img.getchannel("A")
+        # blanc en opaque
+        newA = A.point(lambda i: alpha if i > 0 else 0)
+        # pixels modifiés + overwrite dans nouvelle image
+        img.putalpha(newA)
+        base_folder = "./images/connect the dots/fade img/"
+        img_ref_name = drawing_ref.replace(self.base_file_img_ref, "")
+        final_path = base_folder+img_ref_name
+        img.save(final_path)
+        return final_path
+
     def initialiasize_pic(self):
-        im_file = open(self.imgs[self.master.game_e_handler.index_dot], mode="rb")
-        current_im = Image.open(im_file)
+        """
+        Crée diff. versions de la même img en plusieurs opacités
+        """
+        drawing_ref = self.imgs[self.master.game_e_handler.index_dot]
+        print(drawing_ref)
         alpha = min(self.curstep * self.fadestep, 255)  # clamp to 255 maximum
-        current_im.putalpha(alpha)
+        modified_img = self.remove_fully_transparent_pixels(drawing_ref, alpha)
+        current_im = Image.open(modified_img)
         pic = ImageTk.PhotoImage(current_im)
         self.pic_list.append(pic)
         return pic, alpha
@@ -114,9 +136,9 @@ class FadeIn:
         Lancement transition
         """
         pic, alpha = self.initialiasize_pic()
-        self.initial_img = self.master.rect.canvas.create_image(screen_width / 2, screen_height / 2, image=pic)
+        # print(self.middle_x_point, self.middle_y_point)
+        self.initial_img = self.master.rect.canvas.create_image(self.middle_x_point, self.middle_y_point, image=pic)
         self.pic_list.append(self.initial_img)
-        # self.place(x=100, y=100)
         self.update_label()
 
     def update_label(self):

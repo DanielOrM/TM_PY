@@ -59,12 +59,30 @@ class ConnectDotsGame:
         Position des points connues
         Chaque point --> placé dans self.current_dots_img
         """
+        x_left, x_right, y_top, y_bot = 0, 0, 0, 0
         for i, d in enumerate(dots_position):
+            if i == 0:
+                x_left = dots_position[1][0]
+                y_top = dots_position[1][1]
+                y_bot = y_top
+            if d[0] > x_right:
+                x_right = d[0]
+            if d[0] < x_left:
+                x_left = d[0]
+            if d[1] < y_bot:
+                y_bot = d[1]
+            if d[1] > y_top:
+                y_top = d[1]
             x1, y1 = (d[0] + CENTER_POSITION_X - 3), (d[1] + CENTER_POSITION_Y - 3)
             x2, y2 = (d[0] + CENTER_POSITION_X + 3), (d[1] + CENTER_POSITION_Y + 3)
             canvas = self.master.rect.canvas
             img = canvas.create_oval(x1, y1, x2, y2, fill="black", tag=i)
             self.current_dots_img.append(img)
+        self.master.fade_in.middle_x_point = (x_left+x_right+CENTER_POSITION_X*2)/2
+        self.master.fade_in.middle_y_point = (y_bot+y_top+CENTER_POSITION_Y*2)/2
+        # print(self.current_dots_img)
+        # print(f"furthest left point: {x_left}, furthest right point: {x_right}\n, lowest point: {y_bot}, "
+        #       f"highest point: {y_top}")
 
     def is_dot_hovered(self, dot):
         """
@@ -261,7 +279,7 @@ class ConnectDotsGame:
         """
         white_timer = threading.Timer(sec, self.white_inter)
         white_timer.start()
-        black_and_monster_timer = threading.Timer(sec*2, self.black_monster_inter)
+        black_and_monster_timer = threading.Timer(sec * 2, self.black_monster_inter)
         black_and_monster_timer.start()
 
     def white_inter(self):
@@ -269,14 +287,14 @@ class ConnectDotsGame:
         Délai pour blanc
         """
         self.all_white()
-        self.t_w = SetInterval(self.all_white, self.w_b_delay*2)
+        self.t_w = SetInterval(self.all_white, self.w_b_delay * 2)
 
     def black_monster_inter(self):
         """
         Délai pour noir
         """
         self.all_black_and_monster()
-        self.t_b = SetInterval(self.all_black_and_monster, self.w_b_delay*2)
+        self.t_b = SetInterval(self.all_black_and_monster, self.w_b_delay * 2)
 
     def remove_epileptic_bg(self):
         """
@@ -304,12 +322,10 @@ class ConnectDotsGame:
             - panel
             - self.monster_canvas_item
         """
-        print("START MONSTER")
         self.monster_img = Image.open("./images/monster/PA_NB_SourireMonstre.png")
         self.monster_final_img = ImageTk.PhotoImage(image=self.monster_img)
         self.monster_img_list.append(self.monster_final_img)
         panel = self.master.rect.canvas.create_image(screen_width / 2, screen_height / 2, image=self.monster_final_img)
-        print(panel)
         self.monster_canvas_item = panel
         self.monster_img_list.append(panel)
         self.monster_smile_timer = SetInterval(self.monster_resize, 0.2)
