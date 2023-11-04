@@ -1,0 +1,2 @@
+Pendant que vous êtes en jeu,
+Appuyez sur <q> pour le quitter.

@@ -68,13 +68,13 @@ class GameEventHandler:
 
         # dots
         self.index_dot = 0
-        # self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png",
-        #                  "./images/connect the dots/DotsCat.png",
-        #                  "./images/connect the dots/DotsWolfSide.png",
-        #                  "./images/connect the dots/DotsWerewolf.png",
-        #                  "./images/connect the dots/DotsInkAlien.png"
-        #                  ]
-        self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png"]
+        self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png",
+                         "./images/connect the dots/DotsCat.png",
+                         "./images/connect the dots/DotsWolfSide.png",
+                         "./images/connect the dots/DotsWerewolf.png",
+                         "./images/connect the dots/DotsInkAlien.png"
+                         ]
+        # self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png"]
 
     def skip_intro(self):
         """
