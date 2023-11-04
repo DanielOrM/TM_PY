@@ -8,7 +8,7 @@ import threading
 from txt_story_reader import txt_files_story
 from threading import Thread
 from PIL import Image, ImageTk
-from images import bg_image_setup, open_image_setup_file
+from images import bg_image_setup, open_image_setup_file, open_and_resize_img
 from fade_transition import FadeTransition, FadeIn
 from dialog.dialog_boxes import DialogBoxes
 from game_events_handler import GameEventHandler
@@ -53,23 +53,27 @@ class HomeScreen:
         Tuto icon
             - recommended size: 147x95
         """
+        x_icon = int(self.master.winfo_screenwidth()/(640/49))
+        y_icon = int(self.master.winfo_screenheight()/(216/19))
         self.camera = self.master.camera
         self.camera_icon = None
         self.camera_tuto_txt = None
-        self.album_ref = self.master.album
-        self.album = self.resizeImage(self.album_ref, 147, 95)
+        self.album = open_and_resize_img("./images/player/PA_NB_Album.png", "album", x_icon, y_icon)
         self.album_icon = None
         self.album_tuto_txt = None
-        self.motion_img = open_image_setup_file("./images/homescreen/icons/PA_NB_MotionIcon.png")
+        self.motion_img = open_and_resize_img("./images/homescreen/icons/PA_NB_MotionIcon.png",
+                                                "motion", x_icon, y_icon)
         self.motion_icon = None
         self.motion_tuto_txt = None
-        self.pencil_img = open_image_setup_file("./images/homescreen/icons/PA_NB_Pencil.png")
+        self.pencil_img = open_and_resize_img("./images/homescreen/icons/PA_NB_Pencil.png", "pencil", x_icon, y_icon)
         self.pencil_icon = None
         self.pencil_tuto_txt = None
-        self.red_button_img = open_image_setup_file("./images/homescreen/icons/PA_NB_RedButton.png")
+        self.red_button_img = open_and_resize_img("./images/homescreen/icons/PA_NB_RedButton.png",
+                                                    "exit game", x_icon, y_icon)
         self.red_button_icon = None
         self.red_button_tuto_txt = None
-        self.unzoom_img = open_image_setup_file("./images/homescreen/icons/PA_NB_Unzoom.png")
+        self.unzoom_img = open_and_resize_img("./images/homescreen/icons/PA_NB_Unzoom.png", "exit close-up",
+                                                x_icon, y_icon)
         self.unzoom_icon = None
         self.unzoom_tuto_txt = None
 
@@ -97,21 +101,6 @@ class HomeScreen:
         homescreen_music = pygame.mixer.Sound(music_path)
         music.play(homescreen_music, loops=-1)
         self.master.mainloop()  # A NE PAS CHANGER --> risque d'erreurs
-
-    def resizeImage(self, img, newWidth, newHeight):
-        """
-        Redimensionne image
-        """
-        oldWidth = img.width()
-        oldHeight = img.height()
-        newPhotoImage = PhotoImage(width=newWidth, height=newHeight)
-        for x in range(newWidth):
-            for y in range(newHeight):
-                xOld = int(x * oldWidth / newWidth)
-                yOld = int(y * oldHeight / newHeight)
-                rgb = '#%02x%02x%02x' % img.get(xOld, yOld)
-                newPhotoImage.put(rgb, (x, y))
-        return newPhotoImage
 
     def hover_text(self, tag_or_id):
         self.hs_canvas.itemconfigure(tag_or_id, fill="gray")

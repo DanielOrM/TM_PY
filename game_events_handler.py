@@ -92,7 +92,7 @@ class GameEventHandler:
         bg_music_path = "./son/musiques/MusiqueFond.mp3"
         bg_music = pygame.mixer.Sound(bg_music_path)
         music.play(bg_music, loops=-1)
-        music.set_volume(0.3)
+        music.set_volume(0.8)
 
     def events_to_check(self):
         """
@@ -134,7 +134,7 @@ class GameEventHandler:
             bg_music_path = "./son/musiques/MusiqueFond.mp3"
             bg_music = pygame.mixer.Sound(bg_music_path)
             music.play(bg_music, loops=-1)
-            music.set_volume(0.3)
+            music.set_volume(0.8)
         elif current_room == "salle de bain":
             pass
         # print("Preuves pour activités paranormales.")
