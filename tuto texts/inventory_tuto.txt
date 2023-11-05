@@ -1,2 +1,2 @@
 Appuyez sur [i] pour ouvrir l'inventaire;
-les objets que vous possédez en fera partie.
+les objets que vous possédez en feront partie.
