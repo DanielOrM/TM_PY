@@ -11,14 +11,15 @@ class FadeTransition(tk.Label):
         - bruits de pas début + stop
         - blanc --> noir (flash)
     """
+
     def __init__(self, master, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.configure(background="gray")
         label_background_system_color = self.cget("background")
         label_background_16_bit_color = self.winfo_rgb(label_background_system_color)
         label_background_8_bit_color = tuple(value >> 8 for value in label_background_16_bit_color)
-        self.start_color = label_background_8_bit_color     # blanc
-        self.end_color = tuple((0, 0, 0))   # noir
+        self.start_color = label_background_8_bit_color  # blanc
+        self.end_color = tuple((0, 0, 0))  # noir
         # lapse de temps
         self.duration_ms = 1000
         self.frames_per_second = 60
@@ -81,9 +82,10 @@ class FadeIn:
     Transition de type fondu
         - fin dessin --> fade-in
         """
+
     def __init__(self, master):
         self.master = master
-        self.base_file_img_ref = "./images/connect the dots/ref/"
+        # self.base_file_img_ref = "./images/connect the dots/ref/"
         self.imgs = ["./images/connect the dots/ref/Fish.png",
                      "./images/connect the dots/ref/ChatIRL.png",
                      "./images/connect the dots/ref/WolfSide.png",
@@ -95,11 +97,15 @@ class FadeIn:
         self.middle_x_point = None
         self.middle_y_point = None
         self.pic_list = []
+        # item dans inventaire
+        self.item_text_animation = "./images/inventory/PA_NB_ItemAdded.png"
+        self.fade_o_curstep = 255
         self.fadetime = 1  # temps nécessaire entre temp img (effet fade) en ms
-        self.fadestep = 3  # brutalité changement de transparence
+        self.fadestep = 2  # brutalité changement de transparence
         self.curstep = 0  # étape du fade in
 
-    def remove_fully_transparent_pixels(self, drawing_ref, alpha, event=None):
+    def remove_fully_transparent_pixels(self, drawing_ref, alpha, base_folder="./images/connect the dots/fade img/",
+                                        base_file_img_ref="./images/connect the dots/ref/", event=None):
         """
         Enlève bg transparent d'img
         """
@@ -110,9 +116,8 @@ class FadeIn:
         newA = A.point(lambda i: alpha if i > 0 else 0)
         # pixels modifiés + overwrite dans nouvelle image
         img.putalpha(newA)
-        base_folder = "./images/connect the dots/fade img/"
-        img_ref_name = drawing_ref.replace(self.base_file_img_ref, "")
-        final_path = base_folder+img_ref_name
+        img_ref_name = drawing_ref.replace(base_file_img_ref, "")
+        final_path = base_folder + img_ref_name
         img.save(final_path)
         return final_path
 
@@ -155,4 +160,71 @@ class FadeIn:
         else:
             self.master.after(self.fadetime, self.update_label)
 
+    def initialiasize_text(self, fade_out=False):
+        """
+        Début avec texte (=/opaque ou opaque)
+        """
+        pic_size = (120, 30)
+        if not fade_out:
+            alpha = min(self.curstep * self.fadestep, 255)  # clamp to 255 maximum
+            modified_img = self.remove_fully_transparent_pixels(self.item_text_animation, alpha,
+                                                                "./images/inventory/text animation/",
+                                                                "./images/inventory/")
+            current_im = Image.open(modified_img)
+            pic = ImageTk.PhotoImage(current_im.resize(pic_size))
+            self.pic_list.append(pic)
+            return pic, alpha
+        else:
+            alpha = max(self.fade_o_curstep * self.fadestep, 0)  # clamp to 0 maximum
+            modified_img = self.remove_fully_transparent_pixels(self.item_text_animation, alpha,
+                                                                "./images/inventory/text animation/",
+                                                                "./images/inventory/"
+                                                                )
+            current_im = Image.open(modified_img)
+            pic = ImageTk.PhotoImage(current_im.resize(pic_size))
+            self.pic_list.append(pic)
+            return pic, alpha
 
+    def update_text(self, fade_out=False):
+        """
+        Changement blanc --> noir progressif (t)
+        Quand transition stop --> fin bruits de pas
+        """
+        if not fade_out:
+            pic, alpha = self.initialiasize_text()
+            self.master.rect.canvas.itemconfigure(self.initial_img, image=pic)
+            self.curstep += 2
+            if alpha == 255:
+                self.curstep = 0
+                self.master.after(200, self.fade_out)
+            else:
+                self.master.after(self.fadetime, self.update_text)
+        else:
+            pic, alpha = self.initialiasize_text(True)
+            self.master.rect.canvas.itemconfigure(self.initial_img, image=pic)
+            self.fade_o_curstep -= 2
+            if alpha == 0:
+                print("NOPE NOPE NOPE")
+                self.fade_o_curstep = 255
+            else:
+                self.master.after(self.fadetime, self.update_text, True)
+
+    def start_item_animation(self):
+        """
+        Lance animation quand ajoute obj à inventaire
+        """
+        pic, alpha = self.initialiasize_text()
+        # print(self.middle_x_point, self.middle_y_point)
+        self.initial_img = self.master.rect.canvas.create_image(
+            (self.master.screen_width/6*5, self.master.screen_height*0.8),
+            image=pic)
+        self.pic_list.append(self.initial_img)
+        self.update_text()
+
+    def fade_out(self):
+        """
+        255 --> 0 (opaque --> =/opaque)
+        """
+        pic, alpha = self.initialiasize_text(True)
+        self.master.rect.canvas.itemconfigure(self.initial_img, image=pic)
+        self.update_text(True)

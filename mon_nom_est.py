@@ -19,7 +19,7 @@ from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
 from connect_dots import ConnectDotsGame
 from fonts import RenderFont
-from son.channels import music, monster_music
+from son.channels import music, monster_music, item_sound
 from random import randrange
 
 
@@ -400,8 +400,8 @@ class App(tk.Tk):
         # widgets
         self.view = View(self)
         self.full_w = FullScreenWindow(self)
-        self.game_controls = Control(self)
         self.rect = CanvasHandler(self) # rectangle photo dimensions
+        self.game_controls = Control(self)
         self.fade = FadeTransition(self)
         self.dial = DialogBoxes(self)
         # self.HS = HomeScreen(self)
@@ -475,16 +475,46 @@ class Control:
         - d: déplacement pièce à droite
         - middle-click: ouvre/ferme album photo
     """
-
     def __init__(self, master):
         self.master = master
+        self.inventory_img = bg_image_setup("./images/inventory/PA_NB_Inventory.png", name="inventory wall")
+        self.is_inventory_opened = False
+        self.are_items_img_created = False
+        self.item_pic = []
+        self.item_pic_id = {}
+        self.ir_lense_img = None
+        self.create_item_img()
 
     def initialize_controls(self):
+        """
+        Événements bind aux touches
+        """
         self.master.bind("<a>", self.change_room_left)  # aller à gauche
         self.master.bind("<d>", self.change_room_right)  # aller à droite
         self.master.bind("<s>", self.remove_closeup) # enlève close-up
         self.master.bind("<Button-2>", self.see_album)  # button 2 => mid click
         self.master.bind("<q>", self.exit_game)  # quitte programme
+        self.master.bind("<i>", self.open_close_inventory)  # ouvre/ferme inventaire
+
+    def create_item_img(self):
+        # items size
+        pic_x = int(self.master.screen_width / (512/57))
+        pic_y = int(self.master.screen_height / (864 / 229))
+        # sur mon pc: (298.5, 260.5)
+        pic_pos = (self.master.screen_width/(1024/199), self.master.screen_height/(1728/521))
+        IR_lenses = open_and_resize_img("./images/inventory/PA_IR_Lenses.png", name=self.master.rect.infrared_lenses.name,
+                                        x=pic_x, y=pic_y)
+        self.item_pic.append(IR_lenses)
+        self.ir_lense_img = self.master.rect.canvas.create_image(pic_pos, image=IR_lenses,
+                            tag=self.master.rect.infrared_lenses.name, state="hidden")
+        # tag bind IR + explications
+        self.IR_expl = HoverMessRelPos(self.master, self.master.rect.canvas,
+                       "Appuyez sur <r> pour passer en mode infrarouge.\nPermet aussi de voir certains monstres")
+        self.master.rect.canvas.tag_bind(self.ir_lense_img, "<Enter>", lambda x: self.IR_expl.show_tip
+        (self.master.game_e_handler.rel_pos))
+        self.master.rect.canvas.tag_bind(self.ir_lense_img, "<Leave>", self.IR_expl.hide_tip)
+        tag = self.master.rect.canvas.itemcget(self.ir_lense_img, "tag")
+        self.item_pic_id[tag] = self.ir_lense_img
 
     def exit_game(self, event=None):
         """
@@ -535,6 +565,28 @@ class Control:
         Appelle func show_album
         """
         self.master.view.show_album()
+
+    def open_close_inventory(self, event=None):
+        """
+        Ouvre inventaire
+            - change de bg
+            - charge items (=available) sur écran
+        """
+        if not self.is_inventory_opened:
+            self.master.rect.change_background("app_background",
+                                               "inventory wall")
+            self.is_inventory_opened = not self.is_inventory_opened
+            for item in self.master.rect.inventory:
+                item_id = self.item_pic_id.get(item.name)
+                self.master.rect.canvas.itemconfigure(item_id, state="normal")
+        else:
+            # remove inventory screen --> go back to current room
+            self.master.rect.change_background("app_background",
+                                               self.master.pages.get(self.master.pages_name[self.master.index]))
+            self.is_inventory_opened = not self.is_inventory_opened
+            for item in self.master.rect.inventory:
+                item_id = self.item_pic_id.get(item.name)
+                self.master.rect.canvas.itemconfigure(item_id, state="hidden")
 
 
 class FullScreenWindow(tk.Frame):
@@ -587,7 +639,6 @@ class Item:
     desc:str
     key:str
     is_being_used:bool = False
-    img: ClassVar[str] = None
     available:bool = False
 
 
@@ -691,15 +742,40 @@ class CanvasHandler(tk.Frame):
         self.initial_img_id = 0
         # inventaire
         self.inventory = [] # si pas dans inventaire, =/ available yet
-        self.infrared_lenses = Item("infrared lenses", "En appuyant sur <r>, permet de voir les lumières infrarouges",
-                                    "<r>")
+        self.infrared_lenses = Item(name="infrared lenses", desc="En appuyant sur <r>, permet de voir les lumières infrarouges",
+                                    key="<r>")
         self.modif_pic = None
 
     def make_item_available(self, item, func_id, event=None):
+        """
+        Ajouter item à liste
+        Bind clef
+        Désactivaction de click gauche
+        """
         item.available = True
         self.inventory.append(item)
+        self.item_added_to_inventory()
         self.master.bind(item.key, lambda x: self.use_item(item))
         self.master.unbind("<Button-1>", func_id)
+
+    def activate_ir(self, attach=True, event=None):
+        """
+        Son + activation ir
+        """
+        item = self.master.rect.infrared_lenses
+        if attach:
+            attach_sound = pygame.mixer.Sound("./son/ir/attach_ir.mp3")
+            item_sound.play(attach_sound)
+            item_sound.play(0.8)
+        else:
+            detach_sound = pygame.mixer.Sound("./son/ir/detach_ir.mp3")
+            item_sound.play(detach_sound)
+
+    def item_added_to_inventory(self, event=None):
+        """
+        ++items dans self.master.rect.inventory
+        """
+        self.master.fade_in.start_item_animation()
 
     def on_button_press(self, event):
         """
@@ -744,8 +820,12 @@ class CanvasHandler(tk.Frame):
         """
         item.is_being_used = not item.is_being_used
         if item.is_being_used:
+            if item.name == "infrared lenses":
+                self.activate_ir(True)
             print("IT IS ACTIVE")
         else:
+            if item.name == "infrared lenses":
+                self.activate_ir(False)
             print("Not using it rn.")
 
     def on_button_released(self, event=None):
@@ -910,9 +990,12 @@ class CanvasHandler(tk.Frame):
             pic_taken = ImageTk.PhotoImage(converted_pic.resize(pic_size_in_album), master=self.master)
             self.images_pic_reference.append(pic_taken)
             return pic_taken
-        pic_taken = ImageTk.PhotoImage(converted_pic.resize((pic_x, pic_y)), master=self.master)
-        self.images_pic_reference.append(pic_taken)
-        return pic_taken
+        try:
+            pic_taken = ImageTk.PhotoImage(converted_pic.resize((pic_x, pic_y)), master=self.master)
+            self.images_pic_reference.append(pic_taken)
+            return pic_taken
+        except ValueError:
+            print("Rectangle init")
 
     def moving_color_img(self, crop_dimensions, x, y):
         """
@@ -1101,7 +1184,8 @@ class Monster:
         #                            open_image_setup_file(""),
         #                            ]
         self.monster_design_img = [open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign.png"),
-                                   open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign2.png")
+                                   open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign2.png"),
+
                                    ]
         self.monster_design = None
         self.monster_timer = None
