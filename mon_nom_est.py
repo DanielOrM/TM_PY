@@ -205,7 +205,7 @@ class HomeScreen:
         # quitter le jeu + texte
         self.red_button_icon = self.hs_canvas.create_image((screen_w_img_pos * 4,
                                                           screen_h_img_pos*11/10), image=self.red_button_img)
-        self.red_button_tuto_txt = self.hs_canvas.create_text(((screen_w_img_pos * 3 / 2) * 3 + screen_w_img_text/3*2,
+        self.red_button_tuto_txt = self.hs_canvas.create_text(((screen_w_img_pos * 3 / 2) * 3 + screen_w_img_text/7*5,
                                                           screen_h_img_pos*11/10),
                                                           text=txt_files_story("./tuto texts/exit_game_tuto.txt"),
                                                           fill="white", font=("Helvetica", 15, "italic"))
