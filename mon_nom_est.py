@@ -5,6 +5,9 @@ import sys
 import os
 import pygame
 import threading
+import cv2 as cv
+from dataclasses import dataclass
+from typing import ClassVar
 from txt_story_reader import txt_files_story
 from threading import Thread
 from PIL import Image, ImageTk
@@ -553,6 +556,18 @@ class FullScreenWindow(tk.Frame):
             self.master.attributes("-fullscreen", self.is_fullscreen)
         return "break"
 
+@dataclass
+class Item:
+    """
+    Permet le stockage d'items divers
+    """
+    name:str
+    desc:str
+    key:str
+    is_being_used:bool = False
+    img: ClassVar[str] = None
+    available:bool = False
+
 
 class CanvasHandler(tk.Frame):
     """
@@ -607,6 +622,8 @@ class CanvasHandler(tk.Frame):
                                          "[Click gauche] pour regarder les livres")
         self.open_family_book = HoverMessRelPos(self.master, self.canvas,
                                                 "[Click gauche] pour prendre le livre")
+        self.get_infrared_lenses = HoverMessRelPos(self.master, self.canvas,
+                                                "[Click gauche] pour prendre [?]")
         self.camera = self.canvas.create_image(self.master.winfo_screenwidth()/2,
                                                self.master.winfo_screenheight()/1.5,
                                                image=self.master.camera
@@ -650,6 +667,17 @@ class CanvasHandler(tk.Frame):
         self.start_y = None
         # numéro pour id de la première image de la liste des photos
         self.initial_img_id = 0
+        # inventaire
+        self.inventory = [] # si pas dans inventaire, =/ available yet
+        self.infrared_lenses = Item("infrared lenses", "En appuyant sur <r>, permet de voir les lumières infrarouges",
+                                    "<r>")
+        self.modif_pic = None
+
+    def make_item_available(self, item, func_id, event=None):
+        item.available = True
+        self.inventory.append(item)
+        self.master.bind(item.key, lambda x: self.use_item(item))
+        self.master.unbind("<Button-1>", func_id)
 
     def on_button_press(self, event):
         """
@@ -658,10 +686,12 @@ class CanvasHandler(tk.Frame):
         """
         self.start_x = self.canvas.canvasx(event.x)
         self.start_y = self.canvas.canvasy(event.y)
-        # create rectangle if not yet exist
+        # crée rectangle si existe pas
         if not self.rect:
             self.rect = self.canvas.create_rectangle(self.start_x, self.start_y,
-                                                     1, 1, outline='yellow', dash=(1,2))
+                                                     self.start_x*13/10, self.start_y*13/10,
+                                                     outline='yellow', dash=(1,2))
+            self.canvas.itemconfigure(self.rect, state="hidden")
 
     def on_move_press(self, event):
         """
@@ -669,10 +699,31 @@ class CanvasHandler(tk.Frame):
             - cur_x/cur_y = update
             - rectangle créé à partir de coords
         """
+        if self.modif_pic:
+            self.canvas.delete(self.modif_pic)
+        self.modif_pic = None
         cur_x = self.canvas.canvasx(event.x)
         cur_y = self.canvas.canvasy(event.y)
         # agrandi rectangle pendant sélection
+        self.canvas.itemconfigure(self.rect, state="normal")
         self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
+        if self.master.rect.infrared_lenses.is_being_used:
+            """
+            Effet infrarouge
+            """
+            middle_x_p = (self.start_x+cur_x)/2
+            middle_y_p = (self.start_y+cur_y)/2
+            self.moving_color_img((self.start_x, self.start_y, cur_x, cur_y), middle_x_p, middle_y_p)
+
+    def use_item(self, item, event=None):
+        """
+        Toggle pour drag + drop photos item
+        """
+        item.is_being_used = not item.is_being_used
+        if item.is_being_used:
+            print("IT IS ACTIVE")
+        else:
+            print("Not using it rn.")
 
     def on_button_released(self, event=None):
         """
@@ -684,7 +735,12 @@ class CanvasHandler(tk.Frame):
         """
         cur_x = self.canvas.canvasx(event.x)
         cur_y = self.canvas.canvasy(event.y)
-        self.place_photo_album_list((self.start_x, self.start_y, cur_x, cur_y))
+        if self.master.rect.infrared_lenses.is_being_used:
+            self.canvas.delete(self.modif_pic)
+            self.modif_pic = None
+            self.place_color_img((self.start_x, self.start_y, cur_x, cur_y))
+        else:
+            self.place_photo_album_list((self.start_x, self.start_y, cur_x, cur_y))
         self.master.game_e_handler.check_start_x = self.start_x
         self.master.game_e_handler.check_start_y = self.start_y
         self.master.game_e_handler.check_end_x = cur_x
@@ -694,6 +750,9 @@ class CanvasHandler(tk.Frame):
         self.master.check_game_events()
         # check si photo encadre posi° monstre
         self.master.game_e_handler.check_monster_taken_by_camera()
+        # check pour lentilles infrarouges
+        if not self.master.rect.infrared_lenses.available:
+            self.master.game_e_handler.check_for_infrared_lenses()
         # reset valeur check
         self.master.game_e_handler.check_start_x = 0
         self.master.game_e_handler.check_end_x = 0
@@ -772,12 +831,60 @@ class CanvasHandler(tk.Frame):
         image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
         image_to_crop = image_to_crop_temp.resize((screen_width,screen_height)).convert("RGBA")
         pic_size_in_album = (int(screen_width/8), int(screen_height/7))
+        if crop_dimensions[0] > crop_dimensions[2]:
+            # left > right and bottom > top
+            if crop_dimensions[1] > crop_dimensions[3]:
+                # print("HAHA")
+                crop_dimensions = (crop_dimensions[2], crop_dimensions[3], crop_dimensions[0], crop_dimensions[1])
+                # print(crop_dimensions)
+            else:
+                # left > right
+                crop_dimensions = (crop_dimensions[2], crop_dimensions[1], crop_dimensions[0], crop_dimensions[3])
+        elif crop_dimensions[1] > crop_dimensions[3]:
+            # bottom > top
+            crop_dimensions = (crop_dimensions[0], crop_dimensions[3], crop_dimensions[2], crop_dimensions[1])
+        # print(crop_dimensions)
         pic_taken_temp = image_to_crop.crop(crop_dimensions).resize(pic_size_in_album)
         pic_taken = ImageTk.PhotoImage(pic_taken_temp, master=self.master)
         self.images_pic_reference.append(pic_taken)
         image_id = self.canvas.create_image(
             0, 0,
             image=pic_taken,state="hidden"
+        )
+        self.photos_list_updated.append(image_id)
+
+    def crop_img(self, crop_dimensions):
+        # ajoute photo prise dans liste des photos
+        image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
+        image_to_crop = image_to_crop_temp.resize((screen_width, screen_height)).convert("RGBA")
+        pic_size_in_album = (int(screen_width / 8), int(screen_height / 7))
+        pic_taken_temp = image_to_crop.crop(crop_dimensions).resize(pic_size_in_album)
+        self.images_pic_reference.append(pic_taken_temp)
+        pic_taken_temp.save("./images/infrared pics/ir.png")
+        # infrared style
+        infrared_pic_ref = cv.imread("./images/infrared pics/ir.png")
+        infrared_pic = cv.applyColorMap(infrared_pic_ref, cv.COLORMAP_JET)
+        converted_pic = Image.fromarray(infrared_pic)
+        pic_x = int(crop_dimensions[2]-crop_dimensions[0])
+        pic_y = int(crop_dimensions[3] - crop_dimensions[1])
+        pic_taken = ImageTk.PhotoImage(converted_pic.resize((pic_x, pic_y)), master=self.master)
+        self.images_pic_reference.append(pic_taken)
+        return pic_taken
+
+    def moving_color_img(self, crop_dimensions, x, y):
+        pic = self.crop_img(crop_dimensions)
+        self.modif_pic = self.canvas.create_image(
+            x, y,
+            image=pic, state="normal"
+        )
+        self.images_pic_reference.append(self.modif_pic)
+        return self.modif_pic
+
+    def place_color_img(self, crop_dimensions):
+        pic = self.crop_img(crop_dimensions)
+        image_id = self.canvas.create_image(
+            0, 0,
+            image=pic, state="hidden"
         )
         self.photos_list_updated.append(image_id)
 
@@ -1001,7 +1108,6 @@ class Monster:
         global restart
         restart = True
         self.master.destroy()
-
 
 def main():
     """

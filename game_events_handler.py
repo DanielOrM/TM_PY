@@ -75,6 +75,8 @@ class GameEventHandler:
                          "./images/connect the dots/DotsInkAlien.png"
                          ]
         # self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png"]
+        # infrared
+        self.are_infrared_lenses_seen = False
 
     def skip_intro(self):
         """
@@ -289,6 +291,18 @@ class GameEventHandler:
                                                    self.master.library_closeup.get("see_books")))
             else:
                 self.master.rect.see_books.hide_tip()
+            if self.are_infrared_lenses_seen:
+                y_error_margin = self.master.screen_height / (432 / 5)
+                if self.master.screen_height / (216 / 145) - y_error_margin < self.rel_pos.get("y") < \
+                        self.master.screen_height / (36 / 25) + y_error_margin and self.master.screen_width / (768 / 55) \
+                        < self.rel_pos.get("x") < self.master.screen_width / (768 / 185):
+                    if not self.master.rect.infrared_lenses.available:
+                        self.master.rect.get_infrared_lenses.show_tip(self.rel_pos)
+                        infrared_available = self.master.bind("<Button-1>", lambda x: self.master.rect.
+                                                              make_item_available(
+                            self.master.rect.infrared_lenses, infrared_available))
+                else:
+                    self.master.rect.get_infrared_lenses.hide_tip()
         # regarde livres dispo
         elif current_room == "livres":
             # print("Accès à tous les livres...")
@@ -339,6 +353,25 @@ class GameEventHandler:
                     print("Monstre PAS pris en photo")
             else:
                 print("Bah.. le monstre chasse pas donc c'est bon")
+
+    def check_for_infrared_lenses(self):
+        """
+        Si prend une photo dans endroit particulier bibliothèque (en bleu):
+            - débloque un dialogue
+            - possible de ramasser lentilles infrarouges
+            - nouvelle touche <r> (sur zone de drag + drop)
+        """
+        current_room = self.get_current_room_img()
+        if current_room != "bibliothèque":
+            return
+        # print(f"gauche{self.check_start_x}, droit{self.check_end_x}, bas:{self.check_start_y},
+        # haut{self.check_end_y}")
+        y_error_margin = self.master.screen_height / (432 / 5)
+        if self.master.screen_height / (216 / 145) - y_error_margin < self.check_start_y < self.check_end_y < \
+                self.master.screen_height / (36 / 25) + y_error_margin and self.master.screen_width / (768 / 55) \
+                < self.check_start_x < self.check_end_x < self.master.screen_width / (768 / 185):
+            self.master.rect.create_dialog_box("infrarouges_trouvee")
+            self.are_infrared_lenses_seen = True
 
     def get_current_room_img(self):
         """
@@ -437,6 +470,9 @@ class GameEventHandler:
         # bibliothèque --> bureau OU close-up livres dispo
         elif prev_room == "bibliothèque" and current_room in {"pièce dessin", "livres"}:
             self.master.rect.see_books.hide_tip()
+            if self.are_infrared_lenses_seen:
+                self.master.unbind("<Button-1>")
+                self.master.rect.get_infrared_lenses.hide_tip()
         # close-up livres dispo --> bureau OU lire livre famille OU bibliothèque
         elif prev_room == "livres" and current_room in {"pièce dessin", "lire famille livre", "bibliothèque"}:
             self.master.rect.open_family_book.hide_tip()
