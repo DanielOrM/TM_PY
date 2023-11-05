@@ -37,7 +37,8 @@ class HomeScreen:
         self.master.grid_columnconfigure(0, weight=1)  # pour column 0
         # écran d'accueil initial
         self.hs_image = bg_image_setup("./images/homescreen/PA_PX_BackgroundRework.png", name="écran d'accueil")
-        self.hs_tuto = bg_image_setup("./images/homescreen/GradientBlue.png", name="tuto bg")    # tuto img
+        # self.hs_tuto = bg_image_setup("./images/homescreen/GradientBlue.png", name="tuto bg")    # tuto img
+        self.hs_tuto = bg_image_setup("./images/homescreen/PA_BloodyRoom.png", name="tuto bg")    # tuto img
         self.hs_canvas_img = None
         self.hs_canvas = tk.Canvas(master, height=screen_height, width=screen_width)
         self.apply_hs_canvas_image()
