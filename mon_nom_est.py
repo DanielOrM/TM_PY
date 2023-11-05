@@ -1175,17 +1175,13 @@ class Monster:
     """
     def __init__(self, master):
         self.master = master
-        # self.monster_design_img = [open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign.png"),
-        #                            open_image_setup_file(""),
-        #                            open_image_setup_file(""),
-        #                            open_image_setup_file(""),
-        #                            open_image_setup_file(""),
-        #                            open_image_setup_file(""),
-        #                            open_image_setup_file(""),
-        #                            ]
-        self.monster_design_img = [open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign.png"),
-                                   open_image_setup_file("images/monster/monster design/PA_NB_MonsterDesign2.png"),
-
+        self.monster_design_img = [open_image_setup_file("./images/monster/monster design/PA_NB_MonsterDesign.png"),
+                                   open_image_setup_file("./images/monster/monster design/PA_NB_MonsterDesign2.png"),
+                                   open_image_setup_file(""),
+                                   open_image_setup_file(""),
+                                   open_image_setup_file(""),
+                                   open_image_setup_file(""),
+                                   open_image_setup_file(""),
                                    ]
         self.monster_design = None
         self.monster_timer = None
