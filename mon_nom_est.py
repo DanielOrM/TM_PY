@@ -820,6 +820,13 @@ class CanvasHandler(tk.Frame):
         self.is_hover_message_running = not self.is_hover_message_running
 
     def crop_dimensions_rearrangement(self, crop_dimensions, event=None):
+        """
+        Évite d'avoir des erreurs comme:
+            - left > right
+            - bottom > top
+            - les deux en même temps
+        Redéfini crop_dimensions
+        """
         if crop_dimensions[0] > crop_dimensions[2]:
             # left > right and bottom > top
             if crop_dimensions[1] > crop_dimensions[3]:
@@ -859,6 +866,11 @@ class CanvasHandler(tk.Frame):
         self.photos_list_updated.append(image_id)
 
     def crop_img(self, crop_dimensions,  place_in_album=False, event=None):
+        """
+        Redimensionne image à taille désirée
+            - si place_in_album=True:
+                - redimensionne à taille précise pour fit dans album
+        """
         # ajoute photo prise dans liste des photos
         image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
         image_to_crop = image_to_crop_temp.resize((screen_width, screen_height)).convert("RGBA")
@@ -881,6 +893,9 @@ class CanvasHandler(tk.Frame):
         return pic_taken
 
     def moving_color_img(self, crop_dimensions, x, y):
+        """
+        Montre photo infrarouge pendant drag photos
+        """
         crop_dimensions = self.crop_dimensions_rearrangement(crop_dimensions)
         pic = self.crop_img(crop_dimensions)
         self.modif_pic = self.canvas.create_image(
@@ -891,6 +906,9 @@ class CanvasHandler(tk.Frame):
         return self.modif_pic
 
     def place_color_img(self, crop_dimensions):
+        """
+        Place photos infrarouges dans album photo
+        """
         crop_dimensions = self.crop_dimensions_rearrangement(crop_dimensions)
         pic_size_in_album = (int(screen_width / 8), int(screen_height / 7))
         pic = self.crop_img(crop_dimensions, True)
@@ -914,11 +932,9 @@ class CanvasHandler(tk.Frame):
         current_photos_set = set(self.photos_list)
         diff = updated_photos_set.difference(current_photos_set)
         if diff:
-            # print("SOMETHING HAS CHANGED")
             self.photos_list = self.photos_list_updated[:]
             self.listing_photos()
         else:
-            # print("NOTHING HAS CHANGED")
             pass
 
     def listing_photos(self, event=None):
