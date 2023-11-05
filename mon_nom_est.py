@@ -710,6 +710,7 @@ class CanvasHandler(tk.Frame):
         if self.master.rect.infrared_lenses.is_being_used:
             """
             Effet infrarouge
+                - place l'image au milieu du rectangle photo (du coup ça prend tt la place du rectangle)
             """
             middle_x_p = (self.start_x+cur_x)/2
             middle_y_p = (self.start_y+cur_y)/2
@@ -818,6 +819,21 @@ class CanvasHandler(tk.Frame):
         """
         self.is_hover_message_running = not self.is_hover_message_running
 
+    def crop_dimensions_rearrangement(self, crop_dimensions, event=None):
+        if crop_dimensions[0] > crop_dimensions[2]:
+            # left > right and bottom > top
+            if crop_dimensions[1] > crop_dimensions[3]:
+                # print("HAHA")
+                crop_dimensions = (crop_dimensions[2], crop_dimensions[3], crop_dimensions[0], crop_dimensions[1])
+                # print(crop_dimensions)
+            else:
+                # left > right
+                crop_dimensions = (crop_dimensions[2], crop_dimensions[1], crop_dimensions[0], crop_dimensions[3])
+        elif crop_dimensions[1] > crop_dimensions[3]:
+            # bottom > top
+            crop_dimensions = (crop_dimensions[0], crop_dimensions[3], crop_dimensions[2], crop_dimensions[1])
+        return crop_dimensions
+
     def place_photo_album_list(self, crop_dimensions):
         """
         Ajoute photo prise dans liste
@@ -831,18 +847,7 @@ class CanvasHandler(tk.Frame):
         image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
         image_to_crop = image_to_crop_temp.resize((screen_width,screen_height)).convert("RGBA")
         pic_size_in_album = (int(screen_width/8), int(screen_height/7))
-        if crop_dimensions[0] > crop_dimensions[2]:
-            # left > right and bottom > top
-            if crop_dimensions[1] > crop_dimensions[3]:
-                # print("HAHA")
-                crop_dimensions = (crop_dimensions[2], crop_dimensions[3], crop_dimensions[0], crop_dimensions[1])
-                # print(crop_dimensions)
-            else:
-                # left > right
-                crop_dimensions = (crop_dimensions[2], crop_dimensions[1], crop_dimensions[0], crop_dimensions[3])
-        elif crop_dimensions[1] > crop_dimensions[3]:
-            # bottom > top
-            crop_dimensions = (crop_dimensions[0], crop_dimensions[3], crop_dimensions[2], crop_dimensions[1])
+        crop_dimensions = self.crop_dimensions_rearrangement(crop_dimensions)
         # print(crop_dimensions)
         pic_taken_temp = image_to_crop.crop(crop_dimensions).resize(pic_size_in_album)
         pic_taken = ImageTk.PhotoImage(pic_taken_temp, master=self.master)
@@ -853,7 +858,7 @@ class CanvasHandler(tk.Frame):
         )
         self.photos_list_updated.append(image_id)
 
-    def crop_img(self, crop_dimensions):
+    def crop_img(self, crop_dimensions,  place_in_album=False, event=None):
         # ajoute photo prise dans liste des photos
         image_to_crop_temp = Image.open(self.master.pages_file_location.get(self.master.pages_name[self.master.index]))
         image_to_crop = image_to_crop_temp.resize((screen_width, screen_height)).convert("RGBA")
@@ -867,11 +872,16 @@ class CanvasHandler(tk.Frame):
         converted_pic = Image.fromarray(infrared_pic)
         pic_x = int(crop_dimensions[2]-crop_dimensions[0])
         pic_y = int(crop_dimensions[3] - crop_dimensions[1])
+        if place_in_album:
+            pic_taken = ImageTk.PhotoImage(converted_pic.resize(pic_size_in_album), master=self.master)
+            self.images_pic_reference.append(pic_taken)
+            return pic_taken
         pic_taken = ImageTk.PhotoImage(converted_pic.resize((pic_x, pic_y)), master=self.master)
         self.images_pic_reference.append(pic_taken)
         return pic_taken
 
     def moving_color_img(self, crop_dimensions, x, y):
+        crop_dimensions = self.crop_dimensions_rearrangement(crop_dimensions)
         pic = self.crop_img(crop_dimensions)
         self.modif_pic = self.canvas.create_image(
             x, y,
@@ -881,7 +891,9 @@ class CanvasHandler(tk.Frame):
         return self.modif_pic
 
     def place_color_img(self, crop_dimensions):
-        pic = self.crop_img(crop_dimensions)
+        crop_dimensions = self.crop_dimensions_rearrangement(crop_dimensions)
+        pic_size_in_album = (int(screen_width / 8), int(screen_height / 7))
+        pic = self.crop_img(crop_dimensions, True)
         image_id = self.canvas.create_image(
             0, 0,
             image=pic, state="hidden"
