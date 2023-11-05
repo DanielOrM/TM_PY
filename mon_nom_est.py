@@ -59,27 +59,38 @@ class HomeScreen:
         """
         x_icon = int(self.master.winfo_screenwidth()/(640/49))
         y_icon = int(self.master.winfo_screenheight()/(216/19))
-        self.camera = self.master.camera
+        # caméra + texte
         self.camera_icon = None
         self.camera_tuto_txt = None
-        self.album = open_and_resize_img("./images/player/PA_NB_Album.png", "album", x_icon, y_icon)
+        self.camera = self.master.camera
+        # album + texte
         self.album_icon = None
         self.album_tuto_txt = None
-        self.motion_img = open_and_resize_img("./images/homescreen/icons/PA_NB_MotionIcon.png",
-                                                "motion", x_icon, y_icon)
+        self.album = open_and_resize_img("./images/player/PA_NB_Album.png", "album", x_icon, y_icon)
+        # mouvement + texte
         self.motion_icon = None
         self.motion_tuto_txt = None
-        self.pencil_img = open_and_resize_img("./images/homescreen/icons/PA_NB_Pencil.png", "pencil", x_icon, y_icon)
+        self.motion_img = open_and_resize_img("./images/homescreen/icons/PA_NB_MotionIcon.png",
+                                              "motion", x_icon, y_icon)
+        # crayon + texte
         self.pencil_icon = None
         self.pencil_tuto_txt = None
-        self.red_button_img = open_and_resize_img("./images/homescreen/icons/PA_NB_RedButton.png",
-                                                    "exit game", x_icon, y_icon)
+        self.pencil_img = open_and_resize_img("./images/homescreen/icons/PA_NB_Pencil.png", "pencil", x_icon, y_icon)
+        # bouton rouge + texte
         self.red_button_icon = None
         self.red_button_tuto_txt = None
-        self.unzoom_img = open_and_resize_img("./images/homescreen/icons/PA_NB_Unzoom.png", "exit close-up",
-                                                x_icon, y_icon)
+        self.red_button_img = open_and_resize_img("./images/homescreen/icons/PA_NB_RedButton.png",
+                                                  "exit game", x_icon, y_icon)
+        # quitter close-up + texte
         self.unzoom_icon = None
         self.unzoom_tuto_txt = None
+        self.unzoom_img = open_and_resize_img("./images/homescreen/icons/PA_NB_Unzoom.png", "exit close-up",
+                                              x_icon, y_icon)
+        # ouvrir inventaire
+        self.inventory_icon = None
+        self.inventory_tuto_txt = None
+        self.inventory_img = open_and_resize_img("./images/homescreen/icons/PA_NB_Bagpack.png", "bag pack",
+                                              x_icon, y_icon)
 
         # quitter tuto
         self.exit_tuto = None
@@ -200,31 +211,38 @@ class HomeScreen:
                                                          text=txt_files_story("./tuto texts/album_tuto.txt"),
                                                          fill="white", font=("Helvetica", 15, "italic"))
         # mouvement + texte
-        self.motion_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_img_pos*11/10), image=self.motion_img)
+        self.motion_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_img_pos*0.95), image=self.motion_img)
         self.motion_tuto_txt = self.hs_canvas.create_text((screen_w_img_pos * 3 / 2 + screen_w_img_text,
-                                                          screen_h_img_pos*11/10),
+                                                          screen_h_img_pos*0.95),
                                                          text=txt_files_story("./tuto texts/motion_tuto.txt"),
                                                          fill="white", font=("Helvetica", 15, "italic"))
         # quitter le jeu + texte
         self.red_button_icon = self.hs_canvas.create_image((screen_w_img_pos * 4,
-                                                          screen_h_img_pos*11/10), image=self.red_button_img)
+                                                          screen_h_img_pos*0.95), image=self.red_button_img)
         self.red_button_tuto_txt = self.hs_canvas.create_text(((screen_w_img_pos * 3 / 2) * 3 + screen_w_img_text/7*5,
-                                                          screen_h_img_pos*11/10),
+                                                          screen_h_img_pos*0.95),
                                                           text=txt_files_story("./tuto texts/exit_game_tuto.txt"),
                                                           fill="white", font=("Helvetica", 15, "italic"))
         # dessiner + texte
-        self.pencil_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_space+screen_h_img_pos),
+        self.pencil_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_space+screen_h_img_pos*0.8),
                                                        image=self.pencil_img)
         self.pencil_tuto_txt = self.hs_canvas.create_text((screen_w_img_pos*3/2 + screen_w_img_text*6/5,
-                                                           screen_h_space+screen_h_img_pos),
+                                                           screen_h_space+screen_h_img_pos*0.8),
                                                           text=txt_files_story("./tuto texts/draw_tuto.txt"),
                                                           fill="white", font=("Helvetica", 15, "italic"))
         # quitter close-up + texte
-        self.unzoom_icon = self.hs_canvas.create_image((screen_w_img_pos*4, screen_h_space+screen_h_img_pos),
+        self.unzoom_icon = self.hs_canvas.create_image((screen_w_img_pos*4, screen_h_space+screen_h_img_pos*0.8),
                                                        image=self.unzoom_img)
         self.unzoom_tuto_txt = self.hs_canvas.create_text(((screen_w_img_pos * 3 / 2) * 3 + screen_w_img_text,
-                                                           screen_h_space+screen_h_img_pos),
+                                                           screen_h_space+screen_h_img_pos*0.8),
                                                           text=txt_files_story("./tuto texts/exit_close_up_tuto.txt"),
+                                                          fill="white", font=("Helvetica", 15, "italic"))
+        # inventaire + texte
+        self.inventory_icon = self.hs_canvas.create_image((screen_w_img_pos, screen_h_space+screen_h_img_pos*(6/5)),
+                                                       image=self.inventory_img)
+        self.inventory_tuto_txt = self.hs_canvas.create_text((screen_w_img_pos*3/2 + screen_w_img_text*11/10,
+                                                           screen_h_space*(1.95)+screen_h_img_pos/3*2),
+                                                          text=txt_files_story("./tuto texts/inventory_tuto.txt"),
                                                           fill="white", font=("Helvetica", 15, "italic"))
 
     def show_all_tuto_icons_txt(self):
@@ -244,6 +262,8 @@ class HomeScreen:
         self.hs_canvas.itemconfigure(self.pencil_tuto_txt, state="normal")
         self.hs_canvas.itemconfigure(self.unzoom_icon, state="normal")
         self.hs_canvas.itemconfigure(self.unzoom_tuto_txt, state="normal")
+        self.hs_canvas.itemconfigure(self.inventory_icon, state="normal")
+        self.hs_canvas.itemconfigure(self.inventory_tuto_txt, state="normal")
 
     def hide_all_icons(self, event=None):
         """
@@ -261,6 +281,8 @@ class HomeScreen:
         self.hs_canvas.itemconfigure(self.pencil_tuto_txt, state="hidden")
         self.hs_canvas.itemconfigure(self.unzoom_icon, state="hidden")
         self.hs_canvas.itemconfigure(self.unzoom_tuto_txt, state="hidden")
+        self.hs_canvas.itemconfigure(self.inventory_icon, state="hidden")
+        self.hs_canvas.itemconfigure(self.inventory_tuto_txt, state="hidden")
 
     def show_tuto(self, event=None):
         """
