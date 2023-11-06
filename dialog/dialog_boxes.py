@@ -29,7 +29,8 @@ class DialogBoxes:
             "player_room": txt_files_reader("dialog/dialog_text/player_room.txt"),
             "découverte_cahier_dessin": txt_files_reader("dialog/dialog_text/découverte_cahier_dessin.txt"),
             "dessins": txt_files_reader("dialog/dialog_text/dessins.txt"),
-            "infrarouges_trouvee": txt_files_reader("dialog/dialog_text/infrarouges_trouvee.txt")
+            "infrarouges_trouvee": txt_files_reader("dialog/dialog_text/infrarouges_trouvee.txt"),
+            "médocs": txt_files_reader("dialog/dialog_text/médocs.txt")
         }
 
     def typewritten_effect(self, text_id, chosen_text):

@@ -490,6 +490,7 @@ class Control:
         self.item_pic = []
         self.item_pic_id = {}
         self.ir_lense_img = None
+        self.drugs_img = None
         self.create_item_img()
 
     def initialize_controls(self):
@@ -504,24 +505,38 @@ class Control:
         self.master.bind("<i>", self.open_close_inventory)  # ouvre/ferme inventaire
 
     def create_item_img(self):
-        # items size
+        # IR size
         pic_x = int(self.master.screen_width / (512/57))
         pic_y = int(self.master.screen_height / (864 / 229))
         # sur mon pc: (298.5, 260.5)
-        pic_pos = (self.master.screen_width/(1024/199), self.master.screen_height/(1728/521))
+        pic_pos_ir = (self.master.screen_width/(1024/199), self.master.screen_height/(1728/521))
+        # ir img
         IR_lenses = open_and_resize_img("./images/inventory/PA_IR_Lenses.png", name=self.master.rect.infrared_lenses.name,
                                         x=pic_x, y=pic_y)
         self.item_pic.append(IR_lenses)
-        self.ir_lense_img = self.master.rect.canvas.create_image(pic_pos, image=IR_lenses,
+        self.ir_lense_img = self.master.rect.canvas.create_image(pic_pos_ir, image=IR_lenses,
                             tag=self.master.rect.infrared_lenses.name, state="hidden")
         # tag bind IR + explications
-        self.IR_expl = HoverMessRelPos(self.master, self.master.rect.canvas,
-                       "Appuyez sur <r> pour passer en mode infrarouge.\nPermet aussi de voir certains monstres")
-        self.master.rect.canvas.tag_bind(self.ir_lense_img, "<Enter>", lambda x: self.IR_expl.show_tip
+        self.bind_item_to_event(self.master.rect.infrared_lenses, self.ir_lense_img)
+        # drug pos
+        img_drug_pos = (732, pic_pos_ir[1])
+        # drugs img
+        drugs = open_and_resize_img("./images/inventory/PA_Drug.png", name=self.master.rect.drugs.name,
+                                        x=pic_x, y=pic_y)
+        self.item_pic.append(drugs)
+        self.drugs_img = self.master.rect.canvas.create_image(img_drug_pos, image=drugs,
+                            tag=self.master.rect.drugs.name, state="hidden")
+        # tag bind IR + explications
+        self.bind_item_to_event(self.master.rect.drugs, self.drugs_img)
+
+    def bind_item_to_event(self, item, item_img):
+        item_mess = HoverMessRelPos(self.master, self.master.rect.canvas,
+                                        item.desc)
+        self.master.rect.canvas.tag_bind(item_img, "<Enter>", lambda x: item_mess.show_tip
         (self.master.game_e_handler.rel_pos))
-        self.master.rect.canvas.tag_bind(self.ir_lense_img, "<Leave>", self.IR_expl.hide_tip)
-        tag = self.master.rect.canvas.itemcget(self.ir_lense_img, "tag")
-        self.item_pic_id[tag] = self.ir_lense_img
+        self.master.rect.canvas.tag_bind(item_img, "<Leave>", item_mess.hide_tip)
+        tag = self.master.rect.canvas.itemcget(item_img, "tag")
+        self.item_pic_id[tag] = item_img
 
     def exit_game(self, event=None):
         """
@@ -563,7 +578,7 @@ class Control:
         """
         current_room = self.master.game_e_handler.get_current_room_img()
         if current_room in {"close-up oranges", "tiroir cuisine", "close-up bureau", "dessin",
-                            "livres", "lire famille livre"}:
+                            "livres", "lire famille livre", "mirroir", "médicaments"}:
             self.master.rect.change_background("app_background",
                                                self.master.pages.get(self.master.pages_name[self.master.index]))
 
@@ -585,6 +600,8 @@ class Control:
             self.is_inventory_opened = not self.is_inventory_opened
             for item in self.master.rect.inventory:
                 item_id = self.item_pic_id.get(item.name)
+                print(item_id, item.name)
+                print(self.master.rect.canvas.itemconfigure(item_id))
                 self.master.rect.canvas.itemconfigure(item_id, state="normal")
         else:
             # remove inventory screen --> go back to current room
@@ -643,8 +660,8 @@ class Item:
     Permet le stockage d'items divers
     """
     name:str
-    desc:str
-    key:str
+    key: str
+    desc:str = None
     is_being_used:bool = False
     available:bool = False
 
@@ -706,8 +723,11 @@ class CanvasHandler(tk.Frame):
                                          "[Click gauche] pour regarder les livres")
         self.open_family_book = HoverMessRelPos(self.master, self.canvas,
                                                 "[Click gauche] pour prendre le livre")
+        # item mess
         self.get_infrared_lenses = HoverMessRelPos(self.master, self.canvas,
                                                 "[Click gauche] pour prendre [?]")
+        self.get_drugs = HoverMessRelPos(self.master, self.canvas,
+                                                "[Click gauche] pour prendre des antidépresseurs")
         self.camera = self.canvas.create_image(self.master.winfo_screenwidth()/2,
                                                self.master.winfo_screenheight()/1.5,
                                                image=self.master.camera
@@ -753,8 +773,12 @@ class CanvasHandler(tk.Frame):
         self.initial_img_id = 0
         # inventaire
         self.inventory = [] # si pas dans inventaire, =/ available yet
-        self.infrared_lenses = Item(name="infrared lenses", desc="En appuyant sur <r>, permet de voir les lumières infrarouges",
-                                    key="<r>")
+        # items, instance de la classe: Item
+        self.infrared_lenses = Item(name="infrared lenses", key="<r>")
+        self.infrared_lenses.desc = f"Appuyez sur {self.infrared_lenses.key} pour passer en mode infrarouge.\nPermet aussi de voir certains monstres"
+        # barre d'anxiété =/ implémenté
+        self.drugs = Item(name="drugs", key="<f>")
+        self.drugs.desc = f"Appuyez sur {self.drugs.key} pour prendre un antidépresseur.\nRéduis la barre d'anxiété"
         self.modif_pic = None
 
     def make_item_available(self, item, func_id, event=None):
@@ -765,6 +789,7 @@ class CanvasHandler(tk.Frame):
         """
         item.available = True
         self.inventory.append(item)
+        print(self.inventory)
         self.item_added_to_inventory()
         self.master.bind(item.key, lambda x: self.use_item(item))
         self.master.unbind("<Button-1>", func_id)
@@ -786,6 +811,7 @@ class CanvasHandler(tk.Frame):
         """
         ++items dans self.master.rect.inventory
         """
+        print("ITEM AJOUTE")
         self.master.fade_in.start_item_animation()
 
     def on_button_press(self, event):
@@ -867,6 +893,9 @@ class CanvasHandler(tk.Frame):
         # check pour lentilles infrarouges
         if not self.master.rect.infrared_lenses.available:
             self.master.game_e_handler.check_for_infrared_lenses()
+        if not self.master.rect.drugs.available:
+            print("checking!")
+            self.master.game_e_handler.check_for_drugs()
         # reset valeur check
         self.master.game_e_handler.check_start_x = 0
         self.master.game_e_handler.check_end_x = 0

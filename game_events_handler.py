@@ -77,6 +77,7 @@ class GameEventHandler:
         # self.img_list = ["./images/connect the dots/FishDrawnDotsSize.png"]
         # infrared
         self.are_infrared_lenses_seen = False
+        self.are_drugs_seen = False
 
     def skip_intro(self):
         """
@@ -139,7 +140,7 @@ class GameEventHandler:
             music.set_volume(0.8)
         elif current_room == "salle de bain":
             # close-up pour miroir + médocs
-            if self.master.screen_width / (6 * 4) < self.rel_pos.get("x") < self.master.screen_width and \
+            if self.master.screen_width * 0.6 < self.rel_pos.get("x") < self.master.screen_width * (4 / 5) and \
                     0 < self.rel_pos.get("y") < self.master.screen_height / 3:
                 self.master.rect.bathroom_mirror.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
@@ -149,8 +150,8 @@ class GameEventHandler:
             else:
                 self.master.rect.bathroom_mirror.hide_tip()
         elif current_room == "mirroir":
-            if self.master.screen_width /(7*4) < self.rel_pos.get("x") < self.master.screen_width /(7*5) and \
-                    self.master.screen_height/5 < self.rel_pos.get("y") < self.master.screen_height/4:
+            if self.master.screen_width / 7 * 4 < self.rel_pos.get("x") < self.master.screen_width / 7 * 5 and \
+                    self.master.screen_height * 0.3 < self.rel_pos.get("y") < self.master.screen_height * 0.4:
                 self.master.rect.bathroom_drugs.show_tip(self.rel_pos)
                 self.master.bind("<Button-1>",
                                  lambda x: self.master.rect.
@@ -159,11 +160,20 @@ class GameEventHandler:
             else:
                 self.master.rect.bathroom_drugs.hide_tip()
         elif current_room == "médicaments":
-            if self.master.screen_width/7 < self.check_start_x < self.check_end_x < self.master.screen_width/7*5 \
-                    and self.master.screen_height/2 < self.check_start_y < self.check_end_y < self.master.screen_height:
-                # souvenir --> désespoir, psychologiqe
-                self.master.rect.create_dialog_box("preuve_parnm_oranges")
-        # print("Preuves pour activités paranormales.")
+            # self.master.rect.canvas.create_rectangle(x_left, y_bot, x_right, y_top, fill="RED")
+            if self.are_drugs_seen:
+                x_left = self.master.screen_width * 0.5
+                x_right = self.master.screen_width*0.7
+                y_bot = self.master.screen_height * 0.8
+                y_top = self.master.screen_height * 0.93
+                if x_left < self.rel_pos.get("x") < x_right and y_bot < self.rel_pos.get("y") < y_top:
+                    if not self.master.rect.drugs.available:
+                        self.master.rect.get_drugs.show_tip(self.rel_pos)
+                        drugs_available = self.master.bind("<Button-1>", lambda x: self.master.rect.
+                                                           make_item_available(
+                            self.master.rect.drugs, drugs_available))
+                else:
+                    self.master.rect.get_drugs.hide_tip()
         elif current_room == "cuisine normale":
             if screen_width / (1536 / 575) < self.rel_pos.get("x") < screen_width / (192 / 125) \
                     and 0 < self.rel_pos.get("y") < screen_height / (72 / 25):
@@ -397,6 +407,27 @@ class GameEventHandler:
             self.master.rect.create_dialog_box("infrarouges_trouvee")
             self.are_infrared_lenses_seen = True
 
+    def check_for_drugs(self):
+        """
+        Si prend une photo dans endroit tiroir, médocs:
+            - débloque un dialogue
+            - possible de ramasser médocs
+            - nouvelle touche <f> (prendre médoc)
+        """
+        current_room = self.get_current_room_img()
+        if current_room != "médicaments":
+            return
+        # print(f"gauche{self.check_start_x}, droit{self.check_end_x}, bas:{self.check_start_y},
+        # haut{self.check_end_y}")
+        x_left = self.master.screen_width / 7
+        x_right = self.master.screen_width / 7 * 5
+        y_bot = self.master.screen_height * 0.4
+        y_top = self.master.screen_height * 0.95
+        if y_bot < self.check_start_y < self.check_end_y < y_top and x_left < self.check_start_x < self.check_end_x < \
+                x_right:
+            self.master.rect.create_dialog_box("médocs")
+            self.are_drugs_seen = True
+
     def get_current_room_img(self):
         """
         Return n° pyimage actuelle (image fond d'écran)
@@ -467,6 +498,17 @@ class GameEventHandler:
             self.is_pamphlet_kitchen_read = False
             reset_story_reader(self.master)
             self.master.unbind("<e>")
+        # salle de bain --> close-up
+        elif prev_room == "salle de bain" and current_room == "mirroir":
+            self.master.rect.bathroom_mirror.hide_tip()
+            self.master.unbind("<Button-1>")
+        # mirroir --> salle de bain OU close-up médocs
+        elif prev_room == "mirroir" and current_room in {"salle de bain", "médicaments"}:
+            self.master.rect.bathroom_drugs.hide_tip()
+            self.master.unbind("<Button-1>")
+        # close-up médocs --> salle de bain OU cuisine
+        elif prev_room == "médicaments" and current_room in {"salle de bain", "cuisine normale", "cuisine changée"}:
+            pass
         # bureau --> porte principale OU bibliothèque OU close-up bureau
         elif prev_room == "pièce dessin" and current_room in {"pièce porte", "bibliothèque", "close-up bureau"}:
             # print("6 condition")
