@@ -1151,7 +1151,6 @@ class CanvasHandler(tk.Frame):
         Photos présentes sur les 2 pages (normal --> hidden)
         """
         index_list = self.page_num-1
-        print(index_list)
         if len(self.segmented_4_indexes_photos_list_updated) != 0:
             try:
                 for pic in self.segmented_4_indexes_photos_list_updated[index_list]:
