@@ -357,6 +357,13 @@ class App(tk.Tk):
             "room1": bg_image_setup(self.pages_file_location.get("room1"), name="pièce dessin"),
             "room2": bg_image_setup(self.pages_file_location.get("room2"), name="bibliothèque")
         }
+        # salle de bain
+        self.bathroom_closeup = {
+            "mirror":
+                bg_image_setup("./images/rooms/real_rooms/bathroom/PA_Mirror.png", name="mirroir"),
+            "drugs":
+                bg_image_setup("./images/rooms/real_rooms/bathroom/PA_Drugs.png", name="médicaments")
+        }
         # cuisine
         self.kitchen_closeup = {
             "oranges":
@@ -681,6 +688,10 @@ class CanvasHandler(tk.Frame):
                              text="[Click Gauche]") # prendre caméra
         self.door_handle = HoverMessRelPos(self.master, self.canvas,
                                            "[Click gauche] pour ouvrir la porte")
+        self.bathroom_mirror = HoverMessRelPos(self.master, self.canvas,
+                                               "[Click gauche] pour observer")
+        self.bathroom_drugs = HoverMessRelPos(self.master, self.canvas,
+                                               "[Click gauche] pour observer")
         self.draw = HoverMessRelPos(self.master, self.canvas,
                                     "[E] pour dessiner")
         self.orange_kitchen = HoverMessRelPos(self.master, self.canvas,
@@ -1140,7 +1151,6 @@ class CanvasHandler(tk.Frame):
         Photos présentes sur les 2 pages (normal --> hidden)
         """
         index_list = self.page_num-1
-        print(index_list)
         if len(self.segmented_4_indexes_photos_list_updated) != 0:
             try:
                 for pic in self.segmented_4_indexes_photos_list_updated[index_list]:
@@ -1177,11 +1187,9 @@ class Monster:
         self.master = master
         self.monster_design_img = [open_image_setup_file("./images/monster/monster design/PA_NB_MonsterDesign.png"),
                                    open_image_setup_file("./images/monster/monster design/PA_NB_MonsterDesign2.png"),
-                                   open_image_setup_file(""),
-                                   open_image_setup_file(""),
-                                   open_image_setup_file(""),
-                                   open_image_setup_file(""),
-                                   open_image_setup_file(""),
+                                   open_image_setup_file("./images/monster/monster design/PA_NB_IceMonster.png"),
+                                   open_image_setup_file("./images/monster/monster design/PA_NB_SpiderMonster.png"),
+                                   open_image_setup_file("./images/monster/monster design/PA_NB_FireAnimalMonster.png"),
                                    ]
         self.monster_design = None
         self.monster_timer = None

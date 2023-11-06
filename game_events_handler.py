@@ -138,7 +138,31 @@ class GameEventHandler:
             music.play(bg_music, loops=-1)
             music.set_volume(0.8)
         elif current_room == "salle de bain":
-            pass
+            # close-up pour miroir + médocs
+            if self.master.screen_width / (6 * 4) < self.rel_pos.get("x") < self.master.screen_width and \
+                    0 < self.rel_pos.get("y") < self.master.screen_height / 3:
+                self.master.rect.bathroom_mirror.show_tip(self.rel_pos)
+                self.master.bind("<Button-1>",
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.bathroom_closeup.get("mirror")))
+            else:
+                self.master.rect.bathroom_mirror.hide_tip()
+        elif current_room == "mirroir":
+            if self.master.screen_width /(7*4) < self.rel_pos.get("x") < self.master.screen_width /(7*5) and \
+                    self.master.screen_height/5 < self.rel_pos.get("y") < self.master.screen_height/4:
+                self.master.rect.bathroom_drugs.show_tip(self.rel_pos)
+                self.master.bind("<Button-1>",
+                                 lambda x: self.master.rect.
+                                 change_background("app_background",
+                                                   self.master.bathroom_closeup.get("drugs")))
+            else:
+                self.master.rect.bathroom_drugs.hide_tip()
+        elif current_room == "médicaments":
+            if self.master.screen_width/7 < self.check_start_x < self.check_end_x < self.master.screen_width/7*5 \
+                    and self.master.screen_height/2 < self.check_start_y < self.check_end_y < self.master.screen_height:
+                # souvenir --> désespoir, psychologiqe
+                self.master.rect.create_dialog_box("preuve_parnm_oranges")
         # print("Preuves pour activités paranormales.")
         elif current_room == "cuisine normale":
             if screen_width / (1536 / 575) < self.rel_pos.get("x") < screen_width / (192 / 125) \
