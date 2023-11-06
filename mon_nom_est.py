@@ -1,16 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
+import sys
 import tkinter as tk
 from tkinter import VERTICAL, HORIZONTAL, PhotoImage
-import sys
 import os
 import pygame
 import threading
 import cv2 as cv
 from dataclasses import dataclass
 from txt_story_reader import txt_files_story
-from threading import Thread
 from PIL import Image, ImageTk
 from images import bg_image_setup, open_image_setup_file, open_and_resize_img
 from fade_transition import FadeTransition, FadeIn
@@ -19,12 +18,10 @@ from game_events_handler import GameEventHandler
 from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
 from connect_dots import ConnectDotsGame
-from fonts import RenderFont    # WIP
+# from fonts import RenderFont    # WIP
 from son.channels import music, monster_music, item_sound
 from random import randrange
 
-global restart
-restart = False
 
 class HomeScreen:
     """
@@ -1265,6 +1262,7 @@ class Monster:
         restart = True
         self.master.destroy()
 
+
 def main():
     """
     Main func pour lancement programme(tkinter)
@@ -1275,6 +1273,7 @@ def main():
     # code en-dessous uniquement atteignable si fenêtre self.master = détruite
     if restart == True:
         os.system('python "C:/Users/alpha/MyCode/Python Scripts/TM/mon_nom_est/mon_nom_est.py"')    # relance fichier
+
 
 if __name__ == '__main__':
     main()
