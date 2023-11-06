@@ -60,6 +60,7 @@ class ConnectDotsGame:
         Chaque point --> placé dans self.current_dots_img
         """
         x_left, x_right, y_top, y_bot = 0, 0, 0, 0
+        dot_radius = self.master.screen_width/512
         for i, d in enumerate(dots_position):
             if i == 0:
                 x_left = dots_position[1][0]
@@ -73,8 +74,8 @@ class ConnectDotsGame:
                 y_bot = d[1]
             if d[1] > y_top:
                 y_top = d[1]
-            x1, y1 = (d[0] + CENTER_POSITION_X - 3), (d[1] + CENTER_POSITION_Y - 3)
-            x2, y2 = (d[0] + CENTER_POSITION_X + 3), (d[1] + CENTER_POSITION_Y + 3)
+            x1, y1 = (d[0] + CENTER_POSITION_X - dot_radius), (d[1] + CENTER_POSITION_Y - dot_radius)
+            x2, y2 = (d[0] + CENTER_POSITION_X + dot_radius), (d[1] + CENTER_POSITION_Y + dot_radius)
             canvas = self.master.rect.canvas
             img = canvas.create_oval(x1, y1, x2, y2, fill="black", tag=i)
             self.current_dots_img.append(img)
@@ -144,9 +145,10 @@ class ConnectDotsGame:
         """
         Place label sur canvas (légèrement en haut à droite de position dot)
         """
+        x_label_margin = self.master.screen_width/(1536/5)
         for i, dots in enumerate(dots_list):
             label = Label(self.master.rect.canvas, text=f"{i}", font=("Calibri", 9))
-            label.place(x=dots[0] + CENTER_POSITION_X + 5, y=dots[1] + CENTER_POSITION_Y - 10)
+            label.place(x=dots[0] + CENTER_POSITION_X + x_label_margin, y=dots[1] + CENTER_POSITION_Y - 2*x_label_margin)
             self.current_labels.append(label)
 
     def get_x_y(self, mouse_position):
