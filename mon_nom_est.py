@@ -519,7 +519,7 @@ class Control:
         # tag bind IR + explications
         self.bind_item_to_event(self.master.rect.infrared_lenses, self.ir_lense_img)
         # drug pos
-        img_drug_pos = (732, pic_pos_ir[1])
+        img_drug_pos = (self.master.screen_width/(128/61), pic_pos_ir[1])
         # drugs img
         drugs = open_and_resize_img("./images/inventory/PA_Drug.png", name=self.master.rect.drugs.name,
                                         x=pic_x, y=pic_y)
@@ -789,7 +789,6 @@ class CanvasHandler(tk.Frame):
         """
         item.available = True
         self.inventory.append(item)
-        print(self.inventory)
         self.item_added_to_inventory()
         self.master.bind(item.key, lambda x: self.use_item(item))
         self.master.unbind("<Button-1>", func_id)
@@ -811,7 +810,6 @@ class CanvasHandler(tk.Frame):
         """
         ++items dans self.master.rect.inventory
         """
-        print("ITEM AJOUTE")
         self.master.fade_in.start_item_animation()
 
     def on_button_press(self, event):
