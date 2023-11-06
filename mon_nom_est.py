@@ -1,6 +1,6 @@
-"""Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
 import tkinter as tk
 from tkinter import VERTICAL, HORIZONTAL, PhotoImage
 import sys
@@ -9,7 +9,6 @@ import pygame
 import threading
 import cv2 as cv
 from dataclasses import dataclass
-from typing import ClassVar
 from txt_story_reader import txt_files_story
 from threading import Thread
 from PIL import Image, ImageTk
@@ -20,10 +19,9 @@ from game_events_handler import GameEventHandler
 from hover_message import create_hover_message, HoverMessage, HoverMessRelPos
 from global_var import screen_width, screen_height
 from connect_dots import ConnectDotsGame
-from fonts import RenderFont
+from fonts import RenderFont    # WIP
 from son.channels import music, monster_music, item_sound
 from random import randrange
-
 
 global restart
 restart = False
@@ -49,12 +47,16 @@ class HomeScreen:
         self.apply_hs_canvas_image()
         # commencer le jeu
         self.start_button = self.hs_canvas.create_text(
-            (screen_width/5*4, screen_height/3*2+40),
+            (screen_width/5*4, screen_height/3*2+screen_height/(108/5)),
             text="Jouer", fill="white", font=("Helvetica", 30, "italic"))
         # regarder touches, donc mouvements, actions, etc.
         self.tuto = self.hs_canvas.create_text(
-            (screen_width/5*4,  screen_height/3*2+100),
+            (screen_width/5*4,  screen_height/3*2+screen_height/(216/25)),
             text="Tutoriel", fill="white", font=("Helvetica", 30, "italic"))
+        # quitter le jeu
+        self.exit_game_button = self.hs_canvas.create_text(
+            (screen_width / 5 * 4, screen_height / 3 * 2 + screen_height/(27/5)),
+            text="Quitter le jeu", fill="white", font=("Helvetica", 30, "italic"))
         """
         Tuto icon
             - recommended size: 147x95
@@ -96,10 +98,6 @@ class HomeScreen:
 
         # quitter tuto
         self.exit_tuto = None
-        # quitter le jeu
-        self.exit_game_button = self.hs_canvas.create_text(
-            (screen_width / 5 * 4, screen_height / 3 * 2 + 160),
-            text="Quitter le jeu", fill="white", font=("Helvetica", 30, "italic"))
         # commencer le jeu-bind
         self.hs_canvas.tag_bind(self.start_button, "<Button-1>", self.intro)
         self.hs_canvas.tag_bind(self.start_button, "<Enter>", lambda x: self.hover_text(self.start_button))
@@ -134,7 +132,7 @@ class HomeScreen:
         Crée bouton pour quitter tuto
         """
         self.exit_tuto = self.hs_canvas.create_text(
-            (screen_width / 5 * 4, screen_height / 3 * 2 + 200),
+            (screen_width / 5 * 4, screen_height / 3 * 2 + screen_height/(108/25)),
             text="Quitter le tutoriel", fill="white", font=("Helvetica", 26, "italic"))
         self.hs_canvas.tag_bind(self.exit_tuto, "<Button-1>", self.hide_tuto)
         self.hs_canvas.tag_bind(self.exit_tuto, "<Enter>", lambda x: self.hover_text(self.exit_tuto))
@@ -340,6 +338,11 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Mon nom est...")
+        # dimensions écran
+        self.screen_width = self.winfo_screenwidth()
+        self.screen_height = self.winfo_screenheight()
+        self.width = int(self.screen_width / 2)
+        self.height = int(self.screen_height / 2)
         # fonts
         self.fonts_list = []
         self.index = 2
@@ -391,16 +394,12 @@ class App(tk.Tk):
         self.camera = open_image_setup_file("./images/player/PA_NB_PhotoCameraFromBehind.png")\
             .subsample(2,2) # image caméra 2 fois plus petite
         self.album = open_image_setup_file("./images/player/PA_NB_Album.png")
-        self.left_arrow = open_image_setup_file("./images/player/red_arrow_left.png")\
-            .subsample(16, 16)
-        self.right_arrow = open_image_setup_file("./images/player/red_arrow_right.png")\
-            .subsample(16, 16)
+        # 600, 529 pour la taille des 2 flèches
+        self.left_arrow = open_and_resize_img("./images/player/red_arrow_left.png", "left arrow",
+                                              int(self.screen_width/(1024/25)), int(self.screen_height/(13824/529)))
+        self.right_arrow = open_and_resize_img("./images/player/red_arrow_right.png", "right arrow",
+                                              int(self.screen_width/(1024/25)), int(self.screen_height/(13824/529)))
         self.black_background = bg_image_setup("images/intro/NB_BlackBox.png", name="écran noir intro")
-        # dimensions écran
-        self.screen_width = self.winfo_screenwidth()
-        self.screen_height = self.winfo_screenheight()
-        self.width = int(self.screen_width / 2)
-        self.height = int(self.screen_height / 2)
         # position x et y centre écran
         self.center_x = int((self.screen_width / 4))
         self.center_y = int((self.screen_height / 4))
@@ -554,7 +553,6 @@ class Control:
         """
         if self.master.index > 0:
             self.master.index -= 1
-            # print(self.master.index)
             self.master.view.change_room(self.master.pages_name[self.master.index])
         else:
             print("C'est un mur...")
@@ -567,7 +565,6 @@ class Control:
         """
         if self.master.index < 4:
             self.master.index += 1
-            # print(self.master.index)
             self.master.view.change_room(self.master.pages_name[self.master.index])
         else:
             print("C'est un mur...")
@@ -606,7 +603,7 @@ class Control:
                 print(self.master.rect.canvas.itemconfigure(item_id))
                 self.master.rect.canvas.itemconfigure(item_id, state="normal")
         else:
-            # remove inventory screen --> go back to current room
+            # enlève image "inventory wall" --> revient à pièce initiale
             self.master.rect.change_background("app_background",
                                                self.master.pages.get(self.master.pages_name[self.master.index]))
             self.is_inventory_opened = not self.is_inventory_opened
@@ -907,8 +904,6 @@ class CanvasHandler(tk.Frame):
         WIP Func, encadré en jaune autour obj. utilisables
         """
         pass
-        # print(self.canvas.itemconfigure(self.clickable_camera_button))
-        # self.canvas.itemconfigure(image, activeimage="yellow")
 
     def take_camera(self, event=None):
         """
@@ -972,9 +967,7 @@ class CanvasHandler(tk.Frame):
         if crop_dimensions[0] > crop_dimensions[2]:
             # left > right and bottom > top
             if crop_dimensions[1] > crop_dimensions[3]:
-                # print("HAHA")
                 crop_dimensions = (crop_dimensions[2], crop_dimensions[3], crop_dimensions[0], crop_dimensions[1])
-                # print(crop_dimensions)
             else:
                 # left > right
                 crop_dimensions = (crop_dimensions[2], crop_dimensions[1], crop_dimensions[0], crop_dimensions[3])
@@ -997,7 +990,6 @@ class CanvasHandler(tk.Frame):
         image_to_crop = image_to_crop_temp.resize((screen_width,screen_height)).convert("RGBA")
         pic_size_in_album = (int(screen_width/8), int(screen_height/7))
         crop_dimensions = self.crop_dimensions_rearrangement(crop_dimensions)
-        # print(crop_dimensions)
         pic_taken_temp = image_to_crop.crop(crop_dimensions).resize(pic_size_in_album)
         pic_taken = ImageTk.PhotoImage(pic_taken_temp, master=self.master)
         self.images_pic_reference.append(pic_taken)
@@ -1143,35 +1135,32 @@ class CanvasHandler(tk.Frame):
             - change state que de 4 photos max
             - recrée une nouvelle liste index_segmented_list si joueur prend nv. photo
         """
-        print(f"This is page {page_num}")
         index_segmented_list = page_num-1
         if len(self.segmented_4_indexes_photos_list_updated) != 0:
             try:
                 current_pics_on_album = self.segmented_4_indexes_photos_list_updated[index_segmented_list]
                 for index, pic in enumerate(current_pics_on_album):
-                    print(pic, index)
                     if index == 0:
-                        print("premier")
+                        # place en haut à gauche
                         relx = int(screen_width/2.36)
                         rely = int(screen_height/2.65)
                         self.canvas.moveto(pic, relx, rely)
                     elif index == 1:
-                        print("deuxième")
+                        # place en haut à droite
                         relx = int(screen_width/1.71)
                         rely = int(screen_height/2.65)
                         self.canvas.moveto(pic, relx, rely)
                     elif index == 2:
-                        print("troisième")
+                        # place en bas à gauche
                         relx = int(screen_width / 2.36)
                         rely = int(screen_height/1.82)
                         self.canvas.moveto(pic, relx, rely)
                     elif index == 3:
-                        print("quatrième")
+                        # place en bas à droite
                         relx = int(screen_width / 1.71)
                         rely = int(screen_height / 1.82)
                         self.canvas.moveto(pic, relx, rely)
                     self.changing_state_canvas_item(pic, "normal")
-                    print(self.canvas.itemcget(pic, "state"))
             except IndexError:
                 print("Il n'y a pas encore de nouvelles images...")
 
@@ -1186,7 +1175,7 @@ class CanvasHandler(tk.Frame):
                     self.changing_state_canvas_item(pic, "hidden")
                     print(self.canvas.itemcget(pic, "state"))
             except IndexError:
-                pass
+                print("Il n'y a aucune image...")
 
     def create_dialog_box(self, chosen_moment, color="white"):
         """
