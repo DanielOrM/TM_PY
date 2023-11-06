@@ -102,6 +102,7 @@ class FadeIn:
         self.fade_o_curstep = 255
         self.fadetime = 1  # temps nécessaire entre temp img (effet fade) en ms
         self.fadestep = 2  # brutalité changement de transparence
+        self.fadestep_draw = 3
         self.curstep = 0  # étape du fade in
 
     def remove_fully_transparent_pixels(self, drawing_ref, alpha, base_folder="./images/connect the dots/fade img/",
@@ -126,8 +127,7 @@ class FadeIn:
         Crée diff. versions de la même img en plusieurs opacités
         """
         drawing_ref = self.imgs[self.master.game_e_handler.index_dot]
-        print(drawing_ref)
-        alpha = min(self.curstep * self.fadestep, 255)  # clamp to 255 maximum
+        alpha = min(self.curstep * self.fadestep_draw, 255)  # clamp to 255 maximum
         modified_img = self.remove_fully_transparent_pixels(drawing_ref, alpha)
         current_im = Image.open(modified_img)
         pic = ImageTk.PhotoImage(current_im)
