@@ -1,4 +1,6 @@
 """Module utilisé pour faire fonctionner la plus grandie partie de mon jeu."""
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import tkinter as tk
 from tkinter import VERTICAL, HORIZONTAL, PhotoImage
 import sys
