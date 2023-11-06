@@ -70,9 +70,6 @@ def create_hover_message(master, widget, tool_tip, item, text):
     widget.tag_bind(item, '<Enter>', enter)
 
 
-
-
-
 class CreateHoverMessRelPos:
     """
     Hover message quand la souris est à une position précise
